@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Search — bscollectionbd</title>
+<meta name="description" content="Search for fans and appliances at bscollectionbd."/>
+<link rel="icon" href="assets/logo.jpg"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:'Poppins','Hind Siliguri',sans-serif;background:#F5F7FA;overflow-x:hidden}
+.container{width:100%;max-width:1240px;margin:0 auto;padding:0 20px}
+:root{--primary:#14213D;--accent:#FCA311;--muted:#6B7280;--shadow:0 8px 24px rgba(20,33,61,.08);--shadow-lg:0 16px 40px rgba(20,33,61,.14)}
+/* ====== GLOBAL NAVBAR BS-STYLE ====== */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{overflow-x:hidden;width:100%}
+img{max-width:100%;height:auto;display:block}
+a{text-decoration:none;color:inherit}
+.container{width:100%;max-width:1240px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px rgba(20,33,61,.08)}
+.main-header{padding:14px 0;border-bottom:1px solid #eef1f5}
+.main-header>.container,.nav-inner{display:flex;align-items:center;gap:22px;flex-wrap:nowrap;width:100%}
+.logo{display:flex;align-items:center;gap:10px;white-space:nowrap;flex-shrink:0;text-decoration:none}
+.logo img{height:48px;width:auto;max-width:200px;object-fit:contain;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.1}
+.logo-text b{font-size:19px;font-weight:800;color:var(--primary,#14213D);letter-spacing:.3px}
+.logo-text small{font-size:10px;color:var(--accent,#FCA311);font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
+/* nav-menu desktop */
+.nav-menu{display:flex;gap:20px;flex-wrap:nowrap;flex:0 0 auto;list-style:none;padding:0;margin:0}
+.nav-menu>li>a{font-weight:500;padding:8px 0;transition:.25s;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--primary,#14213D);text-decoration:none}
+.nav-menu>li>a:hover,.nav-menu>li>a.active{color:var(--accent,#FCA311)}
+.nav-menu li{position:relative}
+.dropdown{position:absolute;top:calc(100%+6px);left:0;background:#fff;min-width:210px;box-shadow:0 16px 40px rgba(20,33,61,.14);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s;z-index:50;list-style:none}
+.nav-menu li:hover>.dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.dropdown li a{display:block;padding:10px 20px;transition:.2s;font-size:14px;text-decoration:none;color:inherit}
+.dropdown li a:hover{background:#F5F7FA;color:var(--accent,#FCA311);padding-left:26px}
+.nav-menu-icons{display:none!important}
+/* search wrap */
+.search-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;justify-content:flex-end}
+.search-bar{display:flex;background:#F1F5F9;overflow:hidden;border:1px solid #e2e8f0;flex:1;max-width:500px}
+.search-bar select{background:transparent;border:none;padding:0 12px;outline:none;font-family:inherit;color:var(--text,#1F2937);border-right:1px solid #cbd5e1;cursor:pointer;font-size:13px;flex-shrink:0;max-width:140px}
+.search-bar input{flex:1;background:transparent;border:none;padding:11px 14px;outline:none;font-family:inherit;min-width:0;font-size:14px}
+.search-bar button{background:var(--primary,#14213D);color:#fff;padding:0 18px;font-size:15px;border:none;cursor:pointer;transition:.25s;flex-shrink:0}
+.search-bar button:hover{background:var(--accent,#FCA311)}
+.search-toggle{display:none;font-size:20px;color:var(--primary,#14213D);background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0}
+.mobile-cart-icon{display:none;font-size:20px;color:var(--primary,#14213D);position:relative;padding:6px;flex-shrink:0;text-decoration:none}
+/* header icons */
+.header-icons{display:flex;gap:16px;align-items:center;flex-shrink:0}
+.header-icons a{position:relative;font-size:20px;color:var(--primary,#14213D);transition:.25s;display:flex;align-items:center;gap:6px;text-decoration:none}
+.header-icons a:hover{color:var(--accent,#FCA311)}
+.header-icons a .link-text{font-size:13px;font-weight:600}
+.badge{position:absolute;top:-6px;right:-8px;background:var(--accent,#FCA311);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;padding:0 4px;display:flex;align-items:center;justify-content:center;line-height:1;border-radius:9px}
+/* hamburger */
+.hamburger{display:none;background:none;border:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:34px;height:34px;flex-shrink:0;cursor:pointer;padding:0 4px;--bar-h:2px;--bar-gap:6px}
+.hamburger .bar{display:block;height:var(--bar-h);width:24px;background:#5f6b7a;border-radius:2px;transition:.28s ease}
+.hamburger.open .bar-top{transform:translateY(calc(var(--bar-h) + var(--bar-gap))) rotate(45deg)}
+.hamburger.open .bar-mid{opacity:0;transform:scaleX(0)}
+.hamburger.open .bar-bottom{transform:translateY(calc(-1*(var(--bar-h) + var(--bar-gap)))) rotate(-45deg)}
+/* overlay */
+.overlay{position:fixed;inset:0;background:rgba(11,21,38,.55);opacity:0;pointer-events:none;transition:.3s;z-index:98}
+.overlay.show{opacity:1;pointer-events:auto}
+/* ── responsive ── */
+@media(max-width:1100px){.search-bar{max-width:340px}.nav-menu{gap:14px}}
+@media(max-width:900px){.logo-text small{display:none}.search-bar{max-width:260px}}
+@media(max-width:768px){
+  .logo{order:0}
+  .nav-inner{gap:8px;flex-wrap:nowrap}
+  .header-icons{display:none!important}
+  .search-bar{display:none;position:absolute;top:calc(100%+8px);left:0;right:0;max-width:100%;background:#fff;border:1px solid #e2e8f0;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;flex:none}
+  .search-bar.open{display:flex}
+  .search-wrap{flex:0 0 auto;justify-content:flex-end;gap:6px;order:2}
+  .search-toggle{display:inline-flex}
+  .mobile-cart-icon{display:inline-flex}
+  .hamburger{display:flex;order:3;margin-left:4px}
+  .nav-menu{display:none;position:absolute;top:calc(100%+10px);left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 18px;gap:4px;z-index:110;max-height:80vh;overflow-y:auto;border-radius:14px;box-shadow:0 16px 40px rgba(20,33,61,.14);border:1px solid #eef1f5;order:6}
+  .nav-menu.open{display:flex}
+  .nav-menu>li{width:100%;border-bottom:1px solid #f1f5f9}
+  .nav-menu>li:last-child{border-bottom:none}
+  .nav-menu>li>a{padding:14px 4px;font-size:16px}
+  .dropdown{position:static;box-shadow:none;opacity:1;visibility:visible;transform:none;display:none;background:#F5F7FA;padding:4px 0 4px 14px;border-radius:0}
+  .nav-menu li.open-sub>.dropdown{display:block}
+  .nav-menu li:hover>.dropdown{display:none}
+  .nav-menu-icons{display:flex!important;justify-content:center;align-items:center;gap:8px;width:100%;border-bottom:none!important;padding:12px 0 4px;order:99;list-style:none}
+  .nav-menu-icons a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 8px;background:#F5F7FA;color:var(--primary,#14213D);font-weight:600;font-size:14px;border:1px solid #eef1f5;text-decoration:none}
+  .nav-menu-icons a:hover{background:var(--primary,#14213D);color:#fff}
+  .nav-menu-icons a i{font-size:16px}
+  .nav-menu-icons a .badge{position:static;margin-left:2px}
+  /* General responsive */
+  .section{padding:40px 0!important}
+  .footer-grid,.footer-grid-inner{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:560px){
+  .footer-grid,.footer-grid-inner{grid-template-columns:1fr!important}
+}
+@media(max-width:480px){
+  .logo img{height:40px}
+  .logo-text b{font-size:16px}
+  .hamburger{width:28px;height:28px;gap:5px;--bar-gap:5px}
+  .hamburger .bar{width:20px}
+  .search-wrap{gap:4px}
+  .container{padding:0 14px}
+}
+/* Search page content */
+.page-header{background:linear-gradient(135deg,#14213D,#1e3a5f);color:#fff;padding:50px 0 44px;text-align:center}
+.page-header h1{font-size:clamp(22px,5vw,34px);font-weight:800;margin-bottom:6px}
+.page-header .crumbs{color:#cbd5e1;font-size:14px}
+.page-header .crumbs a{color:#fff;text-decoration:none}
+.page-header .crumbs a:hover{color:var(--accent)}
+.section{padding:50px 0}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;margin-top:10px}
+.product-card{background:#fff;overflow:hidden;box-shadow:var(--shadow);transition:.3s;position:relative}
+.product-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.product-img{position:relative;overflow:hidden;background:#F5F7FA;aspect-ratio:1}
+.product-img img{width:100%;height:100%;object-fit:cover;transition:.5s}
+.product-card:hover .product-img img{transform:scale(1.08)}
+.sale-badge{position:absolute;top:10px;left:10px;background:var(--accent);color:#fff;padding:4px 10px;font-size:11px;font-weight:700;z-index:2}
+.product-info{padding:14px}
+.product-info .cat{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.product-info h4{font-size:13px;font-weight:600;margin:6px 0;color:var(--primary);min-height:36px;line-height:1.4}
+.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.price .now{font-size:16px;font-weight:800;color:var(--primary)}
+.price .old{text-decoration:line-through;color:var(--muted);font-size:12px}
+.quick-add{width:100%;background:var(--primary);color:#fff;padding:9px;font-weight:600;font-size:13px;border:none;cursor:pointer;transition:.2s;font-family:inherit}
+.quick-add:hover{background:var(--accent)}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px}
+.empty-state i{font-size:50px;color:var(--accent);display:block;margin-bottom:16px}
+.empty-state h3{font-size:22px;color:var(--primary);margin-bottom:8px}
+.empty-state p{color:var(--muted);margin-bottom:20px}
+.btn-accent{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;text-decoration:none;transition:.25s}
+.btn-accent:hover{background:var(--primary)}
+@media(max-width:480px){.product-grid{grid-template-columns:1fr 1fr;gap:12px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="main-header">
+    <div class="container nav-inner">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.jpg" alt="bscollectionbd logo"/>
+        <span class="logo-text"><b><b style="color:var(--accent)"></b></b><small> </small></span>
+      </a>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li class="nav-menu-icons">
+          <a href="account.html" title="Account"><i class="far fa-user"></i><span>Account</span></a>
+          <a href="wishlist.html" title="Wishlist"><i class="far fa-heart"></i><span>Wishlist</span><span class="badge wishlist-badge" id="wishlistBadgeMob">0</span></a>
+        </li>
+      </ul>
+      <div class="search-wrap">
+        <button class="search-toggle" id="searchToggle" aria-label="Search"><i class="fas fa-search"></i></button>
+        <a href="cart.html" class="mobile-cart-icon" id="cartIconMobile" title="Cart"><i class="fas fa-shopping-bag"></i><span class="badge cart-badge" id="cartBadgeMobile">0</span></a>
+        <div class="search-bar" id="searchBar" role="search">
+          <select aria-label="Category">
+            <option>All Categories</option>
+            <option>Ceiling Fans</option>
+            <option>Table Fans</option>
+            <option>Exhaust Fans</option>
+            <option>Industrial Fans</option>
+            <option>Accessories</option>
+          </select>
+          <input type="text" id="searchInput" placeholder="Search for fans, appliances..." aria-label="Search"/>
+          <button aria-label="Search" type="button" onclick="doSearch()"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+      <div class="header-icons">
+        <a href="cart.html" title="Cart" id="cartIconHeader"><i class="fas fa-shopping-bag"></i><span class="link-text">Cart</span><span class="badge cart-badge" id="cartBadgeHeader">0</span></a>
+        <a href="wishlist.html" title="Wishlist" id="wishlistIconHdr"><i class="far fa-heart"></i><span class="link-text">Wishlist</span><span class="badge wishlist-badge" id="wishlistBadge">0</span></a>
+        <a href="account.html" title="Account"><i class="far fa-user"></i><span class="link-text">Account</span></a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span class="bar bar-top"></span>
+        <span class="bar bar-mid"></span>
+        <span class="bar bar-bottom"></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="overlay" id="overlay"></div>
+
+<div class="page-header">
+  <div class="container">
+    <h1 id="searchTitle">Search Results</h1>
+    <div class="crumbs"><a href="index.html">Home</a> / Search</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <form id="searchForm" style="display:flex;max-width:540px;margin:0 auto 36px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);overflow:hidden">
+      <input type="search" name="q" id="mainSearchInput" placeholder="Search fans, appliances..." style="flex:1;background:transparent;border:0;outline:0;padding:14px 18px;font-size:14px;font-family:inherit"/>
+      <button type="submit" style="background:#14213D;color:#fff;border:0;padding:0 24px;cursor:pointer;font-size:15px;transition:.25s;font-family:inherit;font-weight:600"><i class="fas fa-search"></i></button>
+    </form>
+    <div class="product-grid" id="searchGrid"></div>
+  </div>
+</section>
+
+<footer style="background:#0B1526;color:#cbd5e1;padding:56px 0 0" id="siteFooter">
+  <div class="container">
+    <div class="footer-grid-inner" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1.2fr;gap:36px;padding-bottom:44px">
+      <!-- Brand -->
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <img src="assets/logo.jpg" alt="bscollectionbd" style="height:48px;width:auto;object-fit:contain"/>
+        </div>
+        <p style="font-size:14px;line-height:1.75;margin-bottom:10px;color:#94a3b8">Bangladesh's trusted online store for premium fans &amp; electrical appliances. Quality products, fast delivery nationwide.</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px">আমাদের সেরা পণ্য সরাসরি আপনার দরজায় পৌঁছে দিই।</p>
+        <div style="display:flex;gap:10px">
+          <a href="#" aria-label="Facebook" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="WhatsApp" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <!-- Company -->
+      <div>
+        <h4 style="color:#fff;font-size:15px;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #FCA311">Company</h4>
+        <ul style="list-style:none;padding:0;margin:0">
+          <li style="margin-bottom:10px"><a href="about.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>About Us</a></li>
+          <li style="margin-bottom:10px"><a href="contact.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Contact</a></li>
+          <li style="margin-bottom:10px"><a href="privacy-policy.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Privacy Policy</a></li>
+          <li style="margin-bottom:10px"><a href="terms-of-service.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Terms of Service</a></li>
+          <li style="margin-bottom:10px"><a href="return-refund-policy.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Return &amp; Refund</a></li>
+          <li style="margin-bottom:10px"><a href="shipping-policy.html" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Shipping Policy</a></li>
+        </ul>
+      </div>
+      <!-- Products -->
+      <div>
+        <h4 style="color:#fff;font-size:15px;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #FCA311">Products</h4>
+        <ul style="list-style:none;padding:0;margin:0">
+          <li style="margin-bottom:10px"><a href="shop.html?category=ceiling-fans" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Ceiling Fans</a></li>
+          <li style="margin-bottom:10px"><a href="shop.html?category=stand-fans" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Stand Fans</a></li>
+          <li style="margin-bottom:10px"><a href="shop.html?category=table-fans" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Table Fans</a></li>
+          <li style="margin-bottom:10px"><a href="shop.html?category=wall-fans" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Wall Fans</a></li>
+          <li style="margin-bottom:10px"><a href="shop.html?category=accessories" style="font-size:14px;color:#94a3b8;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:.2s"><i class="fas fa-angle-right" style="color:#FCA311"></i>Accessories</a></li>
+        </ul>
+      </div>
+      <!-- Contact -->
+      <div>
+        <h4 style="color:#fff;font-size:15px;font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #FCA311">Contact Us</h4>
+        <ul style="list-style:none;padding:0;margin:0">
+          <li style="margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;font-size:14px;color:#94a3b8"><i class="fas fa-location-dot" style="color:#FCA311;margin-top:3px;flex-shrink:0"></i>Mirpur 10, Dhaka 1216, Bangladesh</li>
+          <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center;font-size:14px;color:#94a3b8"><i class="fas fa-phone" style="color:#FCA311;flex-shrink:0"></i>+880 1700-000000</li>
+          <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center;font-size:14px;color:#94a3b8"><i class="fas fa-envelope" style="color:#FCA311;flex-shrink:0"></i>support@bscollectionbd.com</li>
+          <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center;font-size:14px;color:#94a3b8"><i class="fas fa-clock" style="color:#FCA311;flex-shrink:0"></i>Sat &ndash; Thu: 9:00 AM &ndash; 9:00 PM</li>
+        </ul>
+        <p style="font-size:12px;color:#64748b;margin-top:6px">যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন।</p>
+      </div>
+    </div>
+    <div style="border-top:1px solid #1a2942;padding:20px 0;text-align:center;font-size:13px;color:#94a3b8">
+      &copy; <span id="year"></span> <span style="color:#FCA311;font-weight:600">bscollectionbd</span> &mdash; All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<a href="#" id="toTop" aria-label="Back to top" style="position:fixed;bottom:28px;right:28px;width:46px;height:46px;background:#14213D;color:#fff;display:none;align-items:center;justify-content:center;font-size:16px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:80;text-decoration:none;border-radius:50%"><style>#toTop.show{display:flex!important}#toTop:hover{background:#FCA311}</style><i class="fas fa-arrow-up"></i></a>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var q=(params.get('q')||'').trim();
+  var si=document.getElementById('mainSearchInput');
+  if(si)si.value=q;
+  var title=document.getElementById('searchTitle');
+  if(title)title.textContent=q?('Results for "'+q+'"'):'Search Products';
+  
+  var grid=document.getElementById('searchGrid');
+  if(typeof PRODUCTS!=='undefined'&&grid){
+    var results=q?PRODUCTS.filter(function(p){return p.name.toLowerCase().includes(q.toLowerCase())||(p.category||'').toLowerCase().includes(q.toLowerCase());}):PRODUCTS;
+    if(results.length&&typeof productCard==='function'){
+      grid.innerHTML=results.map(productCard).join('');
+    } else if(!results.length){
+      grid.innerHTML='<div class="empty-state"><i class="fas fa-search"></i><h3>No products found</h3><p>খোঁজ করা পণ্য পাওয়া যায়নি। অন্য কীওয়ার্ড চেষ্টা করুন।</p><a class="btn-accent" href="shop.html"><i class="fas fa-store"></i> Browse Shop</a></div>';
+    }
+  }
+
+  var sf=document.getElementById('searchForm');
+  if(sf){sf.addEventListener('submit',function(e){e.preventDefault();var q2=(document.getElementById('mainSearchInput')||{}).value||'';if(q2.trim())window.location.href='search.html?q='+encodeURIComponent(q2.trim());});}
+
+  window.doSearch=function(){var q3=(document.getElementById('searchInput')||{}).value||'';if(q3.trim())window.location.href='search.html?q='+encodeURIComponent(q3.trim());};
+  
+  var ham=document.getElementById('hamburger');var nav=document.getElementById('navMenu');var ov=document.getElementById('overlay');
+  if(ham&&nav){ham.addEventListener('click',function(){ham.classList.toggle('open');nav.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
+  if(ov)ov.addEventListener('click',function(){if(ham)ham.classList.remove('open');if(nav)nav.classList.remove('open');ov.classList.remove('show');});
+  var st=document.getElementById('searchToggle');var sb=document.getElementById('searchBar');
+  if(st&&sb)st.addEventListener('click',function(){sb.classList.toggle('open');});
+  var y=document.getElementById('year');if(y)y.textContent=new Date().getFullYear();
+  var tt=document.getElementById('toTop');
+  if(tt){window.addEventListener('scroll',function(){tt.classList.toggle('show',window.scrollY>400);},{passive:true});tt.addEventListener('click',function(e){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});}
+})();
+</script>
+<script src="cart.js"></script>
+</body>
+</html>
