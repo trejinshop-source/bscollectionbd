@@ -524,7 +524,22 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 @media(max-width:1150px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){.shop-layout{grid-template-columns:1fr}.shop-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.shop-grid{grid-template-columns:repeat(2,1fr);gap:14px}}
-@media(max-width:480px){.shop-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.shop-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+
+/* shop-top: keep in a single line on mobile, shrink to fit (no page overflow) */
+@media(max-width:768px){
+  .shop-top{flex-wrap:nowrap;padding:9px 10px;gap:6px;width:100%;max-width:100%;box-sizing:border-box}
+  .shop-top>div{order:2;flex:1 1 auto;min-width:0;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .filter-toggle-btn{order:1;flex:0 0 auto;padding:9px 10px;font-size:12px;gap:6px}
+  .filter-toggle-btn .filter-btn-text{display:none}
+  .shop-top select{order:3;flex:0 0 auto;width:auto;max-width:100px;padding:8px 8px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#F5F7FA}
+}
+@media(max-width:400px){
+  .shop-top{padding:8px}
+  .shop-top>div{font-size:10px}
+  .filter-toggle-btn{padding:8px}
+  .shop-top select{max-width:80px;font-size:10px;padding:8px 6px}
+}
 
 /* Cart */
 .cart-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:flex-start}
@@ -616,7 +631,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 
       <div>
         <div class="shop-top">
-          <button class="filter-toggle-btn" id="filterToggleBtn"><i class="fas fa-sliders"></i> Filters</button>
+          <button class="filter-toggle-btn" id="filterToggleBtn"><i class="fas fa-sliders"></i> <span class="filter-btn-text">Filters</span></button>
           <div style="color:var(--muted);font-size:14px">Showing <b style="color:var(--primary)" id="showFrom">1</b>–<b style="color:var(--primary)" id="showTo">12</b> of <b style="color:var(--primary)" id="showTotal">12</b> results</div>
           <select id="sortSelect">
             <option value="popularity">Sort: Popularity</option>

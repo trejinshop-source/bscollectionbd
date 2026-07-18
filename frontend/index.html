@@ -86,13 +86,38 @@ ul{list-style:none}
 .hero-card-img{flex:0 0 50%;width:50%;height:100%;min-height:220px;object-fit:cover;opacity:1}
 
 /* ============ CATEGORIES ============ */
-.category-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:18px}
-.cat-item{background:#fff;padding:22px 10px;text-align:center;transition:.25s;box-shadow:var(--shadow);cursor:pointer;border-top:3px solid transparent}
-.cat-item:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-top-color:var(--accent)}
-.cat-icon{width:72px;height:72px;background:linear-gradient(135deg,#F5F7FA,#E5E9F0);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:30px;color:var(--primary);transition:.3s}
-.cat-item:hover .cat-icon{background:var(--primary);color:var(--accent)}
-.cat-item h4{font-size:13px;font-weight:600;color:var(--primary)}
-.cat-item span{font-size:11px;color:var(--muted)}
+.cat-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.cat-head h2{font-size:clamp(20px,4vw,30px);font-weight:800;color:var(--primary);margin-bottom:6px}
+.cat-head h2 span{color:var(--accent)}
+.cat-head p{color:var(--muted);font-size:13px}
+.cat-viewall-wrap{display:flex;justify-content:flex-end;margin-top:16px}
+.cat-viewall{color:var(--accent-dark);font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:.25s;background:none;padding:0}
+.cat-viewall:hover{gap:10px;color:var(--primary)}
+.cat-viewall i{transition:.3s}
+.cat-viewall.expanded i{transform:rotate(180deg)}
+.category-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.cat-item{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:18px;overflow:hidden;min-height:110px;padding:14px 10px 14px 16px;transition:transform .3s,box-shadow .3s;box-shadow:var(--shadow)}
+.cat-item:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.cat-text{position:relative;z-index:2;max-width:56%}
+.cat-text h4{font-size:13px;font-weight:800;color:#14213D;line-height:1.28;margin-bottom:4px}
+.cat-text span{font-size:10px;font-weight:600;color:rgba(20,33,61,.6)}
+.cat-img-wrap{position:relative;z-index:1;width:42%;height:100%;min-height:78px;display:flex;align-items:flex-end;justify-content:center}
+.cat-img-wrap img{width:100%;max-height:80px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.2))}
+/* show only first 4 by default (2x2) — rest reveal on "View All" */
+.category-grid .cat-item:nth-child(n+5){display:none}
+.category-grid.expanded .cat-item:nth-child(n+5){display:flex;animation:catReveal .45s ease both}
+@keyframes catReveal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:769px){
+  .category-grid{grid-template-columns:repeat(5,1fr);gap:18px}
+  .cat-item{min-height:132px;padding:18px 12px 18px 20px;border-radius:20px}
+  .cat-text h4{font-size:14px}
+  .cat-text span{font-size:11px}
+  .cat-img-wrap{min-height:92px}
+  .cat-img-wrap img{max-height:96px}
+  /* desktop: show all categories by default, no expand/collapse */
+  .category-grid .cat-item:nth-child(n+5){display:flex}
+  .cat-viewall{display:none}
+}
 
 /* ============ FEATURED PRODUCTS ============ */
 .featured{background:#EEF1F6}
@@ -211,7 +236,6 @@ footer{background:#0B1526;color:#cbd5e1;padding:60px 0 0}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1100px){
-  .category-grid{grid-template-columns:repeat(4,1fr)}
   .product-grid{grid-template-columns:repeat(4,1fr)}
 }
 @media(max-width:1024px){
@@ -238,7 +262,6 @@ footer{background:#0B1526;color:#cbd5e1;padding:60px 0 0}
   .hero-card a{font-size:10px;gap:3px}
   .hero-card.dark a{font-size:9px;gap:2px}
   .hero-card-img{position:absolute;right:-10px;bottom:-10px;flex:none;width:60px;height:60px;min-height:0;object-fit:cover;opacity:.28}
-  .category-grid{grid-template-columns:repeat(3,1fr)}
   .product-grid{grid-template-columns:repeat(2,1fr);gap:14px}
   .promo-grid{grid-template-columns:1fr}
   .why-grid{grid-template-columns:1fr 1fr}
@@ -257,7 +280,6 @@ footer{background:#0B1526;color:#cbd5e1;padding:60px 0 0}
   .filter-tabs button{padding:8px 14px;font-size:12px}
 }
 @media(max-width:480px){
-  .category-grid{grid-template-columns:repeat(2,1fr)}
   .product-info h4{font-size:13px;min-height:36px}
   .price .now{font-size:15px}
   .why-grid{grid-template-columns:1fr}
@@ -489,11 +511,16 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 <!-- ============ CATEGORIES ============ -->
 <section class="section" id="categories">
   <div class="container">
-    <div class="section-title fade-in">
-      <h2>ক্যাটাগরি অনুযায়ী <span>শপিং করুন</span></h2>
-      <p>আমাদের প্রিমিয়াম কুলিং ও ইলেকট্রিক্যাল পণ্যের সম্পূর্ণ কালেকশন দেখুন</p>
+    <div class="cat-head fade-in">
+      <div>
+        <h2>ক্যাটাগরি অনুযায়ী <span>শপিং করুন</span></h2>
+        <p>আমাদের প্রিমিয়াম কুলিং ও ইলেকট্রিক্যাল পণ্যের সম্পূর্ণ কালেকশন দেখুন</p>
+      </div>
     </div>
     <div class="category-grid" id="categoryGrid"></div>
+    <div class="cat-viewall-wrap">
+      <button type="button" class="cat-viewall" id="catViewAllBtn" onclick="toggleCategories()"><span id="catViewAllLabel">View All</span> <i class="fas fa-chevron-down"></i></button>
+    </div>
   </div>
 </section>
 
@@ -663,21 +690,39 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 
 <script>
 /* ================= CATEGORIES ================= */
-const categories = [
-  {icon:"fa-fan",name:"Ceiling Fan",count:42},
-  {icon:"fa-wind",name:"Table Fan",count:28},
-  {icon:"fa-tower-broadcast",name:"Stand Fan",count:36},
-  {icon:"fa-arrows-spin",name:"Exhaust Fan",count:18},
-  {icon:"fa-compass",name:"Wall Fan",count:22},
-  {icon:"fa-record-vinyl",name:"Pedestal Fan",count:31},
-  {icon:"fa-industry",name:"Industrial",count:14},
-  {icon:"fa-plug",name:"Accessories",count:56}
+const catColors = [
+  ["#FFEFD6","#FCA311"],
+  ["#E3E8F2","#A8B7D6"]
 ];
-document.getElementById('categoryGrid').innerHTML = categories.map(c=>`
-  <div class="cat-item fade-in">
-    <div class="cat-icon"><i class="fas ${c.icon}"></i></div>
-    <h4>${c.name}</h4><span>${c.count}টি পণ্য</span>
-  </div>`).join('');
+const categories = [
+  {name:"সিলিং ফ্যান",slug:"ceiling-fans",count:3,img:"https://images.unsplash.com/photo-1631545308456-6a4fdd3d80c9?w=300&auto=format&fit=crop"},
+  {name:"টেবিল ফ্যান",slug:"table-fans",count:4,img:"https://images.unsplash.com/photo-1587304313409-7bd2b32ca428?w=300&auto=format&fit=crop"},
+  {name:"স্ট্যান্ড ফ্যান",slug:"stand-fans",count:3,img:"https://images.unsplash.com/photo-1601275549435-a2b58077cd5f?w=300&auto=format&fit=crop"},
+  {name:"ইন্ডাস্ট্রিয়াল ফ্যান",slug:"industrial-fans",count:2,img:"https://images.unsplash.com/photo-1580901368919-7738efb0f87e?w=300&auto=format&fit=crop"},
+  {name:"এক্সহস্ট ফ্যান",slug:"exhaust-fans",count:2,img:"https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=300&auto=format&fit=crop"},
+  {name:"রিচার্জেবল ফ্যান",slug:"rechargeable-fans",count:1,img:"https://loremflickr.com/300/300/rechargeable-fan"},
+  {name:"এলইডি লাইট",slug:"led-lights",count:1,img:"https://loremflickr.com/300/300/led-bulb"},
+  {name:"হোম অ্যাপ্লায়েন্স",slug:"home-appliances",count:4,img:"https://loremflickr.com/300/300/blender,kitchen"},
+  {name:"ওয়াল ফ্যান",slug:"wall-fans",count:1,img:"https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=300&auto=format&fit=crop"},
+  {name:"আনুষঙ্গিক",slug:"accessories",count:1,img:"https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=300&auto=format&fit=crop"}
+];
+document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>{
+  const [c1,c2] = catColors[i%catColors.length];
+  return `
+  <a href="shop.html?category=${c.slug}" class="cat-item fade-in" style="background:linear-gradient(120deg,${c1} 0%,${c1} 48%,${c2} 48%,${c2} 100%)">
+    <div class="cat-text"><h4>${c.name}</h4><span>${c.count} Products</span></div>
+    <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
+  </a>`;
+}).join('');
+
+function toggleCategories(){
+  const grid = document.getElementById('categoryGrid');
+  const btn = document.getElementById('catViewAllBtn');
+  const label = document.getElementById('catViewAllLabel');
+  const expanded = grid.classList.toggle('expanded');
+  btn.classList.toggle('expanded', expanded);
+  label.textContent = expanded ? 'Show Less' : 'View All';
+}
 
 /* ================= PRODUCTS DATA ================= */
 const featured = [
