@@ -7,82 +7,141 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   :root{
-    --primary:#14213D; --accent:#FCA311; --bg:#F4F6FA; --card:#fff;
-    --border:#E2E8F0; --muted:#64748B; --danger:#DC2626; --success:#16A34A;
+    --primary:#1C1C28; --accent:#FF8A00; --bg:#F7F7FA; --card:#fff;
+    --border:#EDEDF2; --muted:#8B8D98; --danger:#F14C4C; --success:#1FAE60;
+    --accent-light:#FFF1DE; --accent-soft:#FFD9A8; --radius:16px;
+    --sidebar-w:230px;
   }
   *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
-  body{background:var(--bg);color:#1E293B;min-height:100vh}
+  body{background:var(--bg);color:var(--primary);min-height:100vh}
   a{text-decoration:none;color:inherit}
   button{cursor:pointer;font-family:inherit}
 
   /* ============ LOGIN ============ */
-  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#14213D,#1E3055)}
-  .login-box{background:#fff;padding:40px 36px;width:360px;max-width:90vw;box-shadow:0 20px 50px rgba(0,0,0,.3);border-radius:10px}
-  .login-box h1{font-size:20px;color:var(--primary);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-  .login-box p{color:var(--muted);font-size:13px;margin-bottom:22px}
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#FFF3E2 0%,#FFE1B8 45%,#FFC57A 100%)}
+  .login-box{background:#fff;padding:42px 38px;width:380px;max-width:90vw;box-shadow:0 25px 60px -15px rgba(255,138,0,.35);border-radius:20px;border:1px solid var(--border)}
+  .login-box h1{font-size:21px;color:var(--primary);margin-bottom:4px;display:flex;align-items:center;gap:10px;font-weight:800}
+  .login-box h1 i{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:15px}
+  .login-box p{color:var(--muted);font-size:13px;margin-bottom:24px}
   .field{margin-bottom:16px}
   .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#334155}
-  .field input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px}
-  .field input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;padding:11px 18px;border-radius:6px;font-size:14px;font-weight:600;width:100%}
-  .btn:hover{background:#1E3055}
-  .btn.accent{background:var(--accent);color:var(--primary)}
-  .btn.outline{background:transparent;border:1px solid var(--border);color:#334155}
-  .btn.danger{background:var(--danger);color:#fff}
-  .btn.sm{width:auto;padding:7px 12px;font-size:12.5px}
+  .field input{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:#FAFAFB}
+  .field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;width:100%;transition:.15s}
+  .btn:hover{opacity:.9}
+  .btn.accent{background:var(--accent);color:#fff;box-shadow:0 8px 18px -6px rgba(255,138,0,.55)}
+  .btn.outline{background:#fff;border:1px solid var(--border);color:#5D5F6E}
+  .btn.outline:hover{background:var(--accent-light);color:var(--accent);border-color:var(--accent-soft)}
+  .btn.danger{background:#FDEDED;color:var(--danger)}
+  .btn.danger:hover{background:var(--danger);color:#fff}
+  .btn.sm{width:auto;padding:8px 13px;font-size:12.5px}
   #loginError{color:var(--danger);font-size:13px;margin-top:10px;display:none}
 
-  /* ============ SHELL ============ */
+  /* ============ SHELL / SIDEBAR ============ */
   #appShell{display:none}
-  header.topbar{background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;position:sticky;top:0;z-index:10}
-  header.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .sidebar{
+    position:fixed;left:0;top:0;height:100vh;width:var(--sidebar-w);
+    background:#fff;border-right:1px solid var(--border);
+    padding:22px 14px;display:flex;flex-direction:column;z-index:60;
+    transition:transform .25s ease;
+  }
+  .sidebar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;padding:4px 8px 26px;color:var(--primary)}
+  .sidebar .brand i{width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:15px}
+
+  .tabs{display:flex;flex-direction:column;gap:4px;background:none;border-bottom:none;padding:0}
+  .tabs button{
+    display:flex;align-items:center;gap:12px;background:none;border:none;
+    padding:12px 14px;font-size:14px;font-weight:500;color:#5D5F6E;
+    border-bottom:none;border-radius:10px;text-align:left;transition:.15s;
+  }
+  .tabs button i{width:18px;text-align:center;font-size:14.5px}
+  .tabs button:hover{background:var(--accent-light);color:var(--accent)}
+  .tabs button.active{color:#fff;background:var(--accent);border-bottom-color:transparent;box-shadow:0 8px 16px -6px rgba(255,138,0,.55)}
+
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(20,20,30,.4);z-index:50}
+  .menu-toggle{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--primary);flex:none}
+
+  .content{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+
+  header.topbar{background:#fff;color:var(--primary);display:flex;align-items:center;justify-content:space-between;padding:16px 26px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);gap:14px}
+  header.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
   header.topbar .brand i{color:var(--accent)}
-  header.topbar .who{font-size:13px;color:#cbd5e1;display:flex;align-items:center;gap:14px}
+  header.topbar .who{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:14px}
 
-  .tabs{display:flex;gap:4px;background:#fff;border-bottom:1px solid var(--border);padding:0 24px}
-  .tabs button{background:none;border:none;padding:14px 18px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent}
-  .tabs button.active{color:var(--primary);border-bottom-color:var(--accent)}
-
-  main{padding:24px;max-width:1200px;margin:0 auto}
+  main{padding:26px;max-width:1300px;margin:0 auto;width:100%}
   .panel{display:none}
   .panel.active{display:block}
 
-  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-  .toolbar h2{font-size:18px;color:var(--primary)}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:8px}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+  .toolbar h2{font-size:19px;color:var(--primary);font-weight:700}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 
   table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:12px 14px;font-size:13.5px;border-bottom:1px solid var(--border)}
-  th{background:#F8FAFC;color:#475569;font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.3px}
+  th,td{text-align:left;padding:13px 16px;font-size:13.5px;border-bottom:1px solid var(--border)}
+  th{background:#FAFAFB;color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
   tr:last-child td{border-bottom:none}
-  td img{width:42px;height:42px;object-fit:cover;border-radius:6px;background:#F1F5F9}
+  tr:hover td{background:#FDFBF8}
+  td img{width:42px;height:42px;object-fit:cover;border-radius:8px;background:#F1F5F9}
   .muted{color:var(--muted)}
-  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
+  .badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:700}
   .badge.pending{background:#FEF3C7;color:#92400E}
   .badge.confirmed{background:#DBEAFE;color:#1E40AF}
-  .badge.shipped{background:#E0E7FF;color:#3730A3}
+  .badge.shipped{background:var(--accent-light);color:#B35B00}
   .badge.delivered{background:#DCFCE7;color:#166534}
   .badge.cancelled{background:#FEE2E2;color:#991B1B}
   .row-actions{display:flex;gap:6px}
-  .empty-state{padding:40px;text-align:center;color:var(--muted)}
+  .empty-state{padding:44px;text-align:center;color:var(--muted)}
 
   /* ============ MODAL / FORM ============ */
-  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .overlay{position:fixed;inset:0;background:rgba(28,28,40,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:70}
   .overlay.show{display:flex}
-  .modal{background:#fff;border-radius:10px;width:560px;max-width:100%;padding:26px}
-  .modal h3{font-size:17px;color:var(--primary);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+  .modal{background:#fff;border-radius:18px;width:560px;max-width:100%;padding:28px}
+  .modal h3{font-size:17px;color:var(--primary);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
   .modal h3 .close{cursor:pointer;color:var(--muted);font-size:18px}
+  .modal h3 .close:hover{color:var(--danger)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
   textarea{resize:vertical;min-height:70px}
   .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:4px}
-  .img-preview{width:70px;height:70px;object-fit:cover;border-radius:6px;background:#F1F5F9;margin-top:8px}
-  .toast{position:fixed;bottom:24px;right:24px;background:#1E293B;color:#fff;padding:12px 18px;border-radius:8px;font-size:13.5px;box-shadow:0 10px 25px rgba(0,0,0,.25);z-index:100;display:none}
-  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
-  .stat-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px}
-  .stat-card .num{font-size:24px;font-weight:800;color:var(--primary)}
+  .img-preview{width:70px;height:70px;object-fit:cover;border-radius:10px;background:#F1F5F9;margin-top:8px}
+  .gallery-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .gallery-thumb{position:relative;width:64px;height:64px}
+  .gallery-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px;background:#F1F5F9;border:1px solid var(--border)}
+  .gallery-thumb .rm{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:var(--danger);color:#fff;display:grid;place-items:center;font-size:10px;cursor:pointer;border:2px solid #fff}
+  .order-detail-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+  .order-detail-row:last-child{border-bottom:none}
+  .order-detail-row b{font-weight:700}
+  .order-items-list{margin-top:6px;font-size:13px}
+  .order-items-list div{padding:6px 0;border-bottom:1px dashed var(--border)}
+  .order-items-list div:last-child{border-bottom:none}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:#fff;padding:13px 20px;border-radius:12px;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:100;display:none}
+
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+  .stat-card.highlight{background:linear-gradient(180deg,#FFF3E2 0%,#FFE7C6 100%);border-color:#FBDFB0}
+  .stat-card .icon{width:32px;height:32px;border-radius:9px;background:var(--accent-light);color:var(--accent);display:grid;place-items:center;margin-bottom:12px;font-size:14px}
+  .stat-card.highlight .icon{background:var(--accent);color:#fff}
+  .stat-card .num{font-size:25px;font-weight:800;color:var(--primary)}
   .stat-card .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
-  .offline-banner{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;padding:10px 24px;font-size:13px;display:none}
+  .offline-banner{background:#FDEDED;color:#B42323;border:1px solid #F6C4C4;padding:11px 26px;font-size:13px;display:none}
+  .offline-banner i{margin-right:6px}
+
+  /* ============ Responsive ============ */
+  @media (max-width: 900px){
+    .menu-toggle{display:flex}
+    .sidebar{transform:translateX(-100%);box-shadow:0 0 30px rgba(0,0,0,.15)}
+    .sidebar.open{transform:translateX(0)}
+    .sidebar.open ~ .sidebar-overlay{display:block}
+    .content{margin-left:0}
+    main{padding:18px}
+    header.topbar{padding:14px 18px}
+    .grid2{grid-template-columns:1fr}
+  }
+  @media (max-width: 560px){
+    header.topbar .who span{display:none}
+    .modal{padding:20px}
+    th,td{padding:10px 12px;font-size:12.5px}
+  }
 </style>
 </head>
 <body>
@@ -109,31 +168,36 @@
 
 <!-- ============ APP SHELL ============ -->
 <div id="appShell">
-  <header class="topbar">
-    <div class="brand"><i class="fas fa-fan"></i> bscollectionbd — Admin Panel</div>
-    <div class="who">
-      <span id="whoUser"></span>
-      <button class="btn outline sm" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> লগআউট</button>
-    </div>
-  </header>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><i class="fas fa-fan"></i> bscollectionbd</div>
+    <nav class="tabs">
+      <button data-tab="dashboard" class="active"><i class="fas fa-gauge-high"></i> ড্যাশবোর্ড</button>
+      <button data-tab="products"><i class="fas fa-box"></i> প্রোডাক্ট</button>
+      <button data-tab="categories"><i class="fas fa-layer-group"></i> ক্যাটাগরি</button>
+      <button data-tab="orders"><i class="fas fa-cart-shopping"></i> অর্ডার</button>
+    </nav>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <div class="offline-banner" id="offlineBanner"><i class="fas fa-triangle-exclamation"></i> ব্যাকএন্ড সার্ভারের সাথে সংযোগ করা যাচ্ছে না। sarver.js (Render) চালু আছে কিনা এবং API_BASE ঠিক আছে কিনা দেখুন।</div>
+  <div class="content">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="মেনু"><i class="fas fa-bars"></i></button>
+      <div class="who">
+        <span id="whoUser"></span>
+        <button class="btn outline sm" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> লগআউট</button>
+      </div>
+    </header>
 
-  <nav class="tabs">
-    <button data-tab="dashboard" class="active">ড্যাশবোর্ড</button>
-    <button data-tab="products">প্রোডাক্ট</button>
-    <button data-tab="categories">ক্যাটাগরি</button>
-    <button data-tab="orders">অর্ডার</button>
-  </nav>
+    <div class="offline-banner" id="offlineBanner"><i class="fas fa-triangle-exclamation"></i> ব্যাকএন্ড সার্ভারের সাথে সংযোগ করা যাচ্ছে না। sarver.js (Render) চালু আছে কিনা এবং API_BASE ঠিক আছে কিনা দেখুন।</div>
 
-  <main>
+    <main>
     <!-- ---------- DASHBOARD ---------- -->
     <section class="panel active" id="panel-dashboard">
       <div class="stat-cards">
-        <div class="stat-card"><div class="num" id="statProducts">0</div><div class="lbl">মোট প্রোডাক্ট</div></div>
-        <div class="stat-card"><div class="num" id="statCategories">0</div><div class="lbl">মোট ক্যাটাগরি</div></div>
-        <div class="stat-card"><div class="num" id="statOrders">0</div><div class="lbl">মোট অর্ডার</div></div>
-        <div class="stat-card"><div class="num" id="statPending">0</div><div class="lbl">পেন্ডিং অর্ডার</div></div>
+        <div class="stat-card"><div class="icon"><i class="fas fa-box"></i></div><div class="num" id="statProducts">0</div><div class="lbl">মোট প্রোডাক্ট</div></div>
+        <div class="stat-card"><div class="icon"><i class="fas fa-layer-group"></i></div><div class="num" id="statCategories">0</div><div class="lbl">মোট ক্যাটাগরি</div></div>
+        <div class="stat-card"><div class="icon"><i class="fas fa-cart-shopping"></i></div><div class="num" id="statOrders">0</div><div class="lbl">মোট অর্ডার</div></div>
+        <div class="stat-card highlight"><div class="icon"><i class="fas fa-clock"></i></div><div class="num" id="statPending">0</div><div class="lbl">পেন্ডিং অর্ডার</div></div>
       </div>
       <div class="card">
         <div style="padding:16px 18px;border-bottom:1px solid var(--border)"><b>সাম্প্রতিক অর্ডার</b></div>
@@ -189,6 +253,7 @@
       </div>
     </section>
   </main>
+  </div>
 </div>
 
 <!-- ============ PRODUCT MODAL ============ -->
@@ -218,11 +283,17 @@
       </div>
       <div class="field"><label>বিবরণ</label><textarea id="pDescription"></textarea></div>
       <div class="field">
-        <label>ছবি</label>
+        <label>মেইন ছবি</label>
         <input type="file" id="pImageFile" accept="image/*"/>
         <input type="hidden" id="pImageUrl"/>
         <img id="pImagePreview" class="img-preview" style="display:none"/>
       </div>
+      <div class="field">
+        <label>গ্যালারি ছবি (একাধিক নির্বাচন করা যাবে)</label>
+        <input type="file" id="pGalleryFiles" accept="image/*" multiple/>
+        <div id="pGalleryPreview" class="gallery-preview"></div>
+      </div>
+      <div class="field"><label>কালার অপশন (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pColors" placeholder="যেমন: Black, White, Grey"/></div>
       <div class="checkbox-row"><input type="checkbox" id="pFeatured"/><label for="pFeatured">হোমপেজে ফিচার্ড হিসেবে দেখাও</label></div>
       <div class="form-actions">
         <button type="button" class="btn outline sm" data-close="productOverlay">বাতিল</button>
@@ -240,13 +311,29 @@
       <input type="hidden" id="cId"/>
       <div class="field"><label>নাম *</label><input type="text" id="cName" required/></div>
       <div class="field"><label>Slug *</label><input type="text" id="cSlug" required placeholder="যেমন: table-fans"/></div>
-      <div class="field"><label>ছবি URL</label><input type="text" id="cImg" placeholder="https:// অথবা assets/..."/></div>
+      <div class="field">
+        <label>ছবি আপলোড করুন</label>
+        <input type="file" id="cImageFile" accept="image/*"/>
+        <img id="cImagePreview" class="img-preview" style="display:none"/>
+      </div>
+      <div class="field"><label>অথবা ছবির URL</label><input type="text" id="cImg" placeholder="https:// অথবা assets/..."/></div>
       <div class="field"><label>ক্রম (Order)</label><input type="number" id="cOrder" value="0"/></div>
       <div class="form-actions">
         <button type="button" class="btn outline sm" data-close="categoryOverlay">বাতিল</button>
         <button type="submit" class="btn accent sm">সংরক্ষণ করুন</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ============ ORDER DETAILS MODAL ============ -->
+<div class="overlay" id="orderOverlay">
+  <div class="modal">
+    <h3><span>অর্ডার বিবরণ</span><span class="close" data-close="orderOverlay"><i class="fas fa-xmark"></i></span></h3>
+    <div id="orderDetailsBody"></div>
+    <div class="form-actions">
+      <button type="button" class="btn outline sm" data-close="orderOverlay">বন্ধ করুন</button>
+    </div>
   </div>
 </div>
 
@@ -514,6 +601,15 @@
       if (!res.ok) throw new Error(data.error || "অর্ডার স্ট্যাটাস আপডেট ব্যর্থ হয়েছে");
       return data;
     },
+    async deleteOrder(id) {
+      const res = await fetch(API_BASE + "/orders/" + id, {
+        method: "DELETE",
+        headers: this.authHeaders(),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "অর্ডার ডিলিট করা যায়নি");
+      return data;
+    },
 
     refresh, // manual re-fetch, exposed for admin.html after edits elsewhere
   };
@@ -649,6 +745,21 @@
     return '../frontend/' + src; // relative asset path from admin_panel/ back into frontend/
   }
 
+  var _currentGallery = [];
+
+  function renderGalleryPreview(){
+    var wrap = document.getElementById('pGalleryPreview');
+    wrap.innerHTML = _currentGallery.map(function(url, i){
+      return '<div class="gallery-thumb"><img src="' + esc(resolveImg(url)) + '" onerror="this.style.visibility=\'hidden\'"/><span class="rm" data-rm-gallery="' + i + '"><i class="fas fa-xmark"></i></span></div>';
+    }).join('');
+    wrap.querySelectorAll('[data-rm-gallery]').forEach(function(el){
+      el.addEventListener('click', function(){
+        _currentGallery.splice(Number(el.dataset.rmGallery), 1);
+        renderGalleryPreview();
+      });
+    });
+  }
+
   document.getElementById('addProductBtn').addEventListener('click', function(){ openProductModal(null); });
 
   function openProductModal(id){
@@ -658,6 +769,8 @@
     document.getElementById('pImagePreview').style.display = 'none';
     document.getElementById('pImageUrl').value = '';
     document.getElementById('pId').value = '';
+    _currentGallery = [];
+    renderGalleryPreview();
 
     if(id){
       var p = BSAdmin.getProducts().find(function(x){ return String(x.id) === String(id); });
@@ -674,11 +787,14 @@
       document.getElementById('pRating').value = p.rating ?? 5;
       document.getElementById('pDescription').value = p.description || '';
       document.getElementById('pFeatured').checked = !!p.featured;
+      document.getElementById('pColors').value = (p.colors || []).join(', ');
       document.getElementById('pImageUrl').value = p.img || '';
       if(p.img){
         var img = document.getElementById('pImagePreview');
         img.src = resolveImg(p.img); img.style.display = 'block';
       }
+      _currentGallery = (p.gallery || []).slice();
+      renderGalleryPreview();
     } else {
       document.getElementById('productModalTitle').textContent = 'নতুন প্রোডাক্ট';
     }
@@ -701,6 +817,23 @@
     }
   });
 
+  document.getElementById('pGalleryFiles').addEventListener('change', async function(e){
+    var files = Array.from(e.target.files || []);
+    if(!files.length) return;
+    toast('গ্যালারি ছবি আপলোড হচ্ছে...');
+    for(var i=0;i<files.length;i++){
+      try{
+        var url = await BSAdmin.uploadImage(files[i]);
+        _currentGallery.push(url);
+        renderGalleryPreview();
+      }catch(err){
+        toast(err.message, true);
+      }
+    }
+    e.target.value = '';
+    toast('গ্যালারি ছবি আপলোড সম্পন্ন হয়েছে');
+  });
+
   document.getElementById('productForm').addEventListener('submit', async function(e){
     e.preventDefault();
     var id = document.getElementById('pId').value;
@@ -716,6 +849,8 @@
       description: document.getElementById('pDescription').value.trim(),
       featured: document.getElementById('pFeatured').checked,
       img: document.getElementById('pImageUrl').value,
+      gallery: _currentGallery.slice(),
+      colors: document.getElementById('pColors').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean),
     };
     try{
       if(id){ await BSAdmin.updateProduct(id, payload); toast('প্রোডাক্ট আপডেট হয়েছে'); }
@@ -781,6 +916,7 @@
     var overlay = document.getElementById('categoryOverlay');
     document.getElementById('categoryForm').reset();
     document.getElementById('cId').value = '';
+    document.getElementById('cImagePreview').style.display = 'none';
     if(id){
       var c = BSAdmin.getCategories().find(function(x){ return String(x.id) === String(id); });
       if(!c) return;
@@ -790,11 +926,31 @@
       document.getElementById('cSlug').value = c.slug;
       document.getElementById('cImg').value = c.img || '';
       document.getElementById('cOrder').value = c.order || 0;
+      if(c.img){
+        var img = document.getElementById('cImagePreview');
+        img.src = resolveImg(c.img); img.style.display = 'block';
+      }
     } else {
       document.getElementById('categoryModalTitle').textContent = 'নতুন ক্যাটাগরি';
     }
     overlay.classList.add('show');
   }
+
+  document.getElementById('cImageFile').addEventListener('change', async function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var preview = document.getElementById('cImagePreview');
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    try{
+      toast('ছবি আপলোড হচ্ছে...');
+      var url = await BSAdmin.uploadImage(file);
+      document.getElementById('cImg').value = url;
+      toast('ছবি আপলোড সম্পন্ন হয়েছে');
+    }catch(err){
+      toast(err.message, true);
+    }
+  });
 
   document.getElementById('categoryForm').addEventListener('submit', async function(e){
     e.preventDefault();
@@ -863,12 +1019,14 @@
         + '<td class="muted">' + esc(o.source) + '</td>'
         + '<td>' + statusBadge(o.status) + '</td>'
         + '<td class="muted">' + fmtDate(o.createdAt) + '</td>'
-        + '<td>'
-        + '<select data-status-for="' + esc(o.id) + '" style="font-size:12.5px;padding:5px">'
+        + '<td class="row-actions" style="flex-wrap:wrap">'
+        + '<select data-status-for="' + esc(o.id) + '" style="font-size:12.5px;padding:5px;border-radius:6px;border:1px solid var(--border)">'
         + ['pending','confirmed','shipped','delivered','cancelled'].map(function(s){
             return '<option value="' + s + '" ' + (o.status===s?'selected':'') + '>' + s + '</option>';
           }).join('')
         + '</select>'
+        + '<button class="btn outline sm" data-view-order="' + esc(o.id) + '"><i class="fas fa-eye"></i></button>'
+        + '<button class="btn danger sm" data-del-order="' + esc(o.id) + '"><i class="fas fa-trash"></i></button>'
         + '</td></tr>';
     }).join('');
 
@@ -881,6 +1039,44 @@
         }catch(err){ toast(err.message, true); }
       });
     });
+    body.querySelectorAll('[data-view-order]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openOrderDetails(btn.dataset.viewOrder); });
+    });
+    body.querySelectorAll('[data-del-order]').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteOrder(btn.dataset.delOrder); });
+    });
+  }
+
+  function openOrderDetails(id){
+    var o = (window._allOrders || []).find(function(x){ return String(x.id) === String(id); });
+    if(!o) return;
+    var addr = [o.customer?.area, o.customer?.union, o.customer?.upazila, o.customer?.district, o.customer?.division].filter(Boolean).join(', ');
+    var itemsHtml = (o.items||[]).map(function(it){
+      return '<div>' + esc(it.name) + ' — পরিমাণ: ' + (it.qty||1) + (it.price ? ' — ৳' + it.price : '') + '</div>';
+    }).join('') || '<div class="muted">কোনো আইটেম নেই</div>';
+    document.getElementById('orderDetailsBody').innerHTML =
+      '<div class="order-detail-row"><span>কাস্টমার</span><b>' + esc(o.customer?.name) + '</b></div>'
+      + '<div class="order-detail-row"><span>ফোন</span><b>' + esc(o.customer?.phone) + '</b></div>'
+      + '<div class="order-detail-row"><span>ঠিকানা</span><b>' + esc(addr) + '</b></div>'
+      + '<div class="order-detail-row"><span>উৎস</span><b>' + esc(o.source) + '</b></div>'
+      + '<div class="order-detail-row"><span>স্ট্যাটাস</span>' + statusBadge(o.status) + '</div>'
+      + '<div class="order-detail-row"><span>ডেলিভারি ফি</span><b>' + fmt(o.deliveryFee) + '</b></div>'
+      + '<div class="order-detail-row"><span>সাবটোটাল</span><b>' + fmt(o.subtotal) + '</b></div>'
+      + '<div class="order-detail-row"><span>মোট</span><b>' + fmt(o.total) + '</b></div>'
+      + '<div class="order-detail-row"><span>তারিখ</span><b>' + fmtDate(o.createdAt) + '</b></div>'
+      + '<div class="order-items-list"><b>আইটেম সমূহ:</b>' + itemsHtml + '</div>';
+    document.getElementById('orderOverlay').classList.add('show');
+  }
+
+  async function deleteOrder(id){
+    if(!confirm('আপনি কি নিশ্চিত এই অর্ডারটি ডিলিট করতে চান?')) return;
+    try{
+      await BSAdmin.deleteOrder(id);
+      toast('অর্ডার ডিলিট হয়েছে');
+      loadOrders();
+    }catch(err){
+      toast(err.message, true);
+    }
   }
 
   function renderDashboard(orders){
@@ -898,6 +1094,25 @@
     }).join('') : '<tr><td colspan="5" class="empty-state">কোনো অর্ডার নেই</td></tr>';
   }
 
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  var toggle = document.getElementById('menuToggle');
+  if(!sidebar || !overlay || !toggle) return;
+  function closeMenu(){ sidebar.classList.remove('open'); overlay.style.display = 'none'; }
+  function openMenu(){ sidebar.classList.add('open'); overlay.style.display = 'block'; }
+  toggle.addEventListener('click', function(){
+    sidebar.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  overlay.addEventListener('click', closeMenu);
+  document.querySelectorAll('.tabs button').forEach(function(btn){
+    btn.addEventListener('click', closeMenu);
+  });
+  window.addEventListener('resize', function(){ if(window.innerWidth > 900) closeMenu(); });
 })();
 </script>
 </body>
