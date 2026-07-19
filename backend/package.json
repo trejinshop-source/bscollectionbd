@@ -2,10 +2,10 @@
   "name": "bscollectionbd-backend",
   "version": "1.0.0",
   "description": "Backend API + Admin panel server for bscollectionbd (products, categories, orders, auth, image upload)",
-  "main": "sarver.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node sarver.js",
-    "dev": "nodemon sarver.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "cloudinary": "^1.41.3",

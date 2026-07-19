@@ -21,7 +21,7 @@
   // ================= CONFIG =================
   // লোকাল হলে লোকাল ব্যাকএন্ড, লাইভ সাইটে হলে প্রোডাকশন ব্যাকএন্ড ব্যবহার হবে।
   // ডিপ্লয়ের পর নিচের PROD URL-টা নিজের Render/Railway ব্যাকএন্ড URL দিয়ে বদলে দিন।
-  const PROD_API_BASE = "https://bscollectionbd-backend.onrender.com/api";
+  const PROD_API_BASE = "https://bscollectionbd.onrender.com/api";
   const LOCAL_API_BASE = "http://localhost:5000/api";
 
   const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
