@@ -405,7 +405,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 
 /* product-detail-responsive */
 @media(max-width:900px){.product-detail{grid-template-columns:1fr!important}.product-thumbs{flex-direction:row!important}}
-@media(max-width:600px){.product-actions{flex-direction:column}.product-actions .btn,.product-actions button{width:100%!important}}
+@media(max-width:600px){.product-actions{flex-direction:column}}
 </style>
 
 <style>
@@ -451,8 +451,9 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 .pd-badge-sale{position:absolute;top:14px;left:14px;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;padding:5px 10px;z-index:2}
 
 /* ============ MINI CRUMBS + CATEGORY ============ */
-.pd-crumbs-mini{font-size:12px;color:var(--muted);margin-bottom:0}
-.pd-crumbs-mini b{color:var(--primary)}
+.pd-crumbs-mini{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:16px 16px 0;margin-bottom:0}
+.pd-crumbs-mini .current{color:var(--primary);font-weight:700}
+.pd-crumbs-mini .crumb-sep{font-size:8px;color:#cbd5e1}
 .pd-cat{color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:1px;font-weight:700}
 
 /* ============ PRICE ROW ============ */
@@ -550,19 +551,46 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 
 /* Sidebar related products (compact vertical) */
 .pd-sidebar{background:#fff;box-shadow:var(--shadow);padding:20px}
-.pd-sidebar h3{font-size:15px;font-weight:800;color:var(--primary);margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #eef1f5}
-.pd-side-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #eef1f5}
-.pd-side-item:last-child{border-bottom:none;padding-bottom:0}
-.pd-side-thumb{width:64px;height:64px;background:#F8FAFC;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pd-sidebar h3{font-size:15px;font-weight:800;color:var(--primary);margin-bottom:6px;padding-bottom:14px;border-bottom:2px solid #eef1f5;display:flex;align-items:center;gap:8px}
+.pd-sidebar h3 i{color:var(--accent);font-size:13px}
+.pd-side-item{display:flex;gap:14px;padding:14px 4px;align-items:center;cursor:pointer;transition:background .2s,box-shadow .2s}
+.pd-side-item:not(:last-child){border-bottom:1px solid #eef1f5}
+.pd-side-item:hover{background:#F8FAFC;box-shadow:inset 3px 0 0 var(--accent)}
+.pd-side-thumb{width:68px;height:68px;background:#F8FAFC;border:1px solid #eef1f5;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pd-side-thumb i{font-size:26px;color:var(--primary);opacity:.3}
-.pd-side-info h5{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:4px}
-.pd-side-info .rating{color:var(--accent);font-size:10.5px;margin-bottom:4px}
-.pd-side-info .rating span{color:var(--muted);margin-left:4px}
-.pd-side-price .now{color:var(--accent);font-weight:800;font-size:13px}
+.pd-side-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.pd-side-item:hover .pd-side-thumb img{transform:scale(1.08)}
+.pd-side-info{flex:1;min-width:0}
+.pd-side-info h5{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.45;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+.pd-side-item:hover .pd-side-info h5{color:var(--accent)}
+.pd-side-info .rating{color:var(--accent);font-size:10.5px;margin-bottom:6px;display:flex;align-items:center}
+.pd-side-info .rating span{color:var(--muted);margin-left:4px;font-size:10px}
+.pd-side-price .now{color:var(--accent);font-weight:800;font-size:14px}
 .pd-side-price .old{color:var(--muted);text-decoration:line-through;font-size:11px;margin-left:6px}
+.pd-side-add{flex-shrink:0;width:32px;height:32px;background:#F5F7FA;color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;transition:.2s}
+.pd-side-item:hover .pd-side-add{background:var(--primary);color:#fff}
+.pd-side-add:hover{background:var(--accent) !important;color:#fff}
+.pd-side-featured{background:linear-gradient(135deg,#FFF8EC,#FFFFFF);border:1px solid #FCE9C4;margin-bottom:4px}
+.pd-side-featured .pd-side-thumb{border-color:var(--accent)}
+.pd-side-featured:hover{box-shadow:inset 3px 0 0 var(--accent);background:linear-gradient(135deg,#FFF3DC,#FFFFFF)}
+
+/* Breadcrumb links */
+.pd-crumbs-mini a{color:var(--muted);display:inline-flex;align-items:center;gap:5px;font-weight:500;transition:.2s}
+.pd-crumbs-mini a:hover{color:var(--accent)}
+.pd-crumbs-mini a i{font-size:11px}
+
+/* Related-products heading: different wording on desktop vs mobile,
+   since on desktop the sidebar already shows "সম্পর্কিত পণ্য" */
+.pd-related-title-mobile{display:none}
 
 @media(max-width:1100px){.pd-wrap{grid-template-columns:1fr 1fr}.pd-sidebar{grid-column:1 / -1}}
 @media(max-width:900px){.pd-wrap{grid-template-columns:1fr}.pd-sidebar{grid-column:auto}}
+@media(max-width:768px){
+  /* Mobile mode: hide the sidebar entirely, pd-related-grid becomes THE related-products section */
+  .pd-sidebar{display:none}
+  .pd-related-title-desktop{display:none}
+  .pd-related-title-mobile{display:inline}
+}
 
 /* ============ DELIVERY ADVICE BLOCK ============ */
 .pd-advice-section{margin-top:56px}
@@ -695,7 +723,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
   <div class="container">
     <div class="pd-wrap">
       <div class="pd-gallery">
-        <div class="pd-crumbs-mini">Home &gt; Shop &gt; Table Fan &gt; <b>JY-2570</b></div>
+        <div class="pd-crumbs-mini"><a href="index.html"><i class="fas fa-house"></i>Home</a><i class="fas fa-chevron-right crumb-sep"></i><a href="shop.html">Shop</a><i class="fas fa-chevron-right crumb-sep"></i><a href="shop.html?category=table-fans">Table Fan</a><i class="fas fa-chevron-right crumb-sep"></i><span class="current">JY-2570</span></div>
         <div class="pd-main-img" style="position:relative">
           <span class="pd-badge-sale">-15%</span>
           <img src="assets/photo_2026-07-15_18-29-17.png" alt="JY-2570 Rechargeable Fan" id="pdMainImg"/>
@@ -768,38 +796,51 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
       </div>
 
       <aside class="pd-sidebar bn">
-        <h3>সম্পর্কিত পণ্য</h3>
-        <div class="pd-side-item">
-          <div class="pd-side-thumb"><i class="fas fa-fan"></i></div>
+        <h3><i class="fas fa-bolt"></i>সম্পর্কিত পণ্য</h3>
+        <div class="pd-side-item pd-side-featured" onclick="location.href='product-jy2218.html'">
+          <div class="pd-side-thumb"><img loading="lazy" src="assets/photo_2026-07-15_18-28-56.png" alt="JYSUPER JY-2218 Rechargeable Fan"/></div>
+          <div class="pd-side-info">
+            <h5>JYSUPER JY-2218 Rechargeable Fan</h5>
+            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><span>(15,571)</span></div>
+            <div class="pd-side-price"><span class="now">Tk 999</span><span class="old">Tk 1,200</span></div>
+          </div>
+          <button class="pd-side-add" aria-label="কার্টে যোগ করুন" onclick="event.stopPropagation();addRelatedToCart('JYSUPER JY-2218 Rechargeable Fan',999)"><i class="fas fa-cart-plus"></i></button>
+        </div>
+        <div class="pd-side-item" onclick="addRelatedToCart('JS-2018 USB Rechargeable Non-Stand Fan',749)">
+          <div class="pd-side-thumb"><img loading="lazy" src="https://target.scene7.com/is/image/Target/GUEST_06a78f6f-2a9e-4c11-acbc-a9134dd914b4" alt="JS-2018 USB Rechargeable Non-Stand Fan"/></div>
           <div class="pd-side-info">
             <h5>JS-2018 USB Rechargeable Non-Stand Fan</h5>
             <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><span>(749)</span></div>
             <div class="pd-side-price"><span class="now">Tk 749</span></div>
           </div>
+          <button class="pd-side-add" aria-label="কার্টে যোগ করুন" onclick="event.stopPropagation();addRelatedToCart('JS-2018 USB Rechargeable Non-Stand Fan',749)"><i class="fas fa-cart-plus"></i></button>
         </div>
-        <div class="pd-side-item">
-          <div class="pd-side-thumb"><i class="fas fa-fan"></i></div>
+        <div class="pd-side-item" onclick="addRelatedToCart('Xiaomi Solove Desk Fan',2239)">
+          <div class="pd-side-thumb"><img loading="lazy" src="https://sinin.com.bd/wp-content/uploads/2022/06/Xiaomi-Jipin-Portable-Desktop-Rechargeable-Fan-1-600x600.jpg" alt="Xiaomi Solove Desk Fan"/></div>
           <div class="pd-side-info">
             <h5>Xiaomi Solove Desk Fan</h5>
             <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><span>(229)</span></div>
             <div class="pd-side-price"><span class="now">Tk 2,239</span></div>
           </div>
+          <button class="pd-side-add" aria-label="কার্টে যোগ করুন" onclick="event.stopPropagation();addRelatedToCart('Xiaomi Solove Desk Fan',2239)"><i class="fas fa-cart-plus"></i></button>
         </div>
-        <div class="pd-side-item">
-          <div class="pd-side-thumb"><i class="fas fa-fan"></i></div>
+        <div class="pd-side-item" onclick="addRelatedToCart('Duration Power DP-1188 Rechargeable Fan',1053)">
+          <div class="pd-side-thumb"><img loading="lazy" src="https://www.techxzon.com/wp-content/uploads/2023/03/techxzon-com-Desktop-Portable-Rechargeable-Fan-With-LED-Price-In-Bangladesh-430x430.jpg" alt="Duration Power DP-1188 Rechargeable Fan"/></div>
           <div class="pd-side-info">
             <h5>Duration Power DP-1188 Rechargeable Fan</h5>
             <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><span>(1,053)</span></div>
             <div class="pd-side-price"><span class="now">Tk 1,053</span></div>
           </div>
+          <button class="pd-side-add" aria-label="কার্টে যোগ করুন" onclick="event.stopPropagation();addRelatedToCart('Duration Power DP-1188 Rechargeable Fan',1053)"><i class="fas fa-cart-plus"></i></button>
         </div>
-        <div class="pd-side-item">
-          <div class="pd-side-thumb"><i class="fas fa-fan"></i></div>
+        <div class="pd-side-item" onclick="addRelatedToCart('Aiwal P23 Portable Rechargeable Fan',1240)">
+          <div class="pd-side-thumb"><img loading="lazy" src="https://ae01.alicdn.com/kf/Sb39f1e34cd06457eb9465ef21068f5efo.jpg" alt="Aiwal P23 Portable Rechargeable Fan"/></div>
           <div class="pd-side-info">
             <h5>Aiwal P23 Portable Rechargeable Fan</h5>
             <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><span>(1,240)</span></div>
             <div class="pd-side-price"><span class="now">Tk 1,240</span></div>
           </div>
+          <button class="pd-side-add" aria-label="কার্টে যোগ করুন" onclick="event.stopPropagation();addRelatedToCart('Aiwal P23 Portable Rechargeable Fan',1240)"><i class="fas fa-cart-plus"></i></button>
         </div>
       </aside>
     </div>
@@ -981,7 +1022,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
     </div>
 
     <div class="pd-related bn">
-      <h2>সম্পর্কিত পণ্য</h2>
+      <h2><span class="pd-related-title-desktop">আপনার জন্য প্রস্তাবিত</span><span class="pd-related-title-mobile">সম্পর্কিত পণ্য</span></h2>
       <div class="pd-related-grid">
         <div class="product-card">
           <div class="product-img">
@@ -990,7 +1031,24 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
               <button aria-label="Wishlist" onclick="toggleRelatedWishlist(this)"><i class="far fa-heart"></i></button>
               <button aria-label="Quick view" onclick="bsToastSafe('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
             </div>
-            <img loading="lazy" src="https://images.unsplash.com/photo-1587304313409-7bd2b32ca428?w=500&auto=format&fit=crop" alt="JYSUPER JY-2210 Mini Fan"/>
+            <a href="product-jy2218.html"><img loading="lazy" src="assets/photo_2026-07-15_18-28-56.png" alt="JYSUPER JY-2218 Rechargeable Fan"/></a>
+            <button class="quick-add" onclick="addRelatedToCart('JYSUPER JY-2218 Rechargeable Fan',999)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+          </div>
+          <div class="product-info">
+            <span class="cat">টেবিল ফ্যান</span>
+            <h4><a href="product-jy2218.html">JYSUPER JY-2218 Rechargeable Fan</a></h4>
+            <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><span>(15,571)</span></div>
+            <div class="price"><span class="now">Tk 999</span><span class="old">Tk 1,200</span></div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img">
+            <span class="sale-badge">-17%</span>
+            <div class="product-actions">
+              <button aria-label="Wishlist" onclick="toggleRelatedWishlist(this)"><i class="far fa-heart"></i></button>
+              <button aria-label="Quick view" onclick="bsToastSafe('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
+            </div>
+            <img loading="lazy" src="https://img.joomcdn.net/38e17daa15a3a878143268b34e42269fed2b3724_1024_1024.jpeg" alt="JYSUPER JY-2210 Mini Fan"/>
             <button class="quick-add" onclick="addRelatedToCart('JYSUPER JY-2210 Mini Fan',750)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
           </div>
           <div class="product-info">
@@ -1007,7 +1065,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
               <button aria-label="Wishlist" onclick="toggleRelatedWishlist(this)"><i class="far fa-heart"></i></button>
               <button aria-label="Quick view" onclick="bsToastSafe('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
             </div>
-            <img loading="lazy" src="https://images.unsplash.com/photo-1601275549435-a2b58077cd5f?w=500&auto=format&fit=crop" alt="JYSUPER JY-3000 Stand Fan"/>
+            <img loading="lazy" src="https://tse2.mm.bing.net/th/id/OIP.tjHMQlaGVKVliboL5Y0nyAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="JYSUPER JY-3000 Stand Fan"/>
             <button class="quick-add" onclick="addRelatedToCart('JYSUPER JY-3000 Stand Fan',1450)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
           </div>
           <div class="product-info">
@@ -1024,7 +1082,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
               <button aria-label="Wishlist" onclick="toggleRelatedWishlist(this)"><i class="far fa-heart"></i></button>
               <button aria-label="Quick view" onclick="bsToastSafe('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
             </div>
-            <img loading="lazy" src="https://images.unsplash.com/photo-1631545308456-6a4fdd3d80c9?w=500&auto=format&fit=crop" alt="JYSUPER Breeze 56&quot; Ceiling Fan"/>
+            <img loading="lazy" src="https://mobileimages.lowes.com/productimages/84b65477-5b09-4fd5-8729-4eec8ebe9f81/17766057.jpg?size=pdhism" alt="JYSUPER Breeze 56&quot; Ceiling Fan"/>
             <button class="quick-add" onclick="addRelatedToCart('JYSUPER Breeze 56&quot; Ceiling Fan',2990)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
           </div>
           <div class="product-info">
@@ -1041,7 +1099,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
               <button aria-label="Wishlist" onclick="toggleRelatedWishlist(this)"><i class="far fa-heart"></i></button>
               <button aria-label="Quick view" onclick="bsToastSafe('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
             </div>
-            <img loading="lazy" src="https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=500&auto=format&fit=crop" alt="USB Charging Cable (Type-C)"/>
+            <img loading="lazy" src="https://p.globalsources.com/IMAGES/PDT/B1172675934/USB-C-Cable.jpg" alt="USB Charging Cable (Type-C)"/>
             <button class="quick-add" onclick="addRelatedToCart('USB Charging Cable (Type-C)',150)"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
           </div>
           <div class="product-info">
