@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="bs-admin-data.js"></script>
 <style>
 /* ============ RESET & BASE ============ */
 *,*::before,*::after{margin:0;padding:0;border-radius:0 !important}
@@ -934,30 +935,12 @@ function observeFadeIns(){
 }
 
 /* ================= PRODUCT DATA (12 items, images instead of icons) ================= */
-const shopProducts = [
-  {id:1, cat:"Ceiling Fans",       brand:"BRB",      name:'BRB Ceiling Fan 56" — Sunrise',        now:4850, old:5500, rating:5, img:"https://bn.smartdeal.com.bd/public/uploads/all/PGK6C3y7vOslPrUZKqxoXs3r9EyqLCUrBKzY4nNy.png"},
-  {id:2, cat:"Ceiling Fans",       brand:"Vision",   name:'Vision Super Deluxe Ceiling Fan',       now:5250, old:6100, rating:4, img:"https://easydeal.com.bd/public/uploads/all/kOcXVFXwuCp68FwDuPCDuhWsvjQmcgn5kmLxoWHN.jpg"},
-  {id:3, cat:"Table Fans",         brand:"Walton",   name:'Walton Table Fan 16" WTF',              now:2450, old:2900, rating:4, img:"https://ruperhat.com/wp-content/uploads/2025/07/Walton-Table-Fan-16-WTF16A-PBC.jpg"},
-  {id:4, cat:"Stand Fans",         brand:"Click",    name:'Click Stand Fan 18" Premium',           now:3990, old:4600, rating:5, img:"https://tse3.mm.bing.net/th/id/OIP.WQuFKLfucbG387SOx0qQtwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"},
-  {id:5, cat:"Industrial Fans",    brand:"National", name:'Industrial Wall Fan 24" HD',            now:7250, old:8500, rating:5, img:"https://m.media-amazon.com/images/I/91kvdJRRc9L.jpg"},
-  {id:6, cat:"Rechargeable Fans",  brand:"BRB",      name:'Rechargeable Fan 14" — Portable',       now:3450, old:3990, rating:4, img:"https://p.globalsources.com/IMAGES/PDT/B1201487071/solar-rechargeable-fans.jpg"},
-  {id:7, cat:"Exhaust Fans",       brand:"Walton",   name:'Exhaust Fan 10" — Metal Body',          now:1290, old:1650, rating:4, img:"https://loremflickr.com/500/500/exhaust-fan"},
-  {id:8, cat:"LED Lights",         brand:"Click",    name:'LED Bulb 12W Pack of 4',                now:620,  old:850,  rating:5, img:"https://m.media-amazon.com/images/I/618VJAMZ7ZL._AC_SS450_.jpg"},
-  {id:9, cat:"Home Appliances",    brand:"National", name:'Multi‑plug Extension 6‑port',           now:850,  old:1100, rating:4, img:"https://m.media-amazon.com/images/I/61M3Ax06wWL.jpg"},
-  {id:10,cat:"Home Appliances",    brand:"Vision",   name:'Voltage Stabilizer 1000VA',             now:2990, old:3500, rating:5, img:"https://smartdeal.com.bd/public/uploads/all/glj3KgHza0Jwax6Nk9nsbVQakc1l7NWqGfGbjmh2.jpg"},
-  {id:11,cat:"Home Appliances",    brand:"Walton",   name:'Blender & Grinder 500W',                now:2450, old:2900, rating:4, img:"https://loremflickr.com/500/500/blender,kitchen"},
-  {id:12,cat:"Home Appliances",    brand:"BRB",      name:'Steam Iron 1600W — Auto Cut',           now:1590, old:1990, rating:4, img:"https://www.courtsmammouth.mu/rodrigues/68255-large_default/morphy-richards-300286-breeze-easyreach-ceramic-black-steam-iron.jpg"},
-  {id:13,cat:"Table Fans",         brand:"JYSUPER",  name:'JY-2570 Rechargeable Fan',              now:2150, old:2550, rating:5, img:"assets/photo_2026-07-15_18-29-17.png"},
-  {id:14,cat:"Table Fans",         brand:"JYSUPER",  name:'JYSUPER JY-2218 Rechargeable Fan',      now:999,  old:1200, rating:4, img:"assets/photo_2026-07-15_18-28-56.png"},
-  {id:15,cat:"Stand Fans",         brand:"BRB",      name:'Oscillating Pedestal Stand Fan',        now:6500, old:9300, rating:5, img:"https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg"},
-  {id:16,cat:"Exhaust Fans",       brand:"Walton",   name:'Kitchen Exhaust Ventilation Fan',       now:3250, old:4100, rating:4, img:"https://i5.walmartimages.com/seo/8-Inch-Exhaust-Fan-Wall-Mounted-Vent-Fans-Ventilation-Extractor-Fan-110V-Wall-Mounted-Square-Blower-for-Kitchen-Bathroom-laundry-room_e8d40b96-9df4-4ba0-93d4-8851fc9cd585.0587f3cfef44e6a256a811ae20fdcab1.jpeg"},
-  {id:17,cat:"Industrial Fans",   brand:"National", name:'Heavy Duty Industrial Fan 30"',         now:19500,old:29900,rating:5, img:"https://i5.walmartimages.com/seo/ATD-TOOLS-ATD-30333-30-in-Tilting-Direct-Drive-Drum-Fan_fa490c65-0651-4d1b-9be2-d87d6ae4ad22.f2e59d3678157ac64b9229be44340818.jpeg"},
-  {id:18,cat:"Ceiling Fans",       brand:"Vision",   name:'Smart Wi-Fi Ceiling Fan with Light',    now:15900,old:22500,rating:5, img:"https://m.media-amazon.com/images/I/61uDKgzd8LL.jpg"},
-  {id:19,cat:"Wall Fans",         brand:"Walton",   name:'Wall Mounted Oscillating Fan',           now:3950, old:4450, rating:4, img:"https://i.pinimg.com/736x/ec/0d/b3/ec0db3feea10de08d4955b276e0d74ca.jpg"},
-  {id:20,cat:"Accessories",       brand:"Click",    name:'Universal Fan Remote Controller',        now:1450, old:1950, rating:5, img:"https://i.ebayimg.com/images/g/IcAAAOSwKIVkuL7z/s-l1200.webp"},
-  {id:21,cat:"Table Fans",         brand:"Vision",   name:'USB Rechargeable Desk Fan',             now:2250, old:3750, rating:4, img:"https://www.dhresource.com/webp/m/0x0/f2/albu/g22/M00/68/E0/rBVaE2JzRDuAHbUKAAOijGHAsrI649.jpg"},
-  {id:22,cat:"Stand Fans",         brand:"Click",    name:'Tower Fan with Remote Control',          now:7950, old:10500,rating:5, img:"https://m.media-amazon.com/images/I/41qE-CRX3vL.jpg"}
-];
+let shopProducts = BSAdmin.getProducts();
+// অ্যাডমিন প্যানেল থেকে আসল ডেটা ব্যাকএন্ড থেকে লোড হওয়ার পর তালিকা রিফ্রেশ হবে
+document.addEventListener('bsdata:ready', function(){
+  shopProducts = BSAdmin.getProducts();
+  if (typeof applyState === 'function') applyState();
+});
 
 const fmt = n => "৳ " + n.toLocaleString('en-IN');
 function star(n){let s='';for(let i=0;i<5;i++)s+=`<i class="fa${i<n?'s':'r'} fa-star"></i>`;return s;}
@@ -1470,6 +1453,24 @@ document.getElementById('year').textContent = new Date().getFullYear();
     if(!ofDivision.value || !ofDistrict.value || !ofUpazila.value){
       bsToast('অনুগ্রহ করে বিভাগ, জেলা ও থানা/উপজেলা নির্বাচন করুন','error');
       return;
+    }
+    if(window.BSAdmin){
+      var _deliveryInput = document.querySelector('input[name=\"ofDelivery\"]:checked');
+      var _delivery = _deliveryInput ? parseInt(_deliveryInput.value,10) : 70;
+      var _subtotal = BSCart.getTotal();
+      BSAdmin.addOrder({
+        customer: {
+          name: ofName.value, phone: ofPhone.value,
+          division: ofDivision.value, district: ofDistrict.value,
+          upazila: ofUpazila.value, union: ofUnion.value,
+          area: (document.getElementById('ofArea')||{}).value || ''
+        },
+        items: BSCart.getCart(),
+        deliveryFee: _delivery,
+        subtotal: _subtotal,
+        total: _subtotal + _delivery,
+        source: location.pathname.split('/').pop() || 'site'
+      }).catch(function(){ /* addOrder নিজেই ব্যর্থ হলে অর্ডার localStorage-এ রেখে দেয় */ });
     }
     closeOrderForm();
     BSCart.clearCart();

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>bscollectionbd — Admin Panel</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --primary:#14213D; --accent:#FCA311; --bg:#F4F6FA; --card:#fff;
+    --border:#E2E8F0; --muted:#64748B; --danger:#DC2626; --success:#16A34A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+  body{background:var(--bg);color:#1E293B;min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  button{cursor:pointer;font-family:inherit}
+
+  /* ============ LOGIN ============ */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#14213D,#1E3055)}
+  .login-box{background:#fff;padding:40px 36px;width:360px;max-width:90vw;box-shadow:0 20px 50px rgba(0,0,0,.3);border-radius:10px}
+  .login-box h1{font-size:20px;color:var(--primary);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .login-box p{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#334155}
+  .field input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px}
+  .field input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--primary);color:#fff;border:none;padding:11px 18px;border-radius:6px;font-size:14px;font-weight:600;width:100%}
+  .btn:hover{background:#1E3055}
+  .btn.accent{background:var(--accent);color:var(--primary)}
+  .btn.outline{background:transparent;border:1px solid var(--border);color:#334155}
+  .btn.danger{background:var(--danger);color:#fff}
+  .btn.sm{width:auto;padding:7px 12px;font-size:12.5px}
+  #loginError{color:var(--danger);font-size:13px;margin-top:10px;display:none}
+
+  /* ============ SHELL ============ */
+  #appShell{display:none}
+  header.topbar{background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;position:sticky;top:0;z-index:10}
+  header.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  header.topbar .brand i{color:var(--accent)}
+  header.topbar .who{font-size:13px;color:#cbd5e1;display:flex;align-items:center;gap:14px}
+
+  .tabs{display:flex;gap:4px;background:#fff;border-bottom:1px solid var(--border);padding:0 24px}
+  .tabs button{background:none;border:none;padding:14px 18px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent}
+  .tabs button.active{color:var(--primary);border-bottom-color:var(--accent)}
+
+  main{padding:24px;max-width:1200px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .toolbar h2{font-size:18px;color:var(--primary)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:12px 14px;font-size:13.5px;border-bottom:1px solid var(--border)}
+  th{background:#F8FAFC;color:#475569;font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.3px}
+  tr:last-child td{border-bottom:none}
+  td img{width:42px;height:42px;object-fit:cover;border-radius:6px;background:#F1F5F9}
+  .muted{color:var(--muted)}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
+  .badge.pending{background:#FEF3C7;color:#92400E}
+  .badge.confirmed{background:#DBEAFE;color:#1E40AF}
+  .badge.shipped{background:#E0E7FF;color:#3730A3}
+  .badge.delivered{background:#DCFCE7;color:#166534}
+  .badge.cancelled{background:#FEE2E2;color:#991B1B}
+  .row-actions{display:flex;gap:6px}
+  .empty-state{padding:40px;text-align:center;color:var(--muted)}
+
+  /* ============ MODAL / FORM ============ */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:10px;width:560px;max-width:100%;padding:26px}
+  .modal h3{font-size:17px;color:var(--primary);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+  .modal h3 .close{cursor:pointer;color:var(--muted);font-size:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+  textarea{resize:vertical;min-height:70px}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+  .img-preview{width:70px;height:70px;object-fit:cover;border-radius:6px;background:#F1F5F9;margin-top:8px}
+  .toast{position:fixed;bottom:24px;right:24px;background:#1E293B;color:#fff;padding:12px 18px;border-radius:8px;font-size:13.5px;box-shadow:0 10px 25px rgba(0,0,0,.25);z-index:100;display:none}
+  .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+  .stat-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px}
+  .stat-card .num{font-size:24px;font-weight:800;color:var(--primary)}
+  .stat-card .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .offline-banner{background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;padding:10px 24px;font-size:13px;display:none}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1><i class="fas fa-fan"></i> bscollectionbd Admin</h1>
+    <p>প্রোডাক্ট, ক্যাটাগরি ও অর্ডার ম্যানেজ করতে লগইন করুন</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUser" autocomplete="username" required/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" autocomplete="current-password" required/>
+      </div>
+      <button class="btn accent" type="submit"><i class="fas fa-right-to-bracket"></i> লগইন করুন</button>
+      <div id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="appShell">
+  <header class="topbar">
+    <div class="brand"><i class="fas fa-fan"></i> bscollectionbd — Admin Panel</div>
+    <div class="who">
+      <span id="whoUser"></span>
+      <button class="btn outline sm" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> লগআউট</button>
+    </div>
+  </header>
+
+  <div class="offline-banner" id="offlineBanner"><i class="fas fa-triangle-exclamation"></i> ব্যাকএন্ড সার্ভারের সাথে সংযোগ করা যাচ্ছে না। sarver.js চালু আছে কিনা এবং bs-admin-data.js-এর API_BASE ঠিক আছে কিনা দেখুন।</div>
+
+  <nav class="tabs">
+    <button data-tab="dashboard" class="active">ড্যাশবোর্ড</button>
+    <button data-tab="products">প্রোডাক্ট</button>
+    <button data-tab="categories">ক্যাটাগরি</button>
+    <button data-tab="orders">অর্ডার</button>
+  </nav>
+
+  <main>
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="panel active" id="panel-dashboard">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num" id="statProducts">0</div><div class="lbl">মোট প্রোডাক্ট</div></div>
+        <div class="stat-card"><div class="num" id="statCategories">0</div><div class="lbl">মোট ক্যাটাগরি</div></div>
+        <div class="stat-card"><div class="num" id="statOrders">0</div><div class="lbl">মোট অর্ডার</div></div>
+        <div class="stat-card"><div class="num" id="statPending">0</div><div class="lbl">পেন্ডিং অর্ডার</div></div>
+      </div>
+      <div class="card">
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border)"><b>সাম্প্রতিক অর্ডার</b></div>
+        <table>
+          <thead><tr><th>কাস্টমার</th><th>ফোন</th><th>মোট</th><th>স্ট্যাটাস</th><th>তারিখ</th></tr></thead>
+          <tbody id="recentOrdersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- PRODUCTS ---------- -->
+    <section class="panel" id="panel-products">
+      <div class="toolbar">
+        <h2>প্রোডাক্ট তালিকা</h2>
+        <button class="btn accent sm" id="addProductBtn"><i class="fas fa-plus"></i> নতুন প্রোডাক্ট</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>ছবি</th><th>নাম</th><th>SKU</th><th>ক্যাটাগরি</th><th>দাম</th><th>স্টক</th><th>ফিচার্ড</th><th>একশন</th></tr></thead>
+          <tbody id="productsBody"></tbody>
+        </table>
+        <div class="empty-state" id="productsEmpty" style="display:none">কোনো প্রোডাক্ট নেই। "নতুন প্রোডাক্ট" চেপে যোগ করুন।</div>
+      </div>
+    </section>
+
+    <!-- ---------- CATEGORIES ---------- -->
+    <section class="panel" id="panel-categories">
+      <div class="toolbar">
+        <h2>ক্যাটাগরি তালিকা</h2>
+        <button class="btn accent sm" id="addCategoryBtn"><i class="fas fa-plus"></i> নতুন ক্যাটাগরি</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>ছবি</th><th>নাম</th><th>Slug</th><th>প্রোডাক্ট সংখ্যা</th><th>একশন</th></tr></thead>
+          <tbody id="categoriesBody"></tbody>
+        </table>
+        <div class="empty-state" id="categoriesEmpty" style="display:none">কোনো ক্যাটাগরি নেই।</div>
+      </div>
+    </section>
+
+    <!-- ---------- ORDERS ---------- -->
+    <section class="panel" id="panel-orders">
+      <div class="toolbar">
+        <h2>অর্ডার তালিকা</h2>
+        <button class="btn outline sm" id="refreshOrdersBtn"><i class="fas fa-rotate"></i> রিফ্রেশ</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>কাস্টমার</th><th>ঠিকানা</th><th>আইটেম</th><th>মোট</th><th>উৎস</th><th>স্ট্যাটাস</th><th>তারিখ</th><th>একশন</th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+        <div class="empty-state" id="ordersEmpty" style="display:none">কোনো অর্ডার নেই।</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ PRODUCT MODAL ============ -->
+<div class="overlay" id="productOverlay">
+  <div class="modal">
+    <h3><span id="productModalTitle">নতুন প্রোডাক্ট</span><span class="close" data-close="productOverlay"><i class="fas fa-xmark"></i></span></h3>
+    <form id="productForm">
+      <input type="hidden" id="pId"/>
+      <div class="grid2">
+        <div class="field"><label>প্রোডাক্ট নাম *</label><input type="text" id="pName" required/></div>
+        <div class="field"><label>SKU *</label><input type="text" id="pSku" required placeholder="যেমন: jy2218"/></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>ক্যাটাগরি (কার্ডে দেখাবে) *</label><input type="text" id="pCat" required placeholder="যেমন: Table Fan"/></div>
+        <div class="field">
+          <label>ক্যাটাগরি Slug</label>
+          <select id="pCategorySlug"></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>বর্তমান দাম (৳) *</label><input type="number" id="pNow" required min="0"/></div>
+        <div class="field"><label>আগের দাম (৳)</label><input type="number" id="pOld" min="0"/></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>স্টক</label><input type="number" id="pStock" min="0" value="10"/></div>
+        <div class="field"><label>রেটিং (0-5)</label><input type="number" id="pRating" min="0" max="5" value="5"/></div>
+      </div>
+      <div class="field"><label>বিবরণ</label><textarea id="pDescription"></textarea></div>
+      <div class="field">
+        <label>ছবি</label>
+        <input type="file" id="pImageFile" accept="image/*"/>
+        <input type="hidden" id="pImageUrl"/>
+        <img id="pImagePreview" class="img-preview" style="display:none"/>
+      </div>
+      <div class="checkbox-row"><input type="checkbox" id="pFeatured"/><label for="pFeatured">হোমপেজে ফিচার্ড হিসেবে দেখাও</label></div>
+      <div class="form-actions">
+        <button type="button" class="btn outline sm" data-close="productOverlay">বাতিল</button>
+        <button type="submit" class="btn accent sm" id="pSaveBtn">সংরক্ষণ করুন</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ CATEGORY MODAL ============ -->
+<div class="overlay" id="categoryOverlay">
+  <div class="modal">
+    <h3><span id="categoryModalTitle">নতুন ক্যাটাগরি</span><span class="close" data-close="categoryOverlay"><i class="fas fa-xmark"></i></span></h3>
+    <form id="categoryForm">
+      <input type="hidden" id="cId"/>
+      <div class="field"><label>নাম *</label><input type="text" id="cName" required/></div>
+      <div class="field"><label>Slug *</label><input type="text" id="cSlug" required placeholder="যেমন: table-fans"/></div>
+      <div class="field"><label>ছবি URL</label><input type="text" id="cImg" placeholder="https:// অথবা assets/..."/></div>
+      <div class="field"><label>ক্রম (Order)</label><input type="number" id="cOrder" value="0"/></div>
+      <div class="form-actions">
+        <button type="button" class="btn outline sm" data-close="categoryOverlay">বাতিল</button>
+        <button type="submit" class="btn accent sm">সংরক্ষণ করুন</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../frontend/bs-admin-data.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ================= HELPERS =================
+  function toast(msg, isError){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isError ? '#DC2626' : '#1E293B';
+    t.style.display = 'block';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(function(){ t.style.display='none'; }, 3200);
+  }
+  function fmt(n){ return '৳' + Number(n||0).toLocaleString('en-IN'); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmtDate(d){ try{ return new Date(d).toLocaleString('bn-BD', {dateStyle:'medium', timeStyle:'short'}); }catch(e){ return d||''; } }
+
+  // ================= LOGIN =================
+  var savedToken = BSAdmin.getToken();
+  if(savedToken){ showApp(); }
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var user = document.getElementById('loginUser').value.trim();
+    var pass = document.getElementById('loginPass').value;
+    var errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+    try{
+      await BSAdmin.login(user, pass);
+      showApp();
+    }catch(err){
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    BSAdmin.logout();
+    document.getElementById('appShell').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  });
+
+  function showApp(){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    var payload = null;
+    try{ payload = JSON.parse(atob(BSAdmin.getToken().split('.')[1])); }catch(e){}
+    document.getElementById('whoUser').textContent = payload ? ('স্বাগতম, ' + payload.username) : '';
+    loadAll();
+  }
+
+  document.addEventListener('bsdata:offline', function(){
+    document.getElementById('offlineBanner').style.display = 'block';
+  });
+  document.addEventListener('bsdata:ready', function(){
+    document.getElementById('offlineBanner').style.display = 'none';
+  });
+
+  // ================= TABS =================
+  document.querySelectorAll('.tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tabs button').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if(btn.dataset.tab === 'orders') loadOrders();
+    });
+  });
+
+  // ================= MODAL HELPERS =================
+  document.querySelectorAll('[data-close]').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.getElementById(el.dataset.close).classList.remove('show');
+    });
+  });
+  document.querySelectorAll('.overlay').forEach(function(ov){
+    ov.addEventListener('click', function(e){ if(e.target === ov) ov.classList.remove('show'); });
+  });
+
+  // ================= LOAD ALL =================
+  async function loadAll(){
+    await BSAdmin.refresh();
+    renderProducts();
+    renderCategories();
+    populateCategorySelect();
+    loadOrders();
+  }
+
+  // ================= PRODUCTS =================
+  function renderProducts(){
+    var products = BSAdmin.getProducts();
+    var body = document.getElementById('productsBody');
+    var empty = document.getElementById('productsEmpty');
+    document.getElementById('statProducts').textContent = products.length;
+    if(!products.length){ body.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+    body.innerHTML = products.map(function(p){
+      return '<tr>'
+        + '<td><img src="' + esc(resolveImg(p.img)) + '" onerror="this.style.visibility=\'hidden\'"/></td>'
+        + '<td>' + esc(p.name) + '</td>'
+        + '<td class="muted">' + esc(p.sku) + '</td>'
+        + '<td>' + esc(p.cat) + '</td>'
+        + '<td>' + fmt(p.now) + (p.old ? ' <span class="muted" style="text-decoration:line-through">' + fmt(p.old) + '</span>' : '') + '</td>'
+        + '<td>' + (p.stock ?? 0) + '</td>'
+        + '<td>' + (p.featured ? '<i class="fas fa-check" style="color:var(--success)"></i>' : '<span class="muted">—</span>') + '</td>'
+        + '<td class="row-actions">'
+        + '<button class="btn outline sm" data-edit-product="' + esc(p.id) + '"><i class="fas fa-pen"></i></button>'
+        + '<button class="btn danger sm" data-del-product="' + esc(p.id) + '"><i class="fas fa-trash"></i></button>'
+        + '</td></tr>';
+    }).join('');
+
+    body.querySelectorAll('[data-edit-product]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openProductModal(btn.dataset.editProduct); });
+    });
+    body.querySelectorAll('[data-del-product]').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteProduct(btn.dataset.delProduct); });
+    });
+  }
+
+  function resolveImg(src){
+    if(!src) return '';
+    if(/^https?:\/\//.test(src)) return src;
+    return '../frontend/' + src; // relative asset path from admin_panel/ back into frontend/
+  }
+
+  document.getElementById('addProductBtn').addEventListener('click', function(){ openProductModal(null); });
+
+  function openProductModal(id){
+    var overlay = document.getElementById('productOverlay');
+    var form = document.getElementById('productForm');
+    form.reset();
+    document.getElementById('pImagePreview').style.display = 'none';
+    document.getElementById('pImageUrl').value = '';
+    document.getElementById('pId').value = '';
+
+    if(id){
+      var p = BSAdmin.getProducts().find(function(x){ return String(x.id) === String(id); });
+      if(!p) return;
+      document.getElementById('productModalTitle').textContent = 'প্রোডাক্ট এডিট করুন';
+      document.getElementById('pId').value = p.id;
+      document.getElementById('pName').value = p.name;
+      document.getElementById('pSku').value = p.sku;
+      document.getElementById('pCat').value = p.cat;
+      document.getElementById('pCategorySlug').value = p.categorySlug || '';
+      document.getElementById('pNow').value = p.now;
+      document.getElementById('pOld').value = p.old || '';
+      document.getElementById('pStock').value = p.stock ?? 0;
+      document.getElementById('pRating').value = p.rating ?? 5;
+      document.getElementById('pDescription').value = p.description || '';
+      document.getElementById('pFeatured').checked = !!p.featured;
+      document.getElementById('pImageUrl').value = p.img || '';
+      if(p.img){
+        var img = document.getElementById('pImagePreview');
+        img.src = resolveImg(p.img); img.style.display = 'block';
+      }
+    } else {
+      document.getElementById('productModalTitle').textContent = 'নতুন প্রোডাক্ট';
+    }
+    overlay.classList.add('show');
+  }
+
+  document.getElementById('pImageFile').addEventListener('change', async function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var preview = document.getElementById('pImagePreview');
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    try{
+      toast('ছবি আপলোড হচ্ছে...');
+      var url = await BSAdmin.uploadImage(file);
+      document.getElementById('pImageUrl').value = url;
+      toast('ছবি আপলোড সম্পন্ন হয়েছে');
+    }catch(err){
+      toast(err.message, true);
+    }
+  });
+
+  document.getElementById('productForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var id = document.getElementById('pId').value;
+    var payload = {
+      name: document.getElementById('pName').value.trim(),
+      sku: document.getElementById('pSku').value.trim().toLowerCase(),
+      cat: document.getElementById('pCat').value.trim(),
+      categorySlug: document.getElementById('pCategorySlug').value,
+      now: Number(document.getElementById('pNow').value),
+      old: Number(document.getElementById('pOld').value) || 0,
+      stock: Number(document.getElementById('pStock').value) || 0,
+      rating: Number(document.getElementById('pRating').value) || 5,
+      description: document.getElementById('pDescription').value.trim(),
+      featured: document.getElementById('pFeatured').checked,
+      img: document.getElementById('pImageUrl').value,
+    };
+    try{
+      if(id){ await BSAdmin.updateProduct(id, payload); toast('প্রোডাক্ট আপডেট হয়েছে'); }
+      else { await BSAdmin.createProduct(payload); toast('নতুন প্রোডাক্ট যোগ হয়েছে'); }
+      document.getElementById('productOverlay').classList.remove('show');
+      renderProducts();
+      renderCategories();
+    }catch(err){
+      toast(err.message, true);
+    }
+  });
+
+  async function deleteProduct(id){
+    if(!confirm('আপনি কি নিশ্চিত এই প্রোডাক্টটি ডিলিট করতে চান?')) return;
+    try{
+      await BSAdmin.deleteProduct(id);
+      toast('প্রোডাক্ট ডিলিট হয়েছে');
+      renderProducts();
+      renderCategories();
+    }catch(err){
+      toast(err.message, true);
+    }
+  }
+
+  // ================= CATEGORIES =================
+  function renderCategories(){
+    var cats = BSAdmin.getCategories();
+    var body = document.getElementById('categoriesBody');
+    var empty = document.getElementById('categoriesEmpty');
+    document.getElementById('statCategories').textContent = cats.length;
+    if(!cats.length){ body.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+    body.innerHTML = cats.map(function(c){
+      return '<tr>'
+        + '<td><img src="' + esc(resolveImg(c.img)) + '" onerror="this.style.visibility=\'hidden\'"/></td>'
+        + '<td>' + esc(c.name) + '</td>'
+        + '<td class="muted">' + esc(c.slug) + '</td>'
+        + '<td>' + (c.count ?? 0) + '</td>'
+        + '<td class="row-actions">'
+        + '<button class="btn outline sm" data-edit-cat="' + esc(c.id) + '"><i class="fas fa-pen"></i></button>'
+        + '<button class="btn danger sm" data-del-cat="' + esc(c.id) + '"><i class="fas fa-trash"></i></button>'
+        + '</td></tr>';
+    }).join('');
+
+    body.querySelectorAll('[data-edit-cat]').forEach(function(btn){
+      btn.addEventListener('click', function(){ openCategoryModal(btn.dataset.editCat); });
+    });
+    body.querySelectorAll('[data-del-cat]').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteCategory(btn.dataset.delCat); });
+    });
+  }
+
+  function populateCategorySelect(){
+    var sel = document.getElementById('pCategorySlug');
+    var cats = BSAdmin.getCategories();
+    sel.innerHTML = '<option value="">— নির্বাচন করুন —</option>' +
+      cats.map(function(c){ return '<option value="' + esc(c.slug) + '">' + esc(c.name) + '</option>'; }).join('');
+  }
+
+  document.getElementById('addCategoryBtn').addEventListener('click', function(){ openCategoryModal(null); });
+
+  function openCategoryModal(id){
+    var overlay = document.getElementById('categoryOverlay');
+    document.getElementById('categoryForm').reset();
+    document.getElementById('cId').value = '';
+    if(id){
+      var c = BSAdmin.getCategories().find(function(x){ return String(x.id) === String(id); });
+      if(!c) return;
+      document.getElementById('categoryModalTitle').textContent = 'ক্যাটাগরি এডিট করুন';
+      document.getElementById('cId').value = c.id;
+      document.getElementById('cName').value = c.name;
+      document.getElementById('cSlug').value = c.slug;
+      document.getElementById('cImg').value = c.img || '';
+      document.getElementById('cOrder').value = c.order || 0;
+    } else {
+      document.getElementById('categoryModalTitle').textContent = 'নতুন ক্যাটাগরি';
+    }
+    overlay.classList.add('show');
+  }
+
+  document.getElementById('categoryForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var id = document.getElementById('cId').value;
+    var payload = {
+      name: document.getElementById('cName').value.trim(),
+      slug: document.getElementById('cSlug').value.trim().toLowerCase(),
+      img: document.getElementById('cImg').value.trim(),
+      order: Number(document.getElementById('cOrder').value) || 0,
+    };
+    try{
+      if(id){ await BSAdmin.updateCategory(id, payload); toast('ক্যাটাগরি আপডেট হয়েছে'); }
+      else { await BSAdmin.createCategory(payload); toast('নতুন ক্যাটাগরি যোগ হয়েছে'); }
+      document.getElementById('categoryOverlay').classList.remove('show');
+      renderCategories();
+      populateCategorySelect();
+    }catch(err){
+      toast(err.message, true);
+    }
+  });
+
+  async function deleteCategory(id){
+    if(!confirm('আপনি কি নিশ্চিত এই ক্যাটাগরিটি ডিলিট করতে চান?')) return;
+    try{
+      await BSAdmin.deleteCategory(id);
+      toast('ক্যাটাগরি ডিলিট হয়েছে');
+      renderCategories();
+      populateCategorySelect();
+    }catch(err){
+      toast(err.message, true);
+    }
+  }
+
+  // ================= ORDERS =================
+  async function loadOrders(){
+    try{
+      var orders = await BSAdmin.getOrders();
+      window._allOrders = orders;
+      renderOrders(orders);
+      renderDashboard(orders);
+    }catch(err){
+      toast(err.message, true);
+    }
+  }
+  document.getElementById('refreshOrdersBtn').addEventListener('click', loadOrders);
+
+  function statusBadge(status){
+    var labels = {pending:'পেন্ডিং', confirmed:'কনফার্মড', shipped:'শিপড', delivered:'ডেলিভারড', cancelled:'বাতিল'};
+    return '<span class="badge ' + status + '">' + (labels[status] || status) + '</span>';
+  }
+
+  function renderOrders(orders){
+    var body = document.getElementById('ordersBody');
+    var empty = document.getElementById('ordersEmpty');
+    document.getElementById('statOrders').textContent = orders.length;
+    if(!orders.length){ body.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+    body.innerHTML = orders.map(function(o){
+      var addr = [o.customer?.upazila, o.customer?.district, o.customer?.division].filter(Boolean).join(', ');
+      var itemsSummary = (o.items||[]).map(function(it){ return esc(it.name) + ' x' + (it.qty||1); }).join(', ');
+      return '<tr>'
+        + '<td>' + esc(o.customer?.name) + '<br><span class="muted">' + esc(o.customer?.phone) + '</span></td>'
+        + '<td class="muted">' + esc(addr) + '</td>'
+        + '<td style="max-width:220px">' + itemsSummary + '</td>'
+        + '<td>' + fmt(o.total) + '</td>'
+        + '<td class="muted">' + esc(o.source) + '</td>'
+        + '<td>' + statusBadge(o.status) + '</td>'
+        + '<td class="muted">' + fmtDate(o.createdAt) + '</td>'
+        + '<td>'
+        + '<select data-status-for="' + esc(o.id) + '" style="font-size:12.5px;padding:5px">'
+        + ['pending','confirmed','shipped','delivered','cancelled'].map(function(s){
+            return '<option value="' + s + '" ' + (o.status===s?'selected':'') + '>' + s + '</option>';
+          }).join('')
+        + '</select>'
+        + '</td></tr>';
+    }).join('');
+
+    body.querySelectorAll('[data-status-for]').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        try{
+          await BSAdmin.updateOrderStatus(sel.dataset.statusFor, sel.value);
+          toast('অর্ডার স্ট্যাটাস আপডেট হয়েছে');
+          loadOrders();
+        }catch(err){ toast(err.message, true); }
+      });
+    });
+  }
+
+  function renderDashboard(orders){
+    var pending = orders.filter(function(o){ return o.status === 'pending'; }).length;
+    document.getElementById('statPending').textContent = pending;
+    var recent = orders.slice(0, 6);
+    document.getElementById('recentOrdersBody').innerHTML = recent.length ? recent.map(function(o){
+      return '<tr>'
+        + '<td>' + esc(o.customer?.name) + '</td>'
+        + '<td class="muted">' + esc(o.customer?.phone) + '</td>'
+        + '<td>' + fmt(o.total) + '</td>'
+        + '<td>' + statusBadge(o.status) + '</td>'
+        + '<td class="muted">' + fmtDate(o.createdAt) + '</td>'
+        + '</tr>';
+    }).join('') : '<tr><td colspan="5" class="empty-state">কোনো অর্ডার নেই</td></tr>';
+  }
+
+})();
+</script>
+</body>
+</html>

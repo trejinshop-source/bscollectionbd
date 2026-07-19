@@ -12,6 +12,7 @@
 <meta property="og:image" content="assets/photo_2026-07-15_18-28-56.png"/>
 <link rel="icon" href="assets/logo.png.jpeg"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="bs-admin-data.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ============ RESET & BASE ============ */
@@ -922,8 +923,8 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
     <div class="pd-wrap">
       <div class="pd-gallery">
         <div class="pd-crumbs-mini"><a href="index.html"><i class="fas fa-house"></i>Home</a><i class="fas fa-chevron-right crumb-sep"></i><a href="shop.html">Shop</a><i class="fas fa-chevron-right crumb-sep"></i><a href="shop.html?category=table-fans">Table Fan</a><i class="fas fa-chevron-right crumb-sep"></i><span class="current">JYSUPER JY-2218</span></div>
-        <div class="pd-main-img" style="position:relative">
-          <span class="pd-badge-sale">-15%</span>
+        <div class="pd-main-img" style="position:relative" data-bs-sku="jy2218">
+          <span class="pd-badge-sale" id="pdBadgeSale">-15%</span>
           <img src="assets/photo_2026-07-15_18-28-56.png" alt="JYSUPER JY-2218 Rechargeable Fan" id="pdMainImg"/>
         </div>
         <div class="pd-thumbs" id="pdThumbs">
@@ -935,16 +936,16 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
       </div>
       <div class="pd-info bn">
         <span class="pd-cat">টেবিল ফ্যান</span>
-        <h2>JYSUPER JY-2218 Rechargeable Fan</h2>
+        <h2 id="pdTitle">JYSUPER JY-2218 Rechargeable Fan</h2>
         <div class="pd-rating">
           <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
           <span>(15,571 টি রিভিউ)</span>
         </div>
-        <p class="pd-desc">JYSUPER JY-2218 Rechargeable Fan-এ পাবেন শক্তিশালী বাতাসের সাথে আধুনিক সুবিধা। এতে রয়েছে বিল্ট-ইন রিচার্জেবল ব্যাটারি, LED লাইট ও USB চার্জিং পোর্ট — বাসা কিংবা বাইরে ব্যবহারের জন্য উপযুক্ত, বিশেষ করে লোডশেডিং-এর সময়।</p>
+        <p class="pd-desc" id="pdDesc">JYSUPER JY-2218 Rechargeable Fan-এ পাবেন শক্তিশালী বাতাসের সাথে আধুনিক সুবিধা। এতে রয়েছে বিল্ট-ইন রিচার্জেবল ব্যাটারি, LED লাইট ও USB চার্জিং পোর্ট — বাসা কিংবা বাইরে ব্যবহারের জন্য উপযুক্ত, বিশেষ করে লোডশেডিং-এর সময়।</p>
 
         <div class="pd-price">
-          <span class="now">Tk 999</span>
-          <span class="old">Tk 1,200</span>
+          <span class="now" id="pdPriceNow">Tk 999</span>
+          <span class="old" id="pdPriceOld">Tk 1,200</span>
           <span class="pd-save-note">শুধু এই উইকেন্ডের জন্য বিশেষ ছাড়</span>
         </div>
 
@@ -954,7 +955,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
           <div class="pd-highlight-row"><b>চার্জিং ব্যাকআপ</b> 6&ndash;8 ঘণ্টা</div>
         </div>
 
-        <div class="pd-instock"><i class="fas fa-circle-check"></i> স্টকে আছে (মাত্র 10 পিস বাকি)</div>
+        <div class="pd-instock" id="pdInstock"><i class="fas fa-circle-check"></i> স্টকে আছে (মাত্র 10 পিস বাকি)</div>
 
         <div class="pd-colors">
           <label>কালার বাছাই করুন</label>
@@ -1063,7 +1064,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
           <li><i class="fas fa-circle-check"></i><span><b>টিল্ট ফিচার:</b> আপনি সহজেই ফ্যানের উপরের অংশ উপরে/নিচে ঘুরিয়ে বাতাসের দিক পরিবর্তন করতে পারবেন।</span></li>
         </ul>
         <div class="pd-price-strip">
-          <span class="price"><i class="fas fa-tag"></i> মাত্র <b>৳999</b></span>
+          <span class="price"><i class="fas fa-tag"></i> মাত্র <b id="pdStripPrice">৳999</b></span>
           <span class="item"><i class="fas fa-circle-check"></i> কোনো অগ্রিম নয়</span>
           <span class="item"><i class="fas fa-truck-fast"></i> সারা বাংলাদেশে Cash on Delivery</span>
         </div>
@@ -1826,6 +1827,24 @@ function toggleRelatedWishlist(btn){
       bsToast('অনুগ্রহ করে বিভাগ, জেলা ও থানা/উপজেলা নির্বাচন করুন','error');
       return;
     }
+    if(window.BSAdmin){
+      var _deliveryInput = document.querySelector('input[name=\"ofDelivery\"]:checked');
+      var _delivery = _deliveryInput ? parseInt(_deliveryInput.value,10) : 70;
+      var _subtotal = BSCart.getTotal();
+      BSAdmin.addOrder({
+        customer: {
+          name: ofName.value, phone: ofPhone.value,
+          division: ofDivision.value, district: ofDistrict.value,
+          upazila: ofUpazila.value, union: ofUnion.value,
+          area: (document.getElementById('ofArea')||{}).value || ''
+        },
+        items: BSCart.getCart(),
+        deliveryFee: _delivery,
+        subtotal: _subtotal,
+        total: _subtotal + _delivery,
+        source: location.pathname.split('/').pop() || 'site'
+      }).catch(function(){ /* addOrder নিজেই ব্যর্থ হলে অর্ডার localStorage-এ রেখে দেয় */ });
+    }
     closeOrderForm();
     BSCart.clearCart();
     orderForm.reset();
@@ -1847,6 +1866,34 @@ function toggleRelatedWishlist(btn){
   /* initial paint (badge counts on page load) */
   renderSidebarCart();
 })();
+</script>
+
+<script>
+/* ============ ADMIN-এ যা আপডেট করা হয় তা এই পেজে সরাসরি বসিয়ে দেওয়া হয় (SKU: jy2218) ============ */
+document.addEventListener('bsdata:ready', function(){
+  var p = BSAdmin.getProductBySku('jy2218');
+  if(!p) return;
+  var fmt = function(n){ return 'Tk ' + Number(n).toLocaleString('en-IN'); };
+  var titleEl = document.getElementById('pdTitle'); if(titleEl) titleEl.textContent = p.name;
+  var descEl = document.getElementById('pdDesc'); if(descEl && p.description) descEl.textContent = p.description;
+  var nowEl = document.getElementById('pdPriceNow'); if(nowEl) nowEl.textContent = fmt(p.now);
+  var oldEl = document.getElementById('pdPriceOld'); if(oldEl){ if(p.old){ oldEl.textContent = fmt(p.old); oldEl.style.display=''; } else { oldEl.style.display='none'; } }
+  var stripEl = document.getElementById('pdStripPrice'); if(stripEl) stripEl.textContent = '৳' + Number(p.now).toLocaleString('en-IN');
+  var mainImg = document.getElementById('pdMainImg'); if(mainImg && p.img) mainImg.src = p.img;
+  var instockEl = document.getElementById('pdInstock');
+  if(instockEl){
+    instockEl.innerHTML = p.stock > 0
+      ? '<i class="fas fa-circle-check"></i> স্টকে আছে (মাত্র ' + p.stock + ' পিস বাকি)'
+      : '<i class="fas fa-circle-xmark"></i> স্টক শেষ';
+  }
+  var badgeEl = document.getElementById('pdBadgeSale');
+  if(badgeEl){
+    if(p.old && p.now && p.old > p.now){
+      badgeEl.textContent = '-' + Math.round((p.old-p.now)/p.old*100) + '%';
+      badgeEl.style.display='';
+    } else { badgeEl.style.display='none'; }
+  }
+});
 </script>
 
 </body>

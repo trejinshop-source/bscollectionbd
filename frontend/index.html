@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="bs-admin-data.js"></script>
 <style>
 /* ============ RESET & BASE ============ */
 *,*::before,*::after{margin:0;padding:0;border-radius:0 !important;box-sizing:border-box}
@@ -907,18 +908,7 @@ const catColors = [
   ["#FFEFD6","#FCA311"],
   ["#E3E8F2","#A8B7D6"]
 ];
-const categories = [
-  {name:"সিলিং ফ্যান",slug:"ceiling-fans",count:3,img:"https://mykit.in/crm/public/uploads/product_images_500x500/sea-wind-1200-ivory-sub-economy-plain.jpg"},
-  {name:"টেবিল ফ্যান",slug:"table-fans",count:4,img:"https://tse3.mm.bing.net/th/id/OIP.hMAgVJNNb8xOeeNEyeY6iwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"},
-  {name:"স্ট্যান্ড ফ্যান",slug:"stand-fans",count:3,img:"https://bn.smartdeal.com.bd/public/uploads/all/P1YHNzfyq5ShIZxAyEgZpXZglX6OfEGdQFGaVKHf.jpg"},
-  {name:"ইন্ডাস্ট্রিয়াল ফ্যান",slug:"industrial-fans",count:2,img:"https://5.imimg.com/data5/WL/CF/CI/SELLER-58937841/elevator-blower-fans-1000x1000.jpg"},
-  {name:"এক্সহস্ট ফ্যান",slug:"exhaust-fans",count:2,img:"https://files.ekmcdn.com/powerstar123/images/industrial-extractor-exhaust-wall-mounted-plate-fan-with-speed-controller-size-14-inches-1500-p.jpg?w=1000&h=1000&v=A8FAD930-A43F-4F8E-8DBE-254D2E90F3CF"},
-  {name:"রিচার্জেবল ফ্যান",slug:"rechargeable-fans",count:1,img:"https://i5.walmartimages.com/asr/0f13bc12-6317-451d-8074-64de154a288c.c5c5327e1e9d3c134d7fa5b7a3d312b8.jpeg"},
-  {name:"এলইডি লাইট",slug:"led-lights",count:1,img:"https://5.imimg.com/data5/SELLER/Default/2021/3/LZ/AO/UM/21225316/bajaj-corona-base-cdl-b22-led-lamp-50w-500x500.jpg"},
-  {name:"হোম অ্যাপ্লায়েন্স",slug:"home-appliances",count:4,img:"https://i.pinimg.com/736x/08/73/4d/08734d7a67c5d484bcbabaa75ab8a89e.jpg"},
-  {name:"ওয়াল ফ্যান",slug:"wall-fans",count:1,img:"https://5.imimg.com/data5/CI/XM/JL/SELLER-52724193/bajaj-wall-fan-250x250.jpg"},
-  {name:"আনুষঙ্গিক",slug:"accessories",count:1,img:"https://www.lovelyetc.com/wp-content/uploads/2021/04/the-best-cleaners-for-cleaning-stencils-480x480.jpg"}
-];
+const categories = BSAdmin.getCategories();
 document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>{
   const [c1,c2] = catColors[i%catColors.length];
   return `
@@ -927,6 +917,32 @@ document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>{
     <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
   </a>`;
 }).join('');
+
+// অ্যাডমিন প্যানেল থেকে ব্যাকএন্ডের আসল ডেটা এলে ক্যাটাগরি ও ফিচার্ড প্রোডাক্টের
+// নাম/দাম/ছবি লাইভ আপডেট হয়ে যাবে (jy2570 = id 101, jy2218 = id 102)
+document.addEventListener('bsdata:ready', function(){
+  const liveCats = BSAdmin.getCategories();
+  document.getElementById('categoryGrid').innerHTML = liveCats.map((c,i)=>{
+    const [c1,c2] = catColors[i%catColors.length];
+    return `
+    <a href="shop.html?category=${c.slug}" class="cat-item fade-in" style="background:linear-gradient(120deg,${c1} 0%,${c1} 48%,${c2} 48%,${c2} 100%)">
+      <div class="cat-text"><h4>${c.name}</h4><span>${c.count} Products</span></div>
+      <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
+    </a>`;
+  }).join('');
+
+  const skuByFeaturedId = {101:'jy2570', 102:'jy2218'};
+  Object.keys(skuByFeaturedId).forEach(fid=>{
+    const live = BSAdmin.getProductBySku(skuByFeaturedId[fid]);
+    if(!live) return;
+    const item = featured.find(p=>p.id===Number(fid));
+    if(!item) return;
+    item.name = live.name; item.now = live.now; item.old = live.old;
+    item.img = live.img || item.img; item.rating = live.rating;
+    if(live.old && live.now) item.sale = '-' + Math.round((live.old-live.now)/live.old*100) + '%';
+  });
+  if(typeof renderProducts === 'function') renderProducts(featured,'featuredGrid');
+});
 
 function toggleCategories(){
   const grid = document.getElementById('categoryGrid');
@@ -1377,6 +1393,24 @@ document.getElementById('year').textContent = new Date().getFullYear();
     if(!ofDivision.value || !ofDistrict.value || !ofUpazila.value){
       bsToast('অনুগ্রহ করে বিভাগ, জেলা ও থানা/উপজেলা নির্বাচন করুন','error');
       return;
+    }
+    if(window.BSAdmin){
+      var _deliveryInput = document.querySelector('input[name=\"ofDelivery\"]:checked');
+      var _delivery = _deliveryInput ? parseInt(_deliveryInput.value,10) : 70;
+      var _subtotal = BSCart.getTotal();
+      BSAdmin.addOrder({
+        customer: {
+          name: ofName.value, phone: ofPhone.value,
+          division: ofDivision.value, district: ofDistrict.value,
+          upazila: ofUpazila.value, union: ofUnion.value,
+          area: (document.getElementById('ofArea')||{}).value || ''
+        },
+        items: BSCart.getCart(),
+        deliveryFee: _delivery,
+        subtotal: _subtotal,
+        total: _subtotal + _delivery,
+        source: location.pathname.split('/').pop() || 'site'
+      }).catch(function(){ /* addOrder নিজেই ব্যর্থ হলে অর্ডার localStorage-এ রেখে দেয় */ });
     }
     closeOrderForm();
     BSCart.clearCart();
