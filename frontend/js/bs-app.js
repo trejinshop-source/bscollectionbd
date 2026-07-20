@@ -10,7 +10,7 @@
   // ============ CONFIG ============
   // Google Apps Script Web App URL — deploy the provided apps-script.gs and paste URL here.
   // Until set, OTPs are shown in an alert (dev fallback).
-  const APPS_SCRIPT_URL = ''; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxeR9qpr2xjieoGhDO2BftQAu2ozeoaiMsO6jx7rDwFv97FD-5O34Li5MHfEiFPnA5W/exec'; // e.g. 'https://script.google.com/macros/s/AKfycb.../exec'
   const CONTACT_PHONE = '01344367630';
   const WHATSAPP_NUMBER = '8801344367630';
   const DELIVERY_DHAKA = 70;
