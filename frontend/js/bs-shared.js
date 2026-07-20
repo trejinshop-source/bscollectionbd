@@ -212,8 +212,22 @@
     markActiveMenu();
     syncBadges();
     prefillSearch();
-    // Observe DOM changes so late-rendered headers still get wired
-    const mo = new MutationObserver(() => { wireSearchInputs(); markActiveMenu(); syncBadges(); });
+    // Observe DOM changes so late-rendered headers still get wired.
+    // IMPORTANT: wireSearchInputs/markActiveMenu/syncBadges themselves modify the DOM
+    // (e.g. syncBadges sets el.textContent). Without disconnecting first, those writes
+    // are picked up by this same observer, re-triggering the callback forever and
+    // freezing the tab ("Page Unresponsive"). Disconnect during our own writes, and
+    // debounce so bursts of unrelated mutations only run the handlers once.
+    let moTimer = null;
+    const mo = new MutationObserver(() => {
+      if (moTimer) return;
+      moTimer = setTimeout(() => {
+        moTimer = null;
+        mo.disconnect();
+        wireSearchInputs(); markActiveMenu(); syncBadges();
+        mo.observe(document.body, { childList: true, subtree: true });
+      }, 50);
+    });
     mo.observe(document.body, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading')
