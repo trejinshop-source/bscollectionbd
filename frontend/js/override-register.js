@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", function(){
   var f = document.getElementById("registerForm");
   if (!f) return;
-  f.onsubmit = function(e){
+  f.onsubmit = async function(e){
     e.preventDefault();
     var fd = new FormData(f);
-    var r = window.bsAuth.signup({
+    var r = await window.bsAuth.signup({
       name: fd.get("name"),
       email: fd.get("email"),
       phone: fd.get("phone"),

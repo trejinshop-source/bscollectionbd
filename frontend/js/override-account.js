@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", function(){
   var f = document.getElementById("loginForm");
   if (f) {
-    f.onsubmit = function(e){
+    f.onsubmit = async function(e){
       e.preventDefault();
       var fd = new FormData(f);
-      var r = window.bsAuth.login({ email: fd.get("email"), password: fd.get("pw") || fd.get("password") });
+      var r = await window.bsAuth.login({ email: fd.get("email"), password: fd.get("pw") || fd.get("password") });
       if (!r.ok) { window.bsToast(r.msg, "err"); return false; }
       window.bsToast("লগইন সফল", "ok");
       setTimeout(function(){ location.reload(); }, 500);
