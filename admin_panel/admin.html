@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BS Collection BD | Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --orange:#F97316;
@@ -32,7 +32,8 @@
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s, color .2s;}
+body{font-family:'Poppins','Hind Siliguri','Noto Sans Bengali',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s, color .2s;}
+:lang(bn), .bn{font-family:'Noto Sans Bengali','Hind Siliguri','Poppins',sans-serif;}
 
 /* Dark mode */
 body[data-theme="dark"]{--bg:#0F1115;--card:#181B21;--border:#262A32;--text:#F2F3F5;--text-soft:#8B8F99;--text-mid:#B7BAC3;}
@@ -412,8 +413,6 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
    User update: font family from product-jy2218 + no border-radius
    + strict sidebar tab isolation
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap');
-
 html, body, button, input, select, textarea, .sidebar, .topbar,
 .card, .stat-card, .data-card, .bs-ext-tabs button, .bs-ext-btn,
 .bs-ext-form input, .bs-ext-form textarea, .bs-ext-form select,
@@ -447,7 +446,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">
-      <img src="https://bscollectionbd.onrender.com/logo.png" onerror="this.style.display='none'" alt="">
+      <img src="logo.jpg" alt="BS Collection BD">
       <h2>BS Collection BD</h2>
       <p>Admin Panel — লগইন করুন</p>
     </div>
@@ -468,7 +467,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 <div class="overlay" id="overlay"></div>
 <aside class="sidebar" id="sidebar">
   <div class="logo">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50'%3E%3Ctext y='38' font-size='28' font-family='Inter,sans-serif' fill='%23F97316' font-weight='800'%3EBS%3C/text%3E%3Ctext x='44' y='38' font-size='18' font-family='Inter,sans-serif' fill='%23fff' font-weight='700'%3ECollection BD%3C/text%3E%3C/svg%3E" alt="BS Collection BD">
+    <img src="logo.jpg" alt="BS Collection BD">
   </div>
   <ul class="nav">
     <li><a class="active" data-page="dashboard" data-title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a></li>
