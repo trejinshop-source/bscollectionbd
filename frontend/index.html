@@ -75,7 +75,11 @@
   function loadCache(key, fallback) {
     try {
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
+      if (!raw) return fallback;
+      const parsed = JSON.parse(raw);
+      // পুরনো/নষ্ট ক্যাশে যদি অ্যারে না হয় বা খালি হয়, তাহলে fallback ব্যবহার হবে —
+      // এটাই মূল কারণ ছিল "ক্যাটাগরি" ও "জনপ্রিয় পণ্যসমূহ" মাঝে মাঝে না দেখানোর
+      return Array.isArray(parsed) && parsed.length ? parsed : fallback;
     } catch (e) {
       return fallback;
     }
@@ -99,12 +103,19 @@
         fetch(API_BASE + "/categories"),
       ]);
       if (prodRes.ok) {
-        _products = await prodRes.json();
-        saveCache("bs_products_cache", _products);
+        const data = await prodRes.json();
+        // খালি/অবৈধ রেসপন্স এলে আগের ভালো ডেটা (fallback/cache) রয়ে যাবে, ওভাররাইট হবে না
+        if (Array.isArray(data) && data.length) {
+          _products = data;
+          saveCache("bs_products_cache", _products);
+        }
       }
       if (catRes.ok) {
-        _categories = await catRes.json();
-        saveCache("bs_categories_cache", _categories);
+        const data = await catRes.json();
+        if (Array.isArray(data) && data.length) {
+          _categories = data;
+          saveCache("bs_categories_cache", _categories);
+        }
       }
       _ready = true;
       fire("bsdata:ready", { products: _products, categories: _categories });
@@ -1180,20 +1191,8 @@ const catColors = [
   ["#E3E8F2","#A8B7D6"]
 ];
 const categories = BSAdmin.getCategories();
-document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>{
-  const [c1,c2] = catColors[i%catColors.length];
-  return `
-  <a href="shop.html?category=${c.slug}" class="cat-item fade-in" style="background:linear-gradient(120deg,${c1} 0%,${c1} 48%,${c2} 48%,${c2} 100%)">
-    <div class="cat-text"><h4>${c.name}</h4><span>${c.count} Products</span></div>
-    <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
-  </a>`;
-}).join('');
-
-// অ্যাডমিন প্যানেল থেকে ব্যাকএন্ডের আসল ডেটা এলে ক্যাটাগরি ও ফিচার্ড প্রোডাক্টের
-// নাম/দাম/ছবি লাইভ আপডেট হয়ে যাবে (jy2570 = id 101, jy2218 = id 102)
-document.addEventListener('bsdata:ready', function(){
-  const liveCats = BSAdmin.getCategories();
-  document.getElementById('categoryGrid').innerHTML = liveCats.map((c,i)=>{
+if (Array.isArray(categories) && categories.length) {
+  document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>{
     const [c1,c2] = catColors[i%catColors.length];
     return `
     <a href="shop.html?category=${c.slug}" class="cat-item fade-in" style="background:linear-gradient(120deg,${c1} 0%,${c1} 48%,${c2} 48%,${c2} 100%)">
@@ -1201,6 +1200,22 @@ document.addEventListener('bsdata:ready', function(){
       <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
     </a>`;
   }).join('');
+}
+
+// অ্যাডমিন প্যানেল থেকে ব্যাকএন্ডের আসল ডেটা এলে ক্যাটাগরি ও ফিচার্ড প্রোডাক্টের
+// নাম/দাম/ছবি লাইভ আপডেট হয়ে যাবে (jy2570 = id 101, jy2218 = id 102)
+document.addEventListener('bsdata:ready', function(){
+  const liveCats = BSAdmin.getCategories();
+  if (Array.isArray(liveCats) && liveCats.length) {
+    document.getElementById('categoryGrid').innerHTML = liveCats.map((c,i)=>{
+      const [c1,c2] = catColors[i%catColors.length];
+      return `
+      <a href="shop.html?category=${c.slug}" class="cat-item fade-in" style="background:linear-gradient(120deg,${c1} 0%,${c1} 48%,${c2} 48%,${c2} 100%)">
+        <div class="cat-text"><h4>${c.name}</h4><span>${c.count} Products</span></div>
+        <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
+      </a>`;
+    }).join('');
+  }
 
   const skuByFeaturedId = {101:'jy2570', 102:'jy2218'};
   Object.keys(skuByFeaturedId).forEach(fid=>{
