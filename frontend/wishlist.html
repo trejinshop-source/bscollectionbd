@@ -559,6 +559,104 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
   </div>
 </header>
 <div class="overlay" id="overlay"></div>
+<!-- ============ CART SIDEBAR ============ -->
+<div class="cart-sidebar-overlay" id="cartSidebarOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-sidebar-header">
+    <h3><i class="fas fa-bag-shopping"></i>Shopping Cart</h3>
+    <button class="cart-sidebar-close" id="cartSidebarClose"><i class="fas fa-xmark"></i>Close</button>
+  </div>
+  <div class="cart-sidebar-body bn" id="cartSidebarBody">
+    <div class="cart-empty"><i class="fas fa-cart-shopping"></i><p>No items in your cart!</p></div>
+  </div>
+  <div class="cart-sidebar-footer bn" id="cartSidebarFooter" style="display:none">
+    <div class="cart-sidebar-total"><span>Total:</span><span id="cartSidebarTotal">Tk 0</span></div>
+    <button class="btn btn-primary cart-checkout-btn" id="cartSidebarCheckout"><i class="fas fa-bolt"></i> Checkout</button>
+  </div>
+</aside>
+
+<!-- ============ ORDER FORM MODAL ============ -->
+<div class="order-modal-overlay" id="orderModalOverlay">
+  <div class="order-modal">
+    <div class="order-modal-header">
+      <h3>Complete Your Order</h3>
+      <button class="order-modal-close" id="orderModalClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="order-modal-body bn">
+      <div class="order-summary-mini" id="orderSummaryMini"></div>
+      <form id="orderForm">
+        <div class="of-group">
+          <label>নাম <span class="req">*</span></label>
+          <input type="text" id="ofName" required placeholder="আপনার পূর্ণ নাম লিখুন"/>
+        </div>
+        <div class="of-group">
+          <label>মোবাইল নাম্বার <span class="req">*</span></label>
+          <input type="tel" id="ofPhone" required placeholder="01XXXXXXXXX" pattern="01[0-9]{9}" title="সঠিক ১১ ডিজিটের মোবাইল নাম্বার দিন"/>
+        </div>
+        <div class="of-row3">
+          <div class="of-group">
+            <label>বিভাগ <span class="req">*</span></label>
+            <select id="ofDivision" required><option value="">বিভাগ নির্বাচন করুন</option></select>
+          </div>
+          <div class="of-group">
+            <label>জেলা <span class="req">*</span></label>
+            <select id="ofDistrict" required disabled><option value="">প্রথমে বিভাগ নির্বাচন করুন</option></select>
+          </div>
+          <div class="of-group">
+            <label>থানা/উপজেলা <span class="req">*</span></label>
+            <select id="ofUpazila" required disabled><option value="">প্রথমে জেলা নির্বাচন করুন</option></select>
+          </div>
+          <div class="of-group">
+            <label>ইউনিয়ন</label>
+            <select id="ofUnion" disabled><option value="">প্রথমে থানা/উপজেলা নির্বাচন করুন</option></select>
+          </div>
+        </div>
+        <div class="of-group">
+          <label>বিস্তারিত এলাকা (রোড, বাসা/হোল্ডিং নং)</label>
+          <textarea id="ofArea" placeholder="বিস্তারিত ঠিকানা লিখুন"></textarea>
+        </div>
+        <div class="of-group">
+          <label>ডেলিভারি চার্জ নির্বাচন করুন <span class="req">*</span></label>
+          <div class="of-delivery-options">
+            <label class="of-delivery-card active">
+              <input type="radio" name="ofDelivery" value="70" checked/>
+              <span class="of-dc-title">ঢাকার ভিতরে</span><span class="of-dc-price">Tk 70</span>
+            </label>
+            <label class="of-delivery-card">
+              <input type="radio" name="ofDelivery" value="130"/>
+              <span class="of-dc-title">ঢাকার বাইরে</span><span class="of-dc-price">Tk 130</span>
+            </label>
+          </div>
+        </div>
+        <div class="of-total-row">
+          <div class="of-total-line"><span>সাবটোটাল</span><span id="ofSubtotal">Tk 0</span></div>
+          <div class="of-total-line"><span>ডেলিভারি চার্জ</span><span id="ofDeliveryAmt">Tk 70</span></div>
+          <div class="of-total-line grand"><span>সর্বমোট</span><span id="ofGrandTotal">Tk 0</span></div>
+        </div>
+        <button type="submit" class="btn btn-primary of-confirm-btn" id="ofConfirmBtn"><i class="fas fa-check"></i> Confirm Order</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SUCCESS POPUP ============ -->
+<div class="success-modal-overlay" id="successModalOverlay">
+  <div class="success-modal bn">
+    <div class="success-icon"><i class="fas fa-circle-check"></i></div>
+    <h3>Order Confirmed!</h3>
+    <p>আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করে অর্ডারটি নিশ্চিত করব।</p>
+    <button class="btn btn-primary" id="successCloseBtn">Continue Shopping</button>
+  </div>
+</div>
+
+
+<!-- Cart docked to the right-middle of the page -->
+<a href="cart.html" class="floating-cart" id="cartIcon" title="Cart">
+  <i class="fas fa-shopping-bag"></i>
+  <span class="badge cart-badge" id="cartBadge">0</span>
+  <span class="label">Cart</span>
+</a>
+
 
 
 
