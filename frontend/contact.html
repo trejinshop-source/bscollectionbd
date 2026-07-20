@@ -582,21 +582,23 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
         </div>
       </div>
 
-      <form class="contact-form" onsubmit="event.preventDefault();alert('Thank you! We will get back to you within 24 hours.');this.reset();">
+      <form class="contact-form" id="contactForm">
         <h3>Send us a Message</h3>
         <p>Fill in the form and we'll reply within 24 hours.</p>
+        <div id="contactSuccess" style="display:none;background:#dcfce7;border:1px solid #86efac;padding:14px 18px;color:#166534;font-weight:600;margin-bottom:16px;font-size:14px"><i class="fas fa-check-circle"></i> আপনার বার্তা পাঠানো হয়েছে! আমরা শীঘ্রই যোগাযোগ করব।</div>
+        <div id="contactError" style="display:none;background:#fee2e2;border:1px solid #fca5a5;padding:14px 18px;color:#991b1b;font-weight:600;margin-bottom:16px;font-size:14px"></div>
         <div class="form-row">
-          <div class="field"><label>Full Name *</label><input required placeholder="Your name"/></div>
-          <div class="field"><label>Phone *</label><input required placeholder="+880 1XXX‑XXXXXX"/></div>
+          <div class="field"><label>Full Name *</label><input id="cfName" name="name" required placeholder="Your name"/></div>
+          <div class="field"><label>Phone *</label><input id="cfPhone" name="phone" required placeholder="+880 1XXX‑XXXXXX"/></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Email *</label><input type="email" required placeholder="you@example.com"/></div>
+          <div class="field"><label>Email</label><input id="cfEmail" name="email" type="email" placeholder="you@example.com"/></div>
           <div class="field"><label>Subject</label>
-            <select><option>General Inquiry</option><option>Order Status</option><option>Warranty Claim</option><option>Bulk / Wholesale</option><option>Partnership</option></select>
+            <select id="cfSubject" name="subject"><option>General Inquiry</option><option>Order Status</option><option>Warranty Claim</option><option>Bulk / Wholesale</option><option>Partnership</option></select>
           </div>
         </div>
-        <div class="field"><label>Message *</label><textarea required placeholder="How can we help you?"></textarea></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center"><i class="fas fa-paper-plane"></i> Send Message</button>
+        <div class="field"><label>Message *</label><textarea id="cfMessage" name="message" required placeholder="How can we help you?"></textarea></div>
+        <button type="submit" id="cfSubmitBtn" class="btn btn-primary" style="width:100%;justify-content:center"><i class="fas fa-paper-plane"></i> Send Message</button>
       </form>
     </div>
 
@@ -898,8 +900,53 @@ document.getElementById('year').textContent = new Date().getFullYear();
 <script src="cart.js"></script>
 
 <!-- BS_INJECT_START -->
-
-
+<script src="js/bs-shared.js" defer></script>
 <!-- BS_INJECT_END -->
+<script>
+(function(){
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+
+  var form = document.getElementById('contactForm');
+  if(!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var btn = document.getElementById('cfSubmitBtn');
+    var successEl = document.getElementById('contactSuccess');
+    var errorEl   = document.getElementById('contactError');
+    successEl.style.display = 'none';
+    errorEl.style.display   = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...';
+    try {
+      var payload = {
+        name:    document.getElementById('cfName').value.trim(),
+        phone:   document.getElementById('cfPhone').value.trim(),
+        email:   document.getElementById('cfEmail').value.trim(),
+        subject: document.getElementById('cfSubject').value,
+        message: document.getElementById('cfMessage').value.trim(),
+      };
+      var res = await fetch(API_BASE + '/contact', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+      var data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Submission failed');
+      successEl.style.display = 'block';
+      form.reset();
+    } catch(err) {
+      errorEl.textContent = err.message || 'বার্তা পাঠানো যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+    }
+  });
+})();
+</script>
 </body>
 </html>

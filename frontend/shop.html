@@ -1216,9 +1216,11 @@ document.addEventListener('bsdata:ready', function(){
 const fmt = n => "৳ " + n.toLocaleString('en-IN');
 function star(n){let s='';for(let i=0;i<5;i++)s+=`<i class="fa${i<n?'s':'r'} fa-star"></i>`;return s;}
 
-/* ================= WISHLIST (persisted in localStorage) ================= */
-function getWishlist(){try{return JSON.parse(localStorage.getItem('bs_wishlist'))||[];}catch(e){return [];}}
-function saveWishlist(w){localStorage.setItem('bs_wishlist', JSON.stringify(w));}
+/* ================= WISHLIST (persisted in localStorage — unified bs_wish_v1 key) ================= */
+var WL_KEY = 'bs_wish_v1';
+function getWishlist(){try{return JSON.parse(localStorage.getItem(WL_KEY))||[];}catch(e){return [];}}
+function saveWishlist(w){localStorage.setItem(WL_KEY, JSON.stringify(w));}
+function isWished(id){return getWishlist().some(function(x){return (x.id||x)===id;});}
 
 function updateBadges(){
   const wishCount = getWishlist().length;
@@ -1228,7 +1230,7 @@ function updateBadges(){
 function addToCart(id){
   const p = shopProducts.find(x=>x.id===id);
   if(!p) return;
-  if(window.BSCart) BSCart.addToCart({id:p.id, name:p.name, price:p.now, img:p.img});
+  if(window.BSCart) BSCart.addToCart({id:p.id, name:p.name, price:p.now, img:p.img, sku:p.sku});
   toast('"' + p.name + '" cart-এ যোগ হয়েছে');
 }
 
@@ -1236,7 +1238,7 @@ function toggleWishlist(id, btn){
   const p = shopProducts.find(x=>x.id===id);
   if(!p) return;
   let wl = getWishlist();
-  const idx = wl.indexOf(id);
+  const idx = wl.findIndex(function(x){return (x.id||x)===id;});
   const i = btn.querySelector('i');
   if(idx>-1){
     wl.splice(idx,1);
@@ -1244,7 +1246,8 @@ function toggleWishlist(id, btn){
     i.style.color='';
     toast('Wishlist থেকে সরানো হয়েছে');
   } else {
-    wl.push(id);
+    // store full product object so wishlist.html can render without a second fetch
+    wl.push({id:p.id, sku:p.sku||p.id, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat, detailPage:p.detailPage||('product-'+p.sku+'.html')});
     i.classList.replace('far','fas');
     i.style.color='#FCA311';
     toast('Wishlist-এ যোগ হয়েছে');
@@ -1255,23 +1258,24 @@ function toggleWishlist(id, btn){
 
 /* ================= RENDER PRODUCTS (identical markup/design to index.html's product-card) ================= */
 function productCardHTML(p){
-  const wished = getWishlist().includes(p.id);
-  const discount = Math.round((p.old-p.now)/p.old*100);
+  const wished = isWished(p.id);
+  const discount = p.old && p.old > p.now ? Math.round((p.old-p.now)/p.old*100) : 0;
+  const detailLink = p.detailPage || (p.sku ? 'product-' + p.sku + '.html' : '#');
   return `<div class="product-card fade-in" data-cat="${p.cat}">
     <div class="product-img">
-      <span class="sale-badge">-${discount}%</span>
+      ${discount>0?`<span class="sale-badge">-${discount}%</span>`:''}
       <div class="product-actions">
         <button aria-label="Wishlist" onclick="toggleWishlist(${p.id}, this)"><i class="${wished?'fas':'far'} fa-heart" style="${wished?'color:#FCA311':''}"></i></button>
-        <button aria-label="Quick view" onclick="toast('শীঘ্রই আসছে')"><i class="far fa-eye"></i></button>
+        <a aria-label="View Details" href="${detailLink}" style="width:36px;height:36px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.12)"><i class="far fa-eye" style="color:#14213D"></i></a>
       </div>
-      <img loading="lazy" src="${p.img}" alt="${p.name}"/>
+      <a href="${detailLink}"><img loading="lazy" src="${p.img}" alt="${p.name}"/></a>
       <button class="quick-add" onclick="addToCart(${p.id})"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
     </div>
     <div class="product-info">
       <span class="cat">${p.cat}</span>
-      <h4>${p.name}</h4>
+      <a href="${detailLink}" style="text-decoration:none;color:inherit"><h4>${p.name}</h4></a>
       <div class="rating">${star(p.rating)}<span>(${20+((p.id*7)%80)})</span></div>
-      <div class="price"><span class="now">${fmt(p.now)}</span><span class="old">${fmt(p.old)}</span></div>
+      <div class="price"><span class="now">${fmt(p.now)}</span>${p.old&&p.old>p.now?`<span class="old">${fmt(p.old)}</span>`:''}</div>
     </div>
   </div>`;
 }
@@ -1768,8 +1772,8 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 
 <!-- BS_INJECT_START -->
-
-
+<script src="js/bs-shared.js" defer></script>
+<script src="js/auth-backend.js" defer></script>
 <!-- BS_INJECT_END -->
 </body>
 </html>

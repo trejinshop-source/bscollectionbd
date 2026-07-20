@@ -567,7 +567,16 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 <section class="section">
   <div class="container">
     <div class="about-grid">
-      <div class="about-img"><i class="fas fa-fan"></i></div>
+      <div class="about-img" id="aboutImgBox" style="position:relative;overflow:hidden;cursor:pointer" title="Click to change image (admin only)">
+        <i class="fas fa-fan" id="aboutImgIcon"></i>
+        <img id="aboutImgEl" src="" alt="About Us" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none"/>
+        <div id="aboutImgUploadOverlay" style="display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(20,33,61,.7);padding:10px;text-align:center">
+          <label style="cursor:pointer;color:#FCA311;font-size:13px;font-weight:600">
+            <i class="fas fa-upload"></i> ছবি পরিবর্তন করুন
+            <input type="file" id="aboutImgInput" accept="image/*" style="display:none"/>
+          </label>
+        </div>
+      </div>
       <div>
         <h2 style="color:var(--primary);font-size:30px;font-weight:800;margin-bottom:12px">Bangladesh's Trusted Home for Premium Fans & Appliances</h2>
         <p style="color:var(--muted);margin-bottom:14px;font-size:15px;line-height:1.85">Since 2015, bscollectionbd has powered thousands of homes, offices, factories and shops across Bangladesh with reliable ceiling fans, table fans, industrial fans and everyday electrical appliances — all backed by real warranty and free delivery.</p>
@@ -908,6 +917,66 @@ document.getElementById('year').textContent = new Date().getFullYear();
 <script src="cart.js"></script>
 
 <!-- BS_INJECT_START -->
+<script>
+(function(){
+  var API_BASE = ['localhost','127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:5000/api' : 'https://bscollectionbd.onrender.com/api';
+  var ADMIN_TOKEN = localStorage.getItem('bs_admin_token');
+
+  // Load about page image from backend settings
+  async function loadAboutImg(){
+    try{
+      var res = await fetch(API_BASE + '/page-settings/about');
+      if(!res.ok) return;
+      var data = await res.json();
+      var imgUrl = data.content && data.content.aboutImg;
+      if(imgUrl) setAboutImg(imgUrl);
+    } catch(e){}
+  }
+
+  function setAboutImg(url){
+    var icon = document.getElementById('aboutImgIcon');
+    var imgEl = document.getElementById('aboutImgEl');
+    if(!imgEl) return;
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    if(icon) icon.style.display = 'none';
+  }
+
+  // Show upload overlay only for admins
+  if(ADMIN_TOKEN){
+    var overlay = document.getElementById('aboutImgUploadOverlay');
+    if(overlay) overlay.style.display = 'block';
+    var input = document.getElementById('aboutImgInput');
+    if(input){
+      input.addEventListener('change', async function(){
+        if(!input.files || !input.files[0]) return;
+        var fd = new FormData();
+        fd.append('image', input.files[0]);
+        try{
+          var res = await fetch(API_BASE + '/upload/about-image', {
+            method: 'POST',
+            headers: {'Authorization':'Bearer ' + ADMIN_TOKEN},
+            body: fd
+          });
+          var data = await res.json();
+          if(!res.ok) throw new Error(data.error);
+          // Save to page-settings
+          await fetch(API_BASE + '/page-settings/about', {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json','Authorization':'Bearer ' + ADMIN_TOKEN},
+            body: JSON.stringify({content:{aboutImg: data.url}})
+          });
+          setAboutImg(data.url);
+          alert('ছবি সেভ হয়েছে!');
+        } catch(e){ alert('ছবি আপলোড ব্যর্থ: ' + e.message); }
+      });
+    }
+  }
+
+  loadAboutImg();
+})();
+</script>
 
 
 <!-- BS_INJECT_END -->

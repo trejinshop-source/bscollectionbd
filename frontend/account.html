@@ -613,12 +613,19 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
       <div class="auth-step" data-step="profile">
         <div class="profile-avatar" id="profileAvatar">U</div>
         <h2 style="text-align:center" id="profileName">Member</h2>
-        <p style="text-align:center;margin-bottom:26px">You are logged in to your account.</p>
+        <p style="text-align:center;margin-bottom:20px;color:#64748b;font-size:14px">আপনার অ্যাকাউন্টে লগইন করা আছে</p>
 
         <div class="profile-detail"><i class="fas fa-phone" style="color:#FCA311;width:18px"></i> <span id="profilePhone">—</span></div>
         <div class="profile-detail"><i class="fas fa-envelope" style="color:#FCA311;width:18px"></i> <span id="profileEmail">—</span></div>
 
-        <a href="index.html" class="btn-login" style="text-decoration:none;justify-content:center;margin-top:24px"><i class="fas fa-bag-shopping"></i> Continue Shopping</a>
+        <div style="margin-top:24px;border-top:1px solid #f1f5f9;padding-top:18px">
+          <h4 style="color:#14213D;font-size:14px;font-weight:700;margin-bottom:12px"><i class="fas fa-box" style="color:#FCA311;margin-right:6px"></i> আমার অর্ডারসমূহ</h4>
+          <div id="orderHistoryBox" style="max-height:280px;overflow-y:auto">
+            <p style="color:#94a3b8;font-size:13px;text-align:center;padding:16px 0">লোড হচ্ছে...</p>
+          </div>
+        </div>
+
+        <a href="index.html" class="btn-login" style="text-decoration:none;justify-content:center;margin-top:18px"><i class="fas fa-bag-shopping"></i> Continue Shopping</a>
         <button type="button" class="btn-login" style="background:#fff;color:#14213D;border:1.5px solid #14213D;margin-top:10px" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
       </div>
 
@@ -765,7 +772,150 @@ document.addEventListener('DOMContentLoaded', function(){
   var current = getCurrentUser();
   if(current){ renderProfile(current); showAuthStep('profile'); }
   else { showAuthStep('login'); }
+  // Also sync with auth-backend.js if available
+  setTimeout(syncWithBackendAuth, 300);
 });
+
+/* ===== Auth-backend.js bridge ===== */
+function syncWithBackendAuth(){
+  // If auth-backend.js is loaded, it manages bs_customer_token / bs_customer_user
+  var token = localStorage.getItem('bs_customer_token');
+  var userJson = localStorage.getItem('bs_customer_user');
+  if(token && userJson){
+    try{
+      var u = JSON.parse(userJson);
+      if(u && u.name){
+        // mirror into old-style current-user key so profile works
+        setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
+        renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
+        showAuthStep('profile');
+        // Load orders from backend
+        loadCustomerOrders(token);
+      }
+    } catch(ex){}
+  }
+}
+
+/* ===== Customer orders from backend ===== */
+async function loadCustomerOrders(token){
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+  try{
+    var res = await fetch(API_BASE + '/customer/orders', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if(!res.ok) return;
+    var orders = await res.json();
+    renderOrderHistory(orders);
+  } catch(ex){}
+}
+
+function renderOrderHistory(orders){
+  var container = document.getElementById('orderHistoryBox');
+  if(!container) return;
+  if(!orders || !orders.length){
+    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:20px 0">কোনো অর্ডার পাওয়া যায়নি।</p>';
+    return;
+  }
+  var statusColors = {Pending:'#f59e0b',Verified:'#3b82f6',Processing:'#8b5cf6',Shipped:'#06b6d4',Completed:'#10b981',Cancelled:'#ef4444',Fake:'#6b7280'};
+  container.innerHTML = orders.map(function(o){
+    var color = statusColors[o.status] || '#94a3b8';
+    var date = new Date(o.createdAt).toLocaleDateString('en-GB');
+    var items = (o.items||[]).map(function(i){return i.name + ' ×' + i.qty;}).join(', ');
+    return '<div style="border:1px solid #e2e8f0;padding:14px;margin-bottom:10px;background:#f8fafc">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<span style="font-weight:700;color:#14213D">' + (o.orderId||'#') + '</span>' +
+      '<span style="background:'+color+';color:#fff;padding:3px 10px;font-size:12px;font-weight:600">' + o.status + '</span>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#374151;margin-bottom:4px">' + (items||'(no items)') + '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">' +
+      '<span>' + date + '</span>' +
+      '<span style="font-weight:700;color:#FCA311">৳ ' + (o.total||0).toLocaleString() + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ===== Override login to also try backend ===== */
+var _origDoLogin = doLogin;
+doLogin = async function(e){
+  e.preventDefault();
+  var f = e.target;
+  var id = f.id.value.trim();
+  var pw = f.pw.value;
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+  // Try backend first (email login)
+  try{
+    var res = await fetch(API_BASE + '/customer/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email: id, password: pw})
+    });
+    var data = await res.json();
+    if(res.ok && data.token){
+      localStorage.setItem('bs_customer_token', data.token);
+      localStorage.setItem('bs_customer_user', JSON.stringify(data.user));
+      var u = data.user;
+      setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
+      if(window.bsToast) bsToast('স্বাগতম, ' + u.name + '!', 'ok');
+      renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
+      showAuthStep('profile');
+      loadCustomerOrders(data.token);
+      return false;
+    }
+  } catch(ex){}
+  // Fall back to local storage auth
+  return _origDoLogin(e);
+};
+
+/* ===== Override register to also try backend ===== */
+var _origDoRegister = doRegister;
+doRegister = async function(e){
+  e.preventDefault();
+  var f = e.target;
+  var name = f.name.value.trim();
+  var phone = f.phone.value.trim();
+  var email = (f.email ? f.email.value.trim() : '');
+  var pw = f.pw.value;
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+  if(!email){
+    return _origDoRegister(e);
+  }
+  try{
+    var res = await fetch(API_BASE + '/customer/signup', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, phone, password: pw})
+    });
+    var data = await res.json();
+    if(res.ok && data.token){
+      localStorage.setItem('bs_customer_token', data.token);
+      localStorage.setItem('bs_customer_user', JSON.stringify(data.user));
+      var u = data.user;
+      setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
+      if(window.bsToast) bsToast('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম, ' + u.name + '!', 'ok');
+      renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
+      showAuthStep('profile');
+      return false;
+    } else {
+      if(window.bsToast) bsToast(data.error || 'Registration failed', 'err');
+      return false;
+    }
+  } catch(ex){
+    return _origDoRegister(e);
+  }
+};
 </script>
 
 <footer style="background:#0B1526;color:#cbd5e1;padding:56px 0 0" id="siteFooter">

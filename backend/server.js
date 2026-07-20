@@ -1,17 +1,13 @@
 /*
- * BS Collection BD — Express Backend (sarver.js) — UPDATED
- * ----------------------------------------------------------
- * Adds: Reviews (with admin moderation), Customer accounts + OTP forgot-password,
- * Page settings, Card-placement (home popular / bestseller / shop), Fake-order
- * detection heuristics, Auto-generated detail pages for new products, and
- * Google Apps Script mail notifications for new orders and OTP.
+ * BS Collection BD — Express Backend — FULL UPDATE
+ * Adds: ContactMessage model + routes, filter-tabs, seed route,
+ *       customer profile/orders, about page settings, all previous features.
  */
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const bcrypt = null; // optional; we use simple sha256 to avoid extra dep
 const crypto = require("crypto");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -34,7 +30,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) return cb(null, true);
+    if (!allowedOrigins.length || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) return cb(null, true);
     cb(new Error("Not allowed by CORS: " + origin));
   },
   credentials: true,
@@ -60,11 +56,17 @@ const ProductSchema = new mongoose.Schema({
   img: String,
   gallery: [String],
   description: String,
+  shortDescription: String,
   detailPage: String,
   hasDetailPage: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
+  tags: [String],
+  // SEO
+  seoTitle: String,
+  seoDescription: String,
+  seoKeywords: String,
   specs: [{ label: String, value: String }],
-  // Placement — where the card is visible in the storefront
+  features: [String],
   placements: {
     shop: { type: Boolean, default: true },
     homePopular: { type: Boolean, default: false },
@@ -85,10 +87,13 @@ const OrderSchema = new mongoose.Schema({
   customer: {
     name: { type: String, required: true },
     phone: { type: String, required: true },
-    address: { type: String, required: true },
+    address: String,
     email: String,
     division: String,
     district: String,
+    upazila: String,
+    union: String,
+    area: String,
   },
   items: [{
     productId: String,
@@ -99,23 +104,24 @@ const OrderSchema = new mongoose.Schema({
     img: String,
   }],
   subtotal: Number,
-  deliveryCharge: { type: Number, default: 60 },
+  deliveryCharge: { type: Number, default: 70 },
+  deliveryFee: Number,
   total: Number,
   paymentMethod: { type: String, default: "COD" },
+  source: String,
   status: {
     type: String,
     enum: ["Pending", "Verified", "Processing", "Shipped", "Completed", "Cancelled", "Fake"],
     default: "Pending",
   },
   note: String,
-  // Fake-order detection metadata
   meta: {
     ip: String,
     userAgent: String,
     referer: String,
     duplicateCount: { type: Number, default: 0 },
   },
-  fakeScore: { type: Number, default: 0 }, // 0-100
+  fakeScore: { type: Number, default: 0 },
   fakeReasons: [String],
   isFake: { type: Boolean, default: false },
 }, { timestamps: true });
@@ -125,20 +131,22 @@ OrderSchema.pre("save", async function (next) {
     const count = await mongoose.model("Order").countDocuments();
     this.orderId = "BS-" + String(count + 1001).padStart(5, "0");
   }
+  // normalize deliveryCharge
+  if (!this.deliveryCharge && this.deliveryFee) this.deliveryCharge = this.deliveryFee;
   next();
 });
 
 const ReviewSchema = new mongoose.Schema({
-  productId: { type: String, required: true, index: true }, // sku or product _id string
+  productId: { type: String, required: true, index: true },
   productName: String,
-  user: { type: String, required: true }, // display name
+  user: { type: String, required: true },
   email: String,
   userId: String,
   type: { type: String, enum: ["review", "question"], default: "review" },
   text: { type: String, required: true },
   rating: { type: Number, min: 1, max: 5, default: 5 },
   visible: { type: Boolean, default: true },
-  reply: String, // admin reply (for questions)
+  reply: String,
 }, { timestamps: true });
 
 const UserSchema = new mongoose.Schema({
@@ -150,12 +158,26 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const PageSettingSchema = new mongoose.Schema({
-  page: { type: String, required: true, unique: true }, // e.g. "home", "shop", "about"
+  page: { type: String, required: true, unique: true },
   title: String,
   metaDescription: String,
+  metaKeywords: String,
   hero: { headline: String, subheadline: String, image: String, ctaLabel: String, ctaHref: String },
   sections: [{ key: String, label: String, visible: Boolean, order: Number, data: mongoose.Schema.Types.Mixed }],
-  content: mongoose.Schema.Types.Mixed, // free-form key/value
+  content: mongoose.Schema.Types.Mixed,
+}, { timestamps: true });
+
+// NEW: ContactMessage model
+const ContactMessageSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: String,
+  phone: String,
+  subject: String,
+  message: { type: String, required: true },
+  read: { type: Boolean, default: false },
+  replied: { type: Boolean, default: false },
+  replyText: String,
+  repliedAt: Date,
 }, { timestamps: true });
 
 const Product = mongoose.model("Product", ProductSchema);
@@ -164,18 +186,19 @@ const Order = mongoose.model("Order", OrderSchema);
 const Review = mongoose.model("Review", ReviewSchema);
 const User = mongoose.model("User", UserSchema);
 const PageSetting = mongoose.model("PageSetting", PageSettingSchema);
+const ContactMessage = mongoose.model("ContactMessage", ContactMessageSchema);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function sha256(s) { return crypto.createHash("sha256").update(String(s)).digest("hex"); }
 function signToken(payload, exp = "7d") {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: exp });
+  return jwt.sign(payload, process.env.JWT_SECRET || "bs_secret_key_2024", { expiresIn: exp });
 }
 function authAdmin(req, res, next) {
   const h = req.headers.authorization || "";
   const tk = h.startsWith("Bearer ") ? h.slice(7) : null;
   if (!tk) return res.status(401).json({ error: "টোকেন প্রয়োজন" });
   try {
-    const d = jwt.verify(tk, process.env.JWT_SECRET);
+    const d = jwt.verify(tk, process.env.JWT_SECRET || "bs_secret_key_2024");
     if (d.role !== "admin") return res.status(403).json({ error: "Admin only" });
     req.admin = d; next();
   } catch { res.status(401).json({ error: "টোকেন অবৈধ" }); }
@@ -185,16 +208,15 @@ function authUser(req, res, next) {
   const tk = h.startsWith("Bearer ") ? h.slice(7) : null;
   if (!tk) return res.status(401).json({ error: "লগইন প্রয়োজন" });
   try {
-    const d = jwt.verify(tk, process.env.JWT_SECRET);
+    const d = jwt.verify(tk, process.env.JWT_SECRET || "bs_secret_key_2024");
     if (!d.userId) return res.status(403).json({ error: "User token required" });
     req.user = d; next();
   } catch { res.status(401).json({ error: "টোকেন অবৈধ" }); }
 }
-// Optional auth: attach req.user if token is valid, otherwise proceed
 function optionalUser(req, res, next) {
   const h = req.headers.authorization || "";
   const tk = h.startsWith("Bearer ") ? h.slice(7) : null;
-  if (tk) { try { req.user = jwt.verify(tk, process.env.JWT_SECRET); } catch {} }
+  if (tk) { try { req.user = jwt.verify(tk, process.env.JWT_SECRET || "bs_secret_key_2024"); } catch {} }
   next();
 }
 
@@ -240,7 +262,7 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// CUSTOMER AUTH (signup / login / forgot / reset)
+// CUSTOMER AUTH (signup / login / forgot / reset / profile / orders)
 // ═════════════════════════════════════════════════════════════════════════════
 app.post("/api/customer/signup", async (req, res) => {
   try {
@@ -250,20 +272,22 @@ app.post("/api/customer/signup", async (req, res) => {
     const exists = await User.findOne({ email: String(email).toLowerCase() });
     if (exists) return res.status(400).json({ error: "এই ইমেইলে অ্যাকাউন্ট আছে" });
     const user = await User.create({ name, email, phone, passwordHash: sha256(password) });
-    const token = signToken({ userId: user._id, email: user.email, name: user.name });
+    const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
+
 app.post("/api/customer/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
     const user = await User.findOne({ email: String(email || "").toLowerCase() });
     if (!user || user.passwordHash !== sha256(password || ""))
       return res.status(401).json({ error: "ইমেইল বা পাসওয়ার্ড ভুল" });
-    const token = signToken({ userId: user._id, email: user.email, name: user.name });
+    const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.post("/api/customer/forgot", async (req, res) => {
   try {
     const email = String(req.body?.email || "").toLowerCase();
@@ -273,65 +297,140 @@ app.post("/api/customer/forgot", async (req, res) => {
     user.otp = { code, expires: new Date(Date.now() + 10 * 60 * 1000) };
     await user.save();
     appsScriptPost({ action: "sendOtp", email, code });
-    res.json({ ok: true, msg: "OTP আপনার ইমেইলে পাঠানো হয়েছে" });
+    res.json({ msg: "OTP পাঠানো হয়েছে। ১০ মিনিটের মধ্যে ব্যবহার করুন।" });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.post("/api/customer/reset", async (req, res) => {
   try {
     const { email, code, newPassword } = req.body || {};
     const user = await User.findOne({ email: String(email || "").toLowerCase() });
-    if (!user || !user.otp?.code) return res.status(400).json({ error: "OTP পাঠানো হয়নি" });
-    if (user.otp.code !== String(code || "").trim())
-      return res.status(400).json({ error: "OTP ভুল" });
-    if (!user.otp.expires || user.otp.expires < new Date())
-      return res.status(400).json({ error: "OTP মেয়াদ শেষ" });
-    if (!newPassword || String(newPassword).length < 6)
-      return res.status(400).json({ error: "নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর" });
+    if (!user) return res.status(404).json({ error: "অ্যাকাউন্ট পাওয়া যায়নি" });
+    if (!user.otp?.code || user.otp.code !== code || new Date() > user.otp.expires)
+      return res.status(400).json({ error: "OTP অবৈধ বা মেয়াদোত্তীর্ণ" });
+    if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর" });
     user.passwordHash = sha256(newPassword);
     user.otp = undefined;
     await user.save();
-    res.json({ ok: true, msg: "পাসওয়ার্ড পরিবর্তন সফল" });
+    res.json({ msg: "পাসওয়ার্ড পরিবর্তন সফল হয়েছে।" });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-app.get("/api/customer/me", authUser, async (req, res) => {
-  const user = await User.findById(req.user.userId).select("-passwordHash -otp");
-  res.json(user);
+
+// Customer profile
+app.get("/api/customer/profile", authUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-passwordHash -otp");
+    if (!user) return res.status(404).json({ error: "ব্যবহারকারী পাওয়া যায়নি" });
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Admin: list / delete users
-app.get("/api/users", authAdmin, async (req, res) => {
-  const users = await User.find().select("-passwordHash -otp").sort({ createdAt: -1 });
-  res.json(users);
+// Customer update profile
+app.put("/api/customer/profile", authUser, async (req, res) => {
+  try {
+    const { name, phone } = req.body || {};
+    const update = {};
+    if (name) update.name = name;
+    if (phone) update.phone = phone;
+    const user = await User.findByIdAndUpdate(req.user.userId, update, { new: true }).select("-passwordHash -otp");
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
-app.delete("/api/users/:id", authAdmin, async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ ok: true });
+
+// Customer orders
+app.get("/api/customer/orders", authUser, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const user = await User.findById(req.user.userId);
+    // Match orders by email or phone
+    const query = [];
+    if (email) query.push({ "customer.email": email });
+    if (user?.phone) query.push({ "customer.phone": user.phone });
+    const orders = await Order.find(query.length ? { $or: query } : { _id: null })
+      .sort({ createdAt: -1 }).limit(50);
+    res.json(orders);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// CONTACT MESSAGES
+// ═════════════════════════════════════════════════════════════════════════════
+// Public: submit contact form
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, phone, subject, message } = req.body || {};
+    if (!name || !message) return res.status(400).json({ error: "নাম ও বার্তা আবশ্যক" });
+    const msg = await ContactMessage.create({ name, email, phone, subject, message });
+    // notify via Apps Script
+    appsScriptPost({ action: "newContact", name, email, phone, subject, message });
+    res.status(201).json({ ok: true, id: msg._id });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: list all contact messages
+app.get("/api/contacts", authAdmin, async (req, res) => {
+  try {
+    const msgs = await ContactMessage.find().sort({ createdAt: -1 }).limit(200);
+    res.json(msgs);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: get single contact message
+app.get("/api/contacts/:id", authAdmin, async (req, res) => {
+  try {
+    const msg = await ContactMessage.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
+    if (!msg) return res.status(404).json({ error: "পাওয়া যায়নি" });
+    res.json(msg);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: reply to contact message
+app.patch("/api/contacts/:id", authAdmin, async (req, res) => {
+  try {
+    const { replyText, read, replied } = req.body || {};
+    const update = { read: true };
+    if (replyText !== undefined) { update.replyText = replyText; update.replied = true; update.repliedAt = new Date(); }
+    if (read !== undefined) update.read = read;
+    if (replied !== undefined) update.replied = replied;
+    const msg = await ContactMessage.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.json(msg);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: delete contact message
+app.delete("/api/contacts/:id", authAdmin, async (req, res) => {
+  try {
+    await ContactMessage.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
 // PRODUCTS
 // ═════════════════════════════════════════════════════════════════════════════
-function slugifyForFile(s) {
-  return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
-}
-
 app.get("/api/products", async (req, res) => {
   try {
-    const { cat, featured, limit, search, placement } = req.query;
-    const filter = {};
-    if (cat) filter.categorySlug = cat;
-    if (featured === "true") filter.featured = true;
-    if (placement) filter["placements." + placement] = true;
-    if (search) filter.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { sku: { $regex: search, $options: "i" } },
-      { cat: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-    ];
-    let q = Product.find(filter).sort({ createdAt: -1 });
-    if (limit) q = q.limit(parseInt(limit));
-    res.json(await q);
+    const { placement, cat, featured, search, limit = 100 } = req.query;
+    const q = {};
+    if (placement === "homePopular") q["placements.homePopular"] = true;
+    else if (placement === "homeBestseller") q["placements.homeBestseller"] = true;
+    else if (placement === "homeNew") q["placements.homeNew"] = true;
+    else if (placement === "shop") q["placements.shop"] = true;
+    if (cat) q.categorySlug = cat;
+    if (featured === "true") q.featured = true;
+    if (search) q.name = { $regex: search, $options: "i" };
+    const products = await Product.find(q).sort({ createdAt: -1 }).limit(Number(limit));
+    res.json(products);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post("/api/products", authAdmin, async (req, res) => {
+  try {
+    const p = await Product.create(req.body);
+    // update category count
+    if (p.categorySlug) await Category.updateOne({ slug: p.categorySlug }, { $inc: { count: 1 } });
+    res.status(201).json(p);
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
 app.get("/api/products/id/:id", async (req, res) => {
@@ -341,275 +440,494 @@ app.get("/api/products/id/:id", async (req, res) => {
     res.json(p);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-app.get("/api/products/sku/:sku", async (req, res) => {
-  try {
-    const p = await Product.findOne({ sku: req.params.sku });
-    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
-    res.json(p);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// Create product — auto-generates detail-page path if not provided
-app.post("/api/products", authAdmin, async (req, res) => {
-  try {
-    const body = { ...req.body };
-    if (!body.detailPage && body.sku) body.detailPage = "product-" + slugifyForFile(body.sku) + ".html";
-    body.hasDetailPage = Boolean(body.detailPage);
-    const p = new Product(body);
-    await p.save();
-    if (p.categorySlug) await Category.findOneAndUpdate({ slug: p.categorySlug }, { $inc: { count: 1 } });
-    res.status(201).json(p);
-  } catch (err) { res.status(400).json({ error: err.message }); }
-});
 
 app.put("/api/products/id/:id", authAdmin, async (req, res) => {
   try {
-    const u = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!u) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
-    res.json(u);
+    const p = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
+    res.json(p);
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
+
 app.delete("/api/products/id/:id", authAdmin, async (req, res) => {
   try {
-    const d = await Product.findByIdAndDelete(req.params.id);
-    if (!d) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
-    if (d.categorySlug) await Category.findOneAndUpdate({ slug: d.categorySlug }, { $inc: { count: -1 } });
-    res.json({ message: "মুছে ফেলা হয়েছে", id: req.params.id });
+    const p = await Product.findByIdAndDelete(req.params.id);
+    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
+    if (p.categorySlug) await Category.updateOne({ slug: p.categorySlug }, { $inc: { count: -1 } });
+    res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Decrement stock (frontend triggers on delivery/completion — admin-only)
-app.post("/api/products/:id/decrement-stock", authAdmin, async (req, res) => {
-  const qty = Math.max(1, parseInt(req.body?.qty || 1, 10));
-  const p = await Product.findByIdAndUpdate(req.params.id, { $inc: { stock: -qty } }, { new: true });
-  if (!p) return res.status(404).json({ error: "পণ্য নেই" });
-  res.json(p);
+// Image upload
+app.post("/api/products/upload", authAdmin, upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+  res.json({ url: req.file.path });
 });
 
-// Image upload (single or multi via ?field=images)
-app.post("/api/products/upload", authAdmin, upload.array("images", 10), (req, res) => {
-  const files = req.files || [];
-  if (!files.length && req.file) files.push(req.file);
-  if (!files.length) return res.status(400).json({ error: "কোনো ছবি পাওয়া যায়নি" });
-  res.json({ urls: files.map(f => f.path) });
+// About page image upload (public but with basic check)
+app.post("/api/upload/about-image", authAdmin, upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+  res.json({ url: req.file.path });
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CATEGORIES
 // ═════════════════════════════════════════════════════════════════════════════
 app.get("/api/categories", async (req, res) => {
-  try { res.json(await Category.find().sort({ name: 1 })); }
-  catch (err) { res.status(500).json({ error: err.message }); }
-});
-app.post("/api/categories", authAdmin, async (req, res) => {
-  try { const c = new Category(req.body); await c.save(); res.status(201).json(c); }
-  catch (err) { res.status(400).json({ error: err.message }); }
-});
-app.put("/api/categories/:id", authAdmin, async (req, res) => {
   try {
-    const u = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!u) return res.status(404).json({ error: "ক্যাটাগরি পাওয়া যায়নি" });
-    res.json(u);
+    const cats = await Category.find().sort({ name: 1 });
+    res.json(cats);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post("/api/categories", authAdmin, async (req, res) => {
+  try {
+    const cat = await Category.create(req.body);
+    res.status(201).json(cat);
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
+
+app.put("/api/categories/:id", authAdmin, async (req, res) => {
+  try {
+    const cat = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!cat) return res.status(404).json({ error: "ক্যাটাগরি পাওয়া যায়নি" });
+    res.json(cat);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
 app.delete("/api/categories/:id", authAdmin, async (req, res) => {
   try {
-    const d = await Category.findByIdAndDelete(req.params.id);
-    if (!d) return res.status(404).json({ error: "ক্যাটাগরি পাওয়া যায়নি" });
-    res.json({ message: "মুছে ফেলা হয়েছে" });
+    await Category.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// ORDERS  (with Fake-Order Detection)
+// ORDERS
 // ═════════════════════════════════════════════════════════════════════════════
-async function computeFakeScore(order, req) {
-  let score = 0; const reasons = [];
-  const phone = String(order.customer?.phone || "").replace(/\D/g, "");
-  const email = String(order.customer?.email || "").toLowerCase();
-  const ip = order.meta?.ip || "";
+app.post("/api/orders", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const { customer, items, subtotal, deliveryCharge, deliveryFee, total, paymentMethod, source, note } = body;
+    if (!customer?.name || !customer?.phone)
+      return res.status(400).json({ error: "নাম ও ফোন নম্বর আবশ্যক" });
 
-  // 1) Same phone recently used
-  if (phone) {
-    const recent = await Order.countDocuments({
-      "customer.phone": order.customer.phone,
-      createdAt: { $gte: new Date(Date.now() - 24 * 3600 * 1000) },
+    // Build order
+    const orderData = {
+      customer: {
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address || [customer.area, customer.upazila, customer.district, customer.division].filter(Boolean).join(", "),
+        email: customer.email || "",
+        division: customer.division || "",
+        district: customer.district || "",
+        upazila: customer.upazila || "",
+        union: customer.union || "",
+        area: customer.area || "",
+      },
+      items: (items || []).map(i => ({
+        productId: i.id || i.productId || "",
+        sku: i.sku || i.id || "",
+        name: i.name || "",
+        price: Number(i.price) || 0,
+        qty: Number(i.qty) || 1,
+        img: i.img || "",
+      })),
+      subtotal: Number(subtotal) || 0,
+      deliveryCharge: Number(deliveryCharge || deliveryFee) || 70,
+      deliveryFee: Number(deliveryFee || deliveryCharge) || 70,
+      total: Number(total) || 0,
+      paymentMethod: paymentMethod || "COD",
+      source: source || "site",
+      note: note || "",
+      meta: {
+        ip: req.ip,
+        userAgent: req.headers["user-agent"] || "",
+        referer: req.headers.referer || "",
+      },
+    };
+
+    // Simple fake-order detection
+    const recentSamePhone = await Order.countDocuments({
+      "customer.phone": customer.phone,
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
     });
-    if (recent > 3) { score += 30; reasons.push("গত ২৪ ঘন্টায় একই ফোন থেকে " + recent + "টি অর্ডার"); }
-    if (recent > 0) order.meta.duplicateCount = recent;
-  }
-  // 2) Same IP many orders
-  if (ip) {
-    const ipCount = await Order.countDocuments({ "meta.ip": ip, createdAt: { $gte: new Date(Date.now() - 24 * 3600 * 1000) } });
-    if (ipCount > 5) { score += 25; reasons.push("একই IP থেকে অনেক অর্ডার"); }
-  }
-  // 3) Invalid BD phone
-  if (phone && !/^(?:88)?01[0-9]{9}$/.test(phone)) { score += 20; reasons.push("অবৈধ বাংলাদেশী ফোন নাম্বার"); }
-  // 4) Very short name / address
-  if (String(order.customer?.name || "").trim().length < 3) { score += 15; reasons.push("খুবই ছোট নাম"); }
-  if (String(order.customer?.address || "").trim().length < 10) { score += 15; reasons.push("খুবই ছোট ঠিকানা"); }
-  // 5) Disposable / suspicious email
-  if (email && /(mailinator|tempmail|guerrillamail|10minutemail|throwaway)/i.test(email)) { score += 15; reasons.push("অস্থায়ী ইমেইল"); }
-  // 6) Abnormally huge quantity
-  const totalQty = (order.items || []).reduce((s, i) => s + (+i.qty || 0), 0);
-  if (totalQty > 20) { score += 15; reasons.push("অস্বাভাবিক বড় পরিমাণ (" + totalQty + ")"); }
-  // 7) Very large amount
-  if ((order.total || 0) > 100000) { score += 10; reasons.push("অস্বাভাবিক বড় অ্যামাউন্ট"); }
+    let fakeScore = 0;
+    const fakeReasons = [];
+    if (recentSamePhone > 3) { fakeScore += 40; fakeReasons.push("Same phone used 3+ times in 24h"); }
+    if (customer.phone && !/^01[3-9]\d{8}$/.test(customer.phone)) { fakeScore += 30; fakeReasons.push("Invalid BD phone number"); }
+    orderData.fakeScore = fakeScore;
+    orderData.fakeReasons = fakeReasons;
+    orderData.isFake = fakeScore >= 60;
 
-  order.fakeScore = Math.min(100, score);
-  order.fakeReasons = reasons;
-  order.isFake = score >= 50;
-  return order;
-}
+    const order = await Order.create(orderData);
+
+    // Decrement stock
+    for (const item of order.items) {
+      if (item.sku) await Product.updateOne({ sku: item.sku }, { $inc: { stock: -item.qty } });
+    }
+
+    // Notify
+    appsScriptPost({
+      action: "newOrder",
+      orderId: order.orderId,
+      customer: order.customer,
+      items: order.items,
+      total: order.total,
+    });
+
+    res.status(201).json({ ok: true, orderId: order.orderId, _id: order._id });
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
 
 app.get("/api/orders", authAdmin, async (req, res) => {
   try {
-    const { status, limit, page = 1, fake, search } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (fake === "true") filter.isFake = true;
-    if (fake === "false") filter.isFake = false;
-    if (search) filter.$or = [
-      { orderId: { $regex: search, $options: "i" } },
+    const { status, fake, limit = 50, skip = 0, search } = req.query;
+    const q = {};
+    if (status) q.status = status;
+    if (fake === "true") q.isFake = true;
+    if (search) q.$or = [
       { "customer.name": { $regex: search, $options: "i" } },
       { "customer.phone": { $regex: search, $options: "i" } },
-      { "customer.email": { $regex: search, $options: "i" } },
+      { orderId: { $regex: search, $options: "i" } },
     ];
-    const per = parseInt(limit) || 50;
-    const orders = await Order.find(filter).sort({ createdAt: -1 }).skip((parseInt(page) - 1) * per).limit(per);
-    const total = await Order.countDocuments(filter);
-    res.json({ orders, total, page: parseInt(page), perPage: per });
+    const [orders, total] = await Promise.all([
+      Order.find(q).sort({ createdAt: -1 }).skip(Number(skip)).limit(Number(limit)),
+      Order.countDocuments(q),
+    ]);
+    res.json({ orders, total });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post("/api/orders", optionalUser, async (req, res) => {
+app.get("/api/orders/:id", authAdmin, async (req, res) => {
   try {
-    const body = { ...req.body };
-    body.meta = body.meta || {};
-    body.meta.ip = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
-    body.meta.userAgent = req.headers["user-agent"] || "";
-    body.meta.referer = req.headers["referer"] || "";
-    const order = new Order(body);
-    await computeFakeScore(order, req);
-    await order.save();
-    // Fire-and-forget Apps Script notification
-    appsScriptPost({
-      action: "newOrder",
-      order: {
-        id: order.orderId,
-        customer: order.customer,
-        items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.deliveryCharge,
-        total: order.total,
-        fakeScore: order.fakeScore,
-        fakeReasons: order.fakeReasons,
-      },
-    });
-    res.status(201).json(order);
-  } catch (err) { res.status(400).json({ error: err.message }); }
+    const o = await Order.findById(req.params.id);
+    if (!o) return res.status(404).json({ error: "অর্ডার পাওয়া যায়নি" });
+    res.json(o);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.patch("/api/orders/:id", authAdmin, async (req, res) => {
   try {
     const { status, note } = req.body || {};
-    const upd = {}; if (status) upd.status = status; if (note !== undefined) upd.note = note;
-    const u = await Order.findByIdAndUpdate(req.params.id, upd, { new: true });
-    if (!u) return res.status(404).json({ error: "অর্ডার নেই" });
-    // On completion → decrement stock
-    if (status === "Completed") {
-      for (const it of u.items || []) {
-        if (it.productId) await Product.findByIdAndUpdate(it.productId, { $inc: { stock: -(it.qty || 1) } });
-      }
-    }
-    res.json(u);
+    const update = {};
+    if (status) update.status = status;
+    if (note !== undefined) update.note = note;
+    const o = await Order.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!o) return res.status(404).json({ error: "অর্ডার পাওয়া যায়নি" });
+    res.json(o);
   } catch (err) { res.status(400).json({ error: err.message }); }
-});
-
-app.post("/api/orders/:id/mark-fake", authAdmin, async (req, res) => {
-  const u = await Order.findByIdAndUpdate(req.params.id, { isFake: true, status: "Fake" }, { new: true });
-  if (!u) return res.status(404).json({ error: "অর্ডার নেই" });
-  res.json(u);
 });
 
 app.delete("/api/orders/:id", authAdmin, async (req, res) => {
-  const d = await Order.findByIdAndDelete(req.params.id);
-  if (!d) return res.status(404).json({ error: "অর্ডার নেই" });
-  res.json({ message: "মুছে ফেলা হয়েছে" });
+  try {
+    await Order.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// REVIEWS (+ Questions)
+// REVIEWS
 // ═════════════════════════════════════════════════════════════════════════════
-// Public: list visible reviews for a product
-app.get("/api/reviews/:productId", async (req, res) => {
-  const list = await Review.find({ productId: req.params.productId, visible: true }).sort({ createdAt: -1 });
-  res.json(list);
-});
-// Customer: submit review (requires login)
-app.post("/api/reviews", authUser, async (req, res) => {
+app.get("/api/reviews", async (req, res) => {
   try {
-    const { productId, productName, text, rating, type } = req.body || {};
-    if (!productId || !text) return res.status(400).json({ error: "প্রয়োজনীয় তথ্য নেই" });
-    const r = await Review.create({
-      productId, productName,
-      user: req.user.name, email: req.user.email, userId: req.user.userId,
-      text: String(text).slice(0, 1000),
-      rating: rating || 5,
-      type: type === "question" ? "question" : "review",
+    const { productId, visible = "true" } = req.query;
+    const q = {};
+    if (productId) q.productId = productId;
+    if (visible !== "all") q.visible = visible === "true";
+    const reviews = await Review.find(q).sort({ createdAt: -1 }).limit(100);
+    res.json(reviews);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post("/api/reviews", optionalUser, async (req, res) => {
+  try {
+    const { productId, productName, user, email, type, text, rating } = req.body || {};
+    if (!productId || !user || !text) return res.status(400).json({ error: "সব তথ্য দিন" });
+    const review = await Review.create({
+      productId, productName, user, email,
+      userId: req.user?.userId,
+      type: type || "review",
+      text, rating: Number(rating) || 5,
       visible: true,
     });
-    res.status(201).json(r);
+    // update product rating
+    const allReviews = await Review.find({ productId, visible: true, type: "review" });
+    if (allReviews.length) {
+      const avg = allReviews.reduce((s, r) => s + (r.rating || 5), 0) / allReviews.length;
+      await Product.updateOne({ $or: [{ sku: productId }, { _id: productId }] }, { rating: Math.round(avg * 10) / 10 });
+    }
+    res.status(201).json(review);
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
-// Admin
+
 app.get("/api/admin/reviews", authAdmin, async (req, res) => {
-  const list = await Review.find().sort({ createdAt: -1 });
-  res.json(list);
+  try {
+    const reviews = await Review.find().sort({ createdAt: -1 }).limit(200);
+    res.json(reviews);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.patch("/api/admin/reviews/:id", authAdmin, async (req, res) => {
-  const u = await Review.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  if (!u) return res.status(404).json({ error: "রিভিউ নেই" });
-  res.json(u);
+  try {
+    const { visible, reply } = req.body || {};
+    const update = {};
+    if (visible !== undefined) update.visible = visible;
+    if (reply !== undefined) update.reply = reply;
+    const r = await Review.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.json(r);
+  } catch (err) { res.status(400).json({ error: err.message }); }
 });
+
 app.delete("/api/admin/reviews/:id", authAdmin, async (req, res) => {
-  await Review.findByIdAndDelete(req.params.id);
-  res.json({ ok: true });
+  try {
+    await Review.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PAGE SETTINGS  (per frontend page)
+// USERS (admin)
+// ═════════════════════════════════════════════════════════════════════════════
+app.get("/api/users", authAdmin, async (req, res) => {
+  try {
+    const users = await User.find().select("-passwordHash -otp").sort({ createdAt: -1 }).limit(200);
+    res.json(users);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete("/api/users/:id", authAdmin, async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// PAGE SETTINGS (About, Home, Shop, Contact, etc.)
 // ═════════════════════════════════════════════════════════════════════════════
 const DEFAULT_PAGES = [
-  { page: "home", label: "হোম" },
-  { page: "shop", label: "শপ" },
-  { page: "about", label: "About" },
-  { page: "contact", label: "Contact" },
-  { page: "wishlist", label: "Wishlist" },
-  { page: "account", label: "Account" },
-  { page: "privacy-policy", label: "Privacy Policy" },
-  { page: "terms-of-service", label: "Terms of Service" },
-  { page: "return-refund-policy", label: "Return / Refund" },
-  { page: "shipping-policy", label: "Shipping Policy" },
+  {
+    page: "home",
+    title: "BS Collection BD — Premium Fans & Electrical Appliances",
+    metaDescription: "Bangladesh's trusted online store for premium fans & electrical appliances. Quality products, fast delivery nationwide.",
+    metaKeywords: "fan bangladesh, ceiling fan, rechargeable fan, table fan, electrical appliances",
+    content: {
+      heroHeadline: "বাংলাদেশের সেরা ফ্যান কালেকশন",
+      heroSubheadline: "প্রিমিয়াম মানের ফ্যান ও ইলেকট্রিক্যাল পণ্য",
+    },
+  },
+  {
+    page: "about",
+    title: "About Us — BS Collection BD",
+    metaDescription: "Learn about BS Collection BD — Bangladesh's trusted store for premium fans and electrical appliances since 2020.",
+    metaKeywords: "about bscollectionbd, fan store bangladesh, electrical appliances",
+    content: {
+      heading: "আমাদের সম্পর্কে",
+      subheading: "About BS Collection BD",
+      intro: "বিএস কালেকশন বিডি বাংলাদেশের একটি বিশ্বস্ত অনলাইন স্টোর যা প্রিমিয়াম মানের ফ্যান ও ইলেকট্রিক্যাল যন্ত্রপাতি বিক্রি করে। আমরা ২০২০ সাল থেকে সারা বাংলাদেশে মানসম্পন্ন পণ্য সরবরাহ করে আসছি।",
+      mission: "আমাদের লক্ষ্য হলো বাংলাদেশের প্রতিটি ঘরে ও অফিসে সর্বোচ্চ মানের কুলিং সমাধান পৌঁছে দেওয়া। আমরা বিশ্বাস করি যে মানসম্পন্ন পণ্য সাশ্রয়ী মূল্যে পাওয়া সবার অধিকার।",
+      visionHeading: "আমাদের দৃষ্টিভঙ্গি",
+      visionText: "বাংলাদেশের সবচেয়ে বিশ্বস্ত ইলেকট্রিক্যাল পণ্যের অনলাইন স্টোর হওয়া এবং গ্রাহকদের সর্বোত্তম সেবা প্রদান করা।",
+      whyUs: "আমরা শুধু পণ্য বিক্রি করি না — আমরা আপনার জীবনকে আরামদায়ক করার চেষ্টা করি। প্রতিটি পণ্য যাচাই করে, দ্রুত ডেলিভারি দিয়ে এবং সেরা গ্রাহক সেবা দিয়ে আমরা আপনার পাশে থাকি।",
+      teamText: "আমাদের দলে রয়েছে অভিজ্ঞ প্রকৌশলী, বিক্রয় বিশেষজ্ঞ এবং গ্রাহক সেবা প্রতিনিধি যারা সর্বদা আপনার সেবায় প্রস্তুত।",
+      address: "Mirpur 10, Dhaka 1216, Bangladesh",
+      phone: "+880 1344-367630",
+      email: "support@bscollectionbd.com",
+      hours: "Sat – Thu: 9:00 AM – 9:00 PM",
+      aboutImg: "",
+      stats: [
+        { label: "Happy Customers", value: "5000+" },
+        { label: "Products", value: "50+" },
+        { label: "Years Experience", value: "4+" },
+        { label: "Cities Covered", value: "64+" },
+      ],
+    },
+  },
+  {
+    page: "shop",
+    title: "Shop — BS Collection BD",
+    metaDescription: "Browse our complete collection of premium fans and electrical appliances. Fast delivery across Bangladesh.",
+    metaKeywords: "shop fans bangladesh, buy ceiling fan, table fan price bangladesh",
+    content: {},
+  },
+  {
+    page: "contact",
+    title: "Contact Us — BS Collection BD",
+    metaDescription: "Get in touch with BS Collection BD. We are here to help with your orders and queries.",
+    metaKeywords: "contact bscollectionbd, fan store contact, electrical appliances support",
+    content: {},
+  },
 ];
 
 app.get("/api/page-settings", async (req, res) => {
-  const all = await PageSetting.find();
-  const map = {}; all.forEach(p => { map[p.page] = p; });
-  const merged = DEFAULT_PAGES.map(d => ({ ...d, ...(map[d.page]?.toObject() || {}) }));
-  res.json(merged);
+  try {
+    const all = await PageSetting.find();
+    const map = {};
+    all.forEach(p => { map[p.page] = p; });
+    const merged = DEFAULT_PAGES.map(d => {
+      const saved = map[d.page];
+      if (saved) {
+        const obj = saved.toObject();
+        // deep merge content
+        if (d.content && obj.content) {
+          obj.content = { ...d.content, ...obj.content };
+        }
+        return { ...d, ...obj };
+      }
+      return d;
+    });
+    res.json(merged);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.get("/api/page-settings/:page", async (req, res) => {
-  const p = await PageSetting.findOne({ page: req.params.page });
-  res.json(p || { page: req.params.page });
+  try {
+    const p = await PageSetting.findOne({ page: req.params.page });
+    const def = DEFAULT_PAGES.find(d => d.page === req.params.page) || { page: req.params.page };
+    if (p) {
+      const obj = p.toObject();
+      if (def.content && obj.content) obj.content = { ...def.content, ...obj.content };
+      res.json({ ...def, ...obj });
+    } else {
+      res.json(def);
+    }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 app.put("/api/page-settings/:page", authAdmin, async (req, res) => {
-  const p = await PageSetting.findOneAndUpdate(
-    { page: req.params.page },
-    { ...req.body, page: req.params.page },
-    { new: true, upsert: true, runValidators: true }
-  );
-  res.json(p);
+  try {
+    const p = await PageSetting.findOneAndUpdate(
+      { page: req.params.page },
+      { ...req.body, page: req.params.page },
+      { new: true, upsert: true, runValidators: true }
+    );
+    res.json(p);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// FILTER TABS (for storefront filter tabs management)
+// ═════════════════════════════════════════════════════════════════════════════
+const DEFAULT_FILTER_TABS = [
+  { id: "all", label: "সকল পন্য", filter: "all", order: 0, visible: true },
+  { id: "popular", label: "জনপ্রিয়", filter: "homePopular", order: 1, visible: true },
+  { id: "bestseller", label: "সেরা বিক্রিত", filter: "homeBestseller", order: 2, visible: true },
+  { id: "new", label: "নতুন পন্য", filter: "homeNew", order: 3, visible: true },
+  { id: "table-fan", label: "Table Fan", filter: "cat:table-fans", order: 4, visible: true },
+  { id: "rechargeable", label: "Rechargeable Fan", filter: "cat:rechargeable-fans", order: 5, visible: true },
+];
+
+app.get("/api/filter-tabs", async (req, res) => {
+  try {
+    const setting = await PageSetting.findOne({ page: "_filter_tabs" });
+    res.json(setting?.content?.tabs || DEFAULT_FILTER_TABS);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put("/api/filter-tabs", authAdmin, async (req, res) => {
+  try {
+    const tabs = req.body;
+    if (!Array.isArray(tabs)) return res.status(400).json({ error: "tabs must be an array" });
+    await PageSetting.findOneAndUpdate(
+      { page: "_filter_tabs" },
+      { page: "_filter_tabs", content: { tabs } },
+      { upsert: true, new: true }
+    );
+    res.json(tabs);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SEED — default products & categories (admin only)
+// ═════════════════════════════════════════════════════════════════════════════
+app.post("/api/seed", authAdmin, async (req, res) => {
+  try {
+    const results = { categories: 0, products: 0, skipped: 0 };
+
+    const defaultCategories = [
+      { name: "Ceiling Fans", slug: "ceiling-fans", img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg", count: 0 },
+      { name: "Table Fans", slug: "table-fans", img: "https://bscollectionbd.onrender.com/placeholder-fan.jpg", count: 2 },
+      { name: "Stand Fans", slug: "stand-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg", count: 0 },
+      { name: "Industrial Fans", slug: "industrial-fans", img: "", count: 0 },
+      { name: "Exhaust Fans", slug: "exhaust-fans", img: "", count: 0 },
+      { name: "Rechargeable Fans", slug: "rechargeable-fans", img: "", count: 2 },
+      { name: "LED Lights", slug: "led-lights", img: "", count: 0 },
+      { name: "Wall Fans", slug: "wall-fans", img: "", count: 0 },
+      { name: "Accessories", slug: "accessories", img: "", count: 0 },
+    ];
+
+    for (const cat of defaultCategories) {
+      const exists = await Category.findOne({ slug: cat.slug });
+      if (!exists) { await Category.create(cat); results.categories++; }
+    }
+
+    const defaultProducts = [
+      {
+        sku: "jy2570", name: "JY-2570 Rechargeable Fan",
+        cat: "Rechargeable Fan", categorySlug: "rechargeable-fans",
+        brand: "JYSUPER", now: 2150, old: 2550, stock: 10, featured: true, rating: 5,
+        img: "assets/photo_2026-07-15_18-29-17.png",
+        gallery: ["assets/photo_2026-07-15_18-29-17.png"],
+        description: "Premium rechargeable fan with high-capacity battery, remote control and dual LED light bar.",
+        shortDescription: "Premium rechargeable fan with remote control",
+        detailPage: "product-jy2570.html", hasDetailPage: true,
+        tags: ["rechargeable", "fan", "LED", "remote control", "battery"],
+        seoTitle: "JY-2570 Rechargeable Fan - Buy Online in Bangladesh | BS Collection BD",
+        seoDescription: "Buy JY-2570 Rechargeable Fan at best price in Bangladesh. 14-inch, 12-hour backup, remote control, dual LED. Fast delivery nationwide.",
+        seoKeywords: "JY-2570, rechargeable fan, battery fan bangladesh, LED fan",
+        specs: [
+          { label: "Model", value: "JY-2570" },
+          { label: "Blade Size", value: "14 inch" },
+          { label: "Battery", value: "6V / 7Ah" },
+          { label: "Backup Time", value: "Up to 12 hours" },
+          { label: "LED Light", value: "Dual LED bar" },
+          { label: "Remote Control", value: "Included" },
+          { label: "Warranty", value: "6 months" },
+        ],
+        features: ["14-inch wide blade", "12-hour battery backup", "Wireless remote control", "Dual LED light bar", "Solar compatible"],
+        placements: { shop: true, homePopular: true, homeBestseller: false, homeNew: false },
+      },
+      {
+        sku: "jy2218", name: "JYSUPER JY-2218 Rechargeable Fan",
+        cat: "Rechargeable Fan", categorySlug: "rechargeable-fans",
+        brand: "JYSUPER", now: 999, old: 1200, stock: 10, featured: true, rating: 4,
+        img: "assets/photo_2026-07-15_18-28-56.png",
+        gallery: ["assets/photo_2026-07-15_18-28-56.png"],
+        description: "12-inch high-airflow rechargeable table & stand fan with LED light, USB charging and long backup.",
+        shortDescription: "12-inch rechargeable fan with LED light",
+        detailPage: "product-jy2218.html", hasDetailPage: true,
+        tags: ["rechargeable", "fan", "LED", "USB", "table fan"],
+        seoTitle: "JYSUPER JY-2218 Rechargeable Fan - Buy in Bangladesh | BS Collection BD",
+        seoDescription: "Buy JYSUPER JY-2218 Rechargeable Fan at Tk 999. 12-inch blade, 8-hour backup, built-in LED. Best price in Bangladesh.",
+        seoKeywords: "JY-2218, JYSUPER fan, rechargeable fan price, LED fan bangladesh",
+        specs: [
+          { label: "Model", value: "JY-2218" },
+          { label: "Blade Size", value: "12 inch" },
+          { label: "Battery", value: "6V / 4.5Ah" },
+          { label: "Backup Time", value: "Up to 8 hours" },
+          { label: "LED Light", value: "Built-in LED panel" },
+          { label: "Warranty", value: "6 months" },
+        ],
+        features: ["12-inch blade", "8-hour battery backup", "Built-in LED panel", "USB charging compatible"],
+        placements: { shop: true, homePopular: false, homeBestseller: true, homeNew: false },
+      },
+    ];
+
+    for (const prod of defaultProducts) {
+      const exists = await Product.findOne({ sku: prod.sku });
+      if (!exists) { await Product.create(prod); results.products++; }
+      else { results.skipped++; }
+    }
+
+    // Also seed about page settings
+    const aboutExists = await PageSetting.findOne({ page: "about" });
+    if (!aboutExists) {
+      await PageSetting.create(DEFAULT_PAGES.find(d => d.page === "about"));
+    }
+
+    res.json({ ok: true, ...results, message: `Seeded: ${results.categories} categories, ${results.products} products (${results.skipped} skipped)` });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -618,7 +936,7 @@ app.put("/api/page-settings/:page", authAdmin, async (req, res) => {
 app.get("/api/stats", authAdmin, async (req, res) => {
   try {
     const [totalProducts, totalOrders, pendingOrders, completedOrders, cancelledOrders,
-           fakeOrders, totalCategories, totalUsers, totalReviews] = await Promise.all([
+           fakeOrders, totalCategories, totalUsers, totalReviews, totalContacts, unreadContacts] = await Promise.all([
       Product.countDocuments(), Order.countDocuments(),
       Order.countDocuments({ status: "Pending" }),
       Order.countDocuments({ status: "Completed" }),
@@ -626,6 +944,8 @@ app.get("/api/stats", authAdmin, async (req, res) => {
       Order.countDocuments({ isFake: true }),
       Category.countDocuments(), User.countDocuments(),
       Review.countDocuments(),
+      ContactMessage.countDocuments(),
+      ContactMessage.countDocuments({ read: false }),
     ]);
     const revenueAgg = await Order.aggregate([
       { $match: { status: { $in: ["Completed", "Shipped"] } } },
@@ -637,6 +957,7 @@ app.get("/api/stats", authAdmin, async (req, res) => {
     res.json({
       totalProducts, totalOrders, pendingOrders, completedOrders, cancelledOrders,
       fakeOrders, totalCategories, totalUsers, totalReviews,
+      totalContacts, unreadContacts,
       totalRevenue: revenueAgg[0]?.total || 0,
       inStock, lowStock, outOfStock,
     });

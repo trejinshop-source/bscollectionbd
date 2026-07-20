@@ -1259,11 +1259,13 @@ const allProducts = [...featured, ...bestSellers];
 const fmt = n => "৳ " + n.toLocaleString('en-IN');
 function star(n){let s='';for(let i=0;i<5;i++)s+=`<i class="fa${i<n?'s':'r'} fa-star"></i>`;return s;}
 function productHTML(p){
-  return `<a class="product-card fade-in" data-cat="${p.cat}" href="${p.url}">
+  var wl = getWL ? getWL() : [];
+  var wished = wl.some(function(x){return (x.id||x)===p.id;});
+  return `<a class="product-card fade-in" data-cat="${p.cat}" data-id="${p.id}" href="${p.url||'#'}">
     <div class="product-img">
       <span class="sale-badge">${p.sale}</span>
       <div class="product-actions">
-        <button aria-label="Wishlist" onclick="event.preventDefault();event.stopPropagation();addWishlist(this)"><i class="far fa-heart"></i></button>
+        <button aria-label="Wishlist" data-id="${p.id}" onclick="event.preventDefault();event.stopPropagation();addWishlist(this)"><i class="${wished?'fas':'far'} fa-heart" style="${wished?'color:#FCA311':''}"></i></button>
         <button aria-label="Quick view" onclick="event.preventDefault();event.stopPropagation();"><i class="far fa-eye"></i></button>
       </div>
       <img loading="lazy" src="${p.img}" alt="${p.name}"/>
@@ -1272,7 +1274,7 @@ function productHTML(p){
     <div class="product-info">
       <span class="cat">${p.cat}</span>
       <h4>${p.name}</h4>
-      <div class="rating">${star(p.rating)}<span>(${20+Math.floor(Math.random()*100)})</span></div>
+      <div class="rating">${star(p.rating)}<span>(${20+((p.id*7)%80)})</span></div>
       <div class="price"><span class="now">${fmt(p.now)}</span><span class="old">${fmt(p.old)}</span></div>
     </div>
   </a>`;
@@ -1310,8 +1312,11 @@ document.getElementById('reviewsGrid').innerHTML = reviews.map(r=>`
     <p>"${r.t}"</p>
   </div>`).join('');
 
-/* ================= CART / WISHLIST ================= */
-let wishCount = 0;
+/* ================= CART / WISHLIST (unified bs_wish_v1) ================= */
+var WL_KEY = 'bs_wish_v1';
+function getWL(){try{return JSON.parse(localStorage.getItem(WL_KEY))||[];}catch(e){return[];}}
+function saveWL(w){localStorage.setItem(WL_KEY,JSON.stringify(w));}
+function syncWishBadge(){var wl=getWL();document.querySelectorAll('.wishlist-badge').forEach(function(b){b.textContent=wl.length;});}
 function addCart(id){
   const p = allProducts.find(x=>x.id===id);
   if(!p) return;
@@ -1319,11 +1324,25 @@ function addCart(id){
   toast('"' + p.name + '" cart-এ যোগ হয়েছে');
 }
 function addWishlist(el){
-  const i = el.querySelector('i');
-  if(i.classList.contains('far')){i.classList.replace('far','fas');i.style.color='#FCA311';wishCount++;toast('Added to wishlist');}
-  else{i.classList.replace('fas','far');i.style.color='';wishCount=Math.max(0,wishCount-1);}
-  document.querySelectorAll('.wishlist-badge').forEach(b=>{b.textContent = wishCount;});
+  var dataId = Number(el.dataset && el.dataset.id ? el.dataset.id : 0);
+  var card = el.closest('[data-id]');
+  if(!dataId && card) dataId = Number(card.dataset.id||0);
+  var i = el.querySelector('i');
+  var wl = getWL();
+  var p = dataId ? allProducts.find(function(x){return x.id===dataId;}) : null;
+  var idx = dataId ? wl.findIndex(function(x){return (x.id||x)===dataId;}) : -1;
+  if(i.classList.contains('far')){
+    i.classList.replace('far','fas'); i.style.color='#FCA311';
+    if(p && idx===-1) wl.push({id:p.id, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat, url:p.url});
+    toast('Wishlist-এ যোগ হয়েছে');
+  } else {
+    i.classList.replace('fas','far'); i.style.color='';
+    if(idx>-1) wl.splice(idx,1);
+    toast('Wishlist থেকে সরানো হয়েছে');
+  }
+  saveWL(wl); syncWishBadge();
 }
+syncWishBadge();
 
 /* ================= TOAST ================= */
 function toast(msg){

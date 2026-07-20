@@ -1770,8 +1770,12 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <button data-tab="reviews"><i class="fas fa-star"></i> রিভিউ (<span data-count="reviews">0</span>)</button>
         <button data-tab="fake"><i class="fas fa-exclamation-triangle"></i> ফেক অর্ডার (<span data-count="fake">0</span>)</button>
         <button data-tab="products"><i class="fas fa-box"></i> এডভান্সড পন্য</button>
+        <button data-tab="contacts"><i class="fas fa-envelope"></i> যোগাযোগ (<span data-count="contacts">0</span>)</button>
+        <button data-tab="about"><i class="fas fa-info-circle"></i> About পেজ</button>
+        <button data-tab="filtertabs"><i class="fas fa-filter"></i> Filter Tabs</button>
         <button data-tab="settings"><i class="fas fa-sliders-h"></i> পেজ সেটিংস</button>
         <button data-tab="users"><i class="fas fa-users"></i> গ্রাহক</button>
+        <button data-tab="seed"><i class="fas fa-seedling"></i> ডেটা সিড</button>
       </div>
       <div id="bsExtBody"></div>
       <div class="bs-ext-modal" id="bsExtModal"><div class="box" id="bsExtModalBody"></div></div>
@@ -1935,6 +1939,18 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <label>স্টক * <input required type="number" name="stock" value="${p.stock || 0}"/></label>
         </div>
         <label>বর্ণনা <textarea name="description" rows="4">${esc(p.description || '')}</textarea></label>
+        <label>সংক্ষিপ্ত বিবরণ <input name="shortDescription" value="${esc(p.shortDescription || '')}" placeholder="Brief product summary"/></label>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:14px 0">
+          <h4 style="margin:0 0 10px;color:#14213D;font-size:14px"><i class="fas fa-search" style="color:#FCA311"></i> SEO সেটিংস
+            <button type="button" class="bs-ext-btn ghost" style="float:right;padding:4px 10px;font-size:12px" onclick="bsExtAutoSEO()"><i class="fas fa-magic"></i> Auto SEO</button>
+          </h4>
+          <label>SEO Title <input name="seoTitle" value="${esc(p.seoTitle || '')}"/></label>
+          <label>SEO Description <textarea name="seoDescription" rows="2">${esc(p.seoDescription || '')}</textarea></label>
+          <label>SEO Keywords (কমা দিয়ে আলাদা করুন) <input name="seoKeywords" value="${esc(p.seoKeywords || '')}" placeholder="rechargeable fan, jy2218, fan bangladesh"/></label>
+        </div>
+
+        <label>Tags (কমা দিয়ে আলাদা করুন) <input name="tags" value="${esc((p.tags||[]).join(', '))}" placeholder="rechargeable, LED, 12-inch, USB"/></label>
 
         <label>ছবি (ড্র্যাগ করে ছেড়ে দিন — একাধিক):</label>
         <div class="bs-ext-dropzone" id="bsExtDropzone">
@@ -2016,13 +2032,20 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         const value = r.querySelector(`[data-spec-value="${i}"]`)?.value.trim();
         if (label && value) specs.push({ label, value });
       });
+      const tagsRaw = fd.get('tags') || '';
+      const tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
       const body = {
         sku: fd.get('sku'), name: fd.get('name'), cat: fd.get('cat'), brand: fd.get('brand'),
         categorySlug: fd.get('categorySlug'), now: +fd.get('now'), old: +fd.get('old') || undefined,
         stock: +fd.get('stock'), description: fd.get('description'),
+        shortDescription: fd.get('shortDescription') || undefined,
         detailPage: fd.get('detailPage') || undefined,
         hasDetailPage: fd.get('hasDetailPage') === 'on',
         featured: fd.get('featured') === 'on',
+        tags,
+        seoTitle: fd.get('seoTitle') || undefined,
+        seoDescription: fd.get('seoDescription') || undefined,
+        seoKeywords: fd.get('seoKeywords') || undefined,
         img: gallery[0] || '', gallery, specs,
         placements: {
           shop: fd.get('pl_shop') === 'on',
@@ -2038,6 +2061,20 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       } catch (err) { toast(err.message, 'err'); }
     };
   };
+  window.bsExtAutoSEO = () => {
+    const form = document.getElementById('bsExtProdForm');
+    if(!form) return;
+    const name = form.querySelector('[name=name]')?.value || '';
+    const cat  = form.querySelector('[name=cat]')?.value || '';
+    const sku  = form.querySelector('[name=sku]')?.value || '';
+    const now  = form.querySelector('[name=now]')?.value || '';
+    const desc = form.querySelector('[name=description]')?.value || '';
+    form.querySelector('[name=seoTitle]').value = name + ' - Buy Online in Bangladesh | BS Collection BD';
+    form.querySelector('[name=seoDescription]').value = ('Buy ' + name + ' at Tk ' + now + ' in Bangladesh. ' + desc.substring(0,100)).substring(0,155);
+    form.querySelector('[name=seoKeywords]').value = [sku, name.toLowerCase(), cat.toLowerCase(), 'fan bangladesh', 'bscollectionbd'].filter(Boolean).join(', ');
+    toast('SEO ফিল্ড স্বয়ংক্রিয়ভাবে পূরণ হয়েছে', 'ok');
+  };
+
   window.bsExtAddSpec = () => {
     const wrap = document.getElementById('bsExtSpecs');
     const i = wrap.querySelectorAll('[data-spec-row]').length;
@@ -2146,14 +2183,292 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
+  // ── TAB: Contact Messages ───────────────────────────────────
+  async function loadContacts() {
+    try {
+      const list = await fetchJSON('/contacts');
+      const unread = list.filter(c => !c.read).length;
+      document.querySelector('[data-count=contacts]').textContent = unread || list.length;
+      const rows = list.map(c => `
+        <tr style="${!c.read?'background:#fff8e7':''}">
+          <td>
+            <b>${esc(c.name)}</b><br>
+            <small style="color:#64748b">${esc(c.email||'')} ${c.phone?'/ '+esc(c.phone):''}</small>
+          </td>
+          <td style="font-size:13px">${esc(c.subject||'General')}</td>
+          <td style="max-width:280px;font-size:13px">${esc(c.message).substring(0,120)}${c.message.length>120?'…':''}</td>
+          <td style="font-size:12px;color:#64748b;white-space:nowrap">${new Date(c.createdAt).toLocaleString('en-GB')}</td>
+          <td>
+            ${c.replied?'<span class="bs-ext-badge ok">উত্তর দেওয়া</span>':'<span class="bs-ext-badge warn">অপেক্ষারত</span>'}
+            ${!c.read?'<span class="bs-ext-badge" style="background:#f59e0b;color:#fff">নতুন</span>':''}
+          </td>
+          <td style="white-space:nowrap">
+            <button class="bs-ext-btn primary" onclick="bsExtContactDetail('${c._id}')"><i class="fas fa-eye"></i> দেখুন</button>
+            <button class="bs-ext-btn danger" onclick="bsExtDelContact('${c._id}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`).join('');
+      document.getElementById('bsExtBody').innerHTML = `
+        <div class="bs-ext-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="margin:0;color:#14213D"><i class="fas fa-envelope"></i> যোগাযোগ বার্তা</h3>
+            <span style="font-size:13px;color:#64748b">${list.length} টি বার্তা, ${unread} টি অপঠিত</span>
+          </div>
+          <table class="bs-ext-table">
+            <thead><tr><th>প্রেরক</th><th>বিষয়</th><th>বার্তা</th><th>তারিখ</th><th>স্ট্যাটাস</th><th></th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px">কোনো বার্তা নেই</td></tr>'}</tbody>
+          </table>
+        </div>`;
+    } catch (e) { document.getElementById('bsExtBody').innerHTML = '<p style="padding:20px;color:#ef4444">'+esc(e.message)+'</p>'; }
+  }
+
+  window.bsExtContactDetail = async (id) => {
+    try {
+      const c = await fetchJSON('/contacts/' + id);
+      openModal(`
+        <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-envelope-open"></i> বার্তার বিবরণ</h3>
+        <div style="background:#f8fafc;padding:14px;margin-bottom:16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div><b style="font-size:12px;color:#64748b">প্রেরক</b><br>${esc(c.name)}</div>
+            <div><b style="font-size:12px;color:#64748b">ইমেইল</b><br>${esc(c.email||'—')}</div>
+            <div><b style="font-size:12px;color:#64748b">ফোন</b><br>${esc(c.phone||'—')}</div>
+            <div><b style="font-size:12px;color:#64748b">বিষয়</b><br>${esc(c.subject||'General')}</div>
+          </div>
+          <b style="font-size:12px;color:#64748b">বার্তা</b>
+          <p style="margin-top:6px;font-size:14px;line-height:1.7;white-space:pre-wrap">${esc(c.message)}</p>
+          <div style="font-size:12px;color:#94a3b8;margin-top:8px">${new Date(c.createdAt).toLocaleString('en-GB')}</div>
+        </div>
+        ${c.replied && c.replyText ? `<div style="background:#dcfce7;border:1px solid #86efac;padding:12px;margin-bottom:16px"><b style="font-size:12px;color:#166534">আপনার উত্তর:</b><p style="margin-top:6px;font-size:13px">${esc(c.replyText)}</p></div>` : ''}
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#14213D;display:block;margin-bottom:6px">উত্তর দিন:</label>
+          <textarea id="contactReplyText" rows="4" style="width:100%;padding:10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;resize:vertical" placeholder="উত্তর লিখুন...">${esc(c.replyText||'')}</textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+            <button class="bs-ext-btn ghost" onclick="bsExtCloseModal()">বাতিল</button>
+            <button class="bs-ext-btn primary" onclick="bsExtSendReply('${c._id}')"><i class="fas fa-paper-plane"></i> উত্তর সেভ করুন</button>
+          </div>
+        </div>
+      `);
+    } catch(e) { toast(e.message,'err'); }
+  };
+
+  window.bsExtSendReply = async (id) => {
+    const txt = document.getElementById('contactReplyText')?.value?.trim();
+    if(!txt) return toast('উত্তর লিখুন','err');
+    try {
+      await fetchJSON('/contacts/' + id, { method:'PATCH', body:JSON.stringify({replyText: txt}) });
+      toast('উত্তর সেভ হয়েছে','ok');
+      bsExtCloseModal();
+      loadContacts();
+    } catch(e){ toast(e.message,'err'); }
+  };
+
+  window.bsExtDelContact = async (id) => {
+    if(!confirm('এই বার্তা মুছে ফেলবেন?')) return;
+    try { await fetchJSON('/contacts/'+id, {method:'DELETE'}); toast('মুছে ফেলা হয়েছে','ok'); loadContacts(); }
+    catch(e){ toast(e.message,'err'); }
+  };
+
+  // ── TAB: About Page Editor ───────────────────────────────────
+  async function loadAboutEditor() {
+    try {
+      const settings = await fetchJSON('/page-settings/about');
+      const c = settings.content || {};
+      document.getElementById('bsExtBody').innerHTML = `
+        <div class="bs-ext-panel">
+          <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-info-circle"></i> About পেজ সম্পাদনা</h3>
+          <form class="bs-ext-form" id="bsAboutForm">
+            <div class="row">
+              <label>পেজ টাইটেল (SEO) <input name="pageTitle" value="${esc(settings.title||'')}"/></label>
+              <label>Meta Description <input name="metaDescription" value="${esc(settings.metaDescription||'')}"/></label>
+            </div>
+            <label>Meta Keywords <input name="metaKeywords" value="${esc(settings.metaKeywords||'')}"/></label>
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e2e8f0"/>
+            <div class="row">
+              <label>হেডিং (বাংলা) <input name="heading" value="${esc(c.heading||'আমাদের সম্পর্কে')}"/></label>
+              <label>Sub Heading <input name="subheading" value="${esc(c.subheading||'About BS Collection BD')}"/></label>
+            </div>
+            <label>পরিচিতি (Intro) <textarea name="intro" rows="3">${esc(c.intro||'')}</textarea></label>
+            <label>মিশন <textarea name="mission" rows="3">${esc(c.mission||'')}</textarea></label>
+            <div class="row">
+              <label>Vision Heading <input name="visionHeading" value="${esc(c.visionHeading||'আমাদের দৃষ্টিভঙ্গি')}"/></label>
+              <label>Vision Text <input name="visionText" value="${esc(c.visionText||'')}"/></label>
+            </div>
+            <label>Why Us <textarea name="whyUs" rows="2">${esc(c.whyUs||'')}</textarea></label>
+            <label>Team Text <textarea name="teamText" rows="2">${esc(c.teamText||'')}</textarea></label>
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e2e8f0"/>
+            <div class="row-3">
+              <label>ঠিকানা <input name="address" value="${esc(c.address||'')}"/></label>
+              <label>ফোন <input name="phone" value="${esc(c.phone||'')}"/></label>
+              <label>ইমেইল <input name="email" value="${esc(c.email||'')}"/></label>
+            </div>
+            <label>সময়সূচি <input name="hours" value="${esc(c.hours||'')}"/></label>
+            <label>About ছবির URL (Cloudinary URL বা খালি রাখুন)
+              <input name="aboutImg" value="${esc(c.aboutImg||'')}"/>
+            </label>
+            <div style="display:flex;gap:8px;margin-top:4px;align-items:center">
+              <input type="file" id="aboutImgAdminFile" accept="image/*" style="font-size:12px"/>
+              <button type="button" class="bs-ext-btn ghost" onclick="bsAboutUploadImg()"><i class="fas fa-upload"></i> আপলোড</button>
+              ${c.aboutImg?`<img src="${esc(c.aboutImg)}" style="height:48px;object-fit:cover" onerror="this.style.display='none'"/>`:''}
+            </div>
+            <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end">
+              <button type="button" class="bs-ext-btn ghost" onclick="bsAboutAutoSEO()"><i class="fas fa-magic"></i> Auto SEO</button>
+              <button type="submit" class="bs-ext-btn primary"><i class="fas fa-save"></i> সেভ করুন</button>
+            </div>
+          </form>
+        </div>`;
+
+      document.getElementById('bsAboutForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = {
+          title: fd.get('pageTitle'),
+          metaDescription: fd.get('metaDescription'),
+          metaKeywords: fd.get('metaKeywords'),
+          content: {
+            heading: fd.get('heading'), subheading: fd.get('subheading'),
+            intro: fd.get('intro'), mission: fd.get('mission'),
+            visionHeading: fd.get('visionHeading'), visionText: fd.get('visionText'),
+            whyUs: fd.get('whyUs'), teamText: fd.get('teamText'),
+            address: fd.get('address'), phone: fd.get('phone'), email: fd.get('email'),
+            hours: fd.get('hours'), aboutImg: fd.get('aboutImg'),
+          }
+        };
+        try {
+          await fetchJSON('/page-settings/about', { method:'PUT', body: JSON.stringify(body) });
+          toast('About পেজ সেভ হয়েছে','ok');
+        } catch(err){ toast(err.message,'err'); }
+      };
+    } catch(e){ document.getElementById('bsExtBody').innerHTML='<p style="padding:20px;color:#ef4444">'+esc(e.message)+'</p>'; }
+  }
+
+  window.bsAboutAutoSEO = () => {
+    const form = document.getElementById('bsAboutForm');
+    if(!form) return;
+    const intro = form.querySelector('[name=intro]')?.value?.substring(0,150) || '';
+    const heading = form.querySelector('[name=heading]')?.value || 'আমাদের সম্পর্কে';
+    form.querySelector('[name=pageTitle]').value = heading + ' — BS Collection BD';
+    form.querySelector('[name=metaDescription]').value = intro.substring(0,155);
+    form.querySelector('[name=metaKeywords]').value = 'about bscollectionbd, fan store bangladesh, electrical appliances bd';
+    toast('SEO ফিল্ড আপডেট হয়েছে','ok');
+  };
+
+  window.bsAboutUploadImg = async () => {
+    const file = document.getElementById('aboutImgAdminFile')?.files?.[0];
+    if(!file) return toast('ফাইল নির্বাচন করুন','err');
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await fetch(API + '/upload/about-image', { method:'POST', headers:{'Authorization':'Bearer '+token()}, body:fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error);
+      const imgInput = document.querySelector('#bsAboutForm [name=aboutImg]');
+      if(imgInput) imgInput.value = data.url;
+      toast('ছবি আপলোড সফল','ok');
+    } catch(e){ toast(e.message,'err'); }
+  };
+
+  // ── TAB: Filter Tabs Management ──────────────────────────────
+  async function loadFilterTabs() {
+    try {
+      const tabs = await fetchJSON('/filter-tabs');
+      renderFilterTabsEditor(tabs);
+    } catch(e){ document.getElementById('bsExtBody').innerHTML='<p style="padding:20px;color:#ef4444">'+esc(e.message)+'</p>'; }
+  }
+
+  function renderFilterTabsEditor(tabs){
+    const rows = tabs.map((t,i) => `
+      <tr data-idx="${i}">
+        <td><input class="ft-label" value="${esc(t.label||'')}" style="width:130px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+        <td><input class="ft-filter" value="${esc(t.filter||'')}" style="width:160px;padding:6px;border:1px solid #e2e8f0;font-size:13px" placeholder="all / homePopular / cat:slug"/></td>
+        <td><input class="ft-order" type="number" value="${t.order||0}" style="width:60px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+        <td><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="ft-visible" ${t.visible?'checked':''}/> দৃশ্যমান</label></td>
+        <td><button class="bs-ext-btn danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td>
+      </tr>`).join('');
+    document.getElementById('bsExtBody').innerHTML = `
+      <div class="bs-ext-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="margin:0;color:#14213D"><i class="fas fa-filter"></i> Filter Tabs ব্যবস্থাপনা</h3>
+          <div style="display:flex;gap:8px">
+            <button class="bs-ext-btn ghost" onclick="bsAddFilterTab()"><i class="fas fa-plus"></i> নতুন Tab</button>
+            <button class="bs-ext-btn primary" onclick="bsSaveFilterTabs()"><i class="fas fa-save"></i> সেভ করুন</button>
+          </div>
+        </div>
+        <p style="color:#64748b;font-size:13px;margin-bottom:12px">Filter field: <code>all</code>, <code>homePopular</code>, <code>homeBestseller</code>, <code>homeNew</code>, বা <code>cat:slug</code> (যেমন: <code>cat:table-fans</code>)</p>
+        <table class="bs-ext-table" id="filterTabsTable">
+          <thead><tr><th>লেবেল</th><th>ফিল্টার</th><th>ক্রম</th><th>দৃশ্যমান</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  window.bsAddFilterTab = () => {
+    const tbody = document.querySelector('#filterTabsTable tbody');
+    if(!tbody) return;
+    const idx = tbody.querySelectorAll('tr').length;
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-idx', idx);
+    tr.innerHTML = `
+      <td><input class="ft-label" value="নতুন Tab" style="width:130px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+      <td><input class="ft-filter" value="all" style="width:160px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+      <td><input class="ft-order" type="number" value="${idx}" style="width:60px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+      <td><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="ft-visible" checked/> দৃশ্যমান</label></td>
+      <td><button class="bs-ext-btn danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td>`;
+    tbody.appendChild(tr);
+  };
+
+  window.bsSaveFilterTabs = async () => {
+    const rows = document.querySelectorAll('#filterTabsTable tbody tr');
+    const tabs = Array.from(rows).map((tr, i) => ({
+      id: 'tab_' + i,
+      label: tr.querySelector('.ft-label')?.value || '',
+      filter: tr.querySelector('.ft-filter')?.value || 'all',
+      order: parseInt(tr.querySelector('.ft-order')?.value || i),
+      visible: tr.querySelector('.ft-visible')?.checked !== false,
+    }));
+    try {
+      await fetchJSON('/filter-tabs', { method:'PUT', body:JSON.stringify(tabs) });
+      toast('Filter Tabs সেভ হয়েছে','ok');
+    } catch(e){ toast(e.message,'err'); }
+  };
+
+  // ── TAB: Seed ──────────────────────────────────────────────
+  async function loadSeed() {
+    document.getElementById('bsExtBody').innerHTML = `
+      <div class="bs-ext-panel">
+        <h3 style="margin:0 0 12px;color:#14213D"><i class="fas fa-seedling"></i> ডেটা সিড</h3>
+        <p style="color:#64748b;font-size:14px;margin-bottom:20px">
+          এটি ডেটাবেজে ডিফল্ট পণ্য (jy2218, jy2570), ক্যাটাগরি এবং About পেজের ডিফল্ট কন্টেন্ট সেভ করবে।
+          আগে থেকে থাকা ডেটা পরিবর্তন করবে না।
+        </p>
+        <div id="seedResult" style="display:none;background:#dcfce7;border:1px solid #86efac;padding:14px;margin-bottom:16px;font-size:14px;color:#166534"></div>
+        <button class="bs-ext-btn primary" id="seedBtn" onclick="bsRunSeed()"><i class="fas fa-play"></i> ডেটা সিড করুন</button>
+      </div>`;
+  }
+
+  window.bsRunSeed = async () => {
+    const btn = document.getElementById('seedBtn');
+    const result = document.getElementById('seedResult');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সিড হচ্ছে...';
+    try {
+      const data = await fetchJSON('/seed', { method:'POST' });
+      result.style.display = 'block';
+      result.innerHTML = '<i class="fas fa-check-circle"></i> ' + (data.message || 'সিড সফল হয়েছে!');
+      toast(data.message || 'সিড সফল','ok');
+    } catch(e){ toast(e.message,'err'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-play"></i> ডেটা সিড করুন'; }
+  };
+
   // ── Router ─────────────────────────────────────────────────
   function loadTab(tab) {
     switch (tab) {
       case 'reviews': return loadReviews();
       case 'fake': return loadFake();
       case 'products': return loadProducts();
+      case 'contacts': return loadContacts();
+      case 'about': return loadAboutEditor();
+      case 'filtertabs': return loadFilterTabs();
       case 'settings': return loadSettings();
       case 'users': return loadUsers();
+      case 'seed': return loadSeed();
     }
   }
 
@@ -2161,8 +2476,9 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
   function init() {
     buildUI();
     // preload badges
-    fetchJSON('/admin/reviews').then(l => { document.querySelector('[data-count=reviews]').textContent = l.length; }).catch(() => {});
-    fetchJSON('/orders?fake=true&limit=1').then(r => { document.querySelector('[data-count=fake]').textContent = r.total || 0; }).catch(() => {});
+    fetchJSON('/admin/reviews').then(l => { const el=document.querySelector('[data-count=reviews]'); if(el) el.textContent = l.length; }).catch(() => {});
+    fetchJSON('/orders?fake=true&limit=1').then(r => { const el=document.querySelector('[data-count=fake]'); if(el) el.textContent = r.total || 0; }).catch(() => {});
+    fetchJSON('/contacts').then(l => { const el=document.querySelector('[data-count=contacts]'); if(el) el.textContent = l.filter(c=>!c.read).length || l.length; }).catch(() => {});
     // Auto-open first tab
     const first = document.querySelector('.bs-ext-tabs button');
     if (first) first.click();

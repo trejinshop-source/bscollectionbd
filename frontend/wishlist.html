@@ -552,8 +552,151 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 <script>window.doSearch=function(e){if(e&&e.preventDefault)e.preventDefault();var q=(document.getElementById('searchInput')||{}).value||'';if(q.trim())window.location.href='search.html?q='+encodeURIComponent(q.trim());}</script>
 
 <!-- BS_INJECT_START -->
-
-
+<script src="js/bs-shared.js" defer></script>
 <!-- BS_INJECT_END -->
+<script>
+/* ============================================================
+   Wishlist page renderer — reads from bs_wish_v1 localStorage
+   ============================================================ */
+(function(){
+  var WL_KEY = 'bs_wish_v1';
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+
+  function readWL(){ try{ return JSON.parse(localStorage.getItem(WL_KEY))||[]; }catch(e){ return []; } }
+  function saveWL(w){ localStorage.setItem(WL_KEY, JSON.stringify(w)); }
+
+  function syncBadges(){
+    var count = readWL().length;
+    document.querySelectorAll('.wishlist-badge').forEach(function(b){ b.textContent = count; });
+  }
+
+  function fmt(n){ return '৳ ' + (n||0).toLocaleString('en-IN'); }
+
+  function removeItem(id){
+    var wl = readWL().filter(function(x){ return (x.id||x) !== id; });
+    saveWL(wl);
+    renderWishlist();
+    syncBadges();
+  }
+
+  function addItemToCart(item){
+    var LS_CART = 'bs_cart_v1';
+    try{
+      var cart = JSON.parse(localStorage.getItem(LS_CART))||[];
+      var ex = cart.find(function(x){ return x.id===item.id; });
+      if(ex){ ex.qty = (ex.qty||1)+1; }
+      else { cart.push({id:item.id||item.sku, name:item.name, price:item.now||item.price, img:item.img, qty:1}); }
+      localStorage.setItem(LS_CART, JSON.stringify(cart));
+      // dispatch event for cart sidebar if present
+      document.dispatchEvent(new CustomEvent('bscart:update'));
+      bsNotify('Cart-এ যোগ হয়েছে ✔');
+    } catch(ex){}
+  }
+
+  function bsNotify(msg){
+    var t = document.createElement('div');
+    t.textContent = msg;
+    Object.assign(t.style,{position:'fixed',bottom:'80px',left:'50%',transform:'translateX(-50%)',background:'#14213D',color:'#fff',padding:'12px 24px',fontSize:'14px',fontWeight:'600',zIndex:'9999',boxShadow:'0 10px 30px rgba(0,0,0,.25)',opacity:'0',transition:'.3s',whiteSpace:'nowrap'});
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){ t.style.opacity='1'; t.style.bottom='90px'; });
+    setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },300); },2000);
+  }
+
+  function renderWishlist(){
+    var box = document.getElementById('wishlistBox');
+    if(!box) return;
+    var items = readWL();
+    syncBadges();
+
+    if(!items.length){
+      box.innerHTML = '<div style="text-align:center;padding:60px 20px;background:#fff;box-shadow:0 8px 24px rgba(20,33,61,.08)">' +
+        '<i class="far fa-heart" style="font-size:64px;color:#e2e8f0;display:block;margin-bottom:20px"></i>' +
+        '<h3 style="color:#14213D;margin-bottom:8px">Wishlist খালি আছে</h3>' +
+        '<p style="color:#64748b;font-size:14px;margin-bottom:24px">পছন্দের পণ্য wishlist-এ যোগ করুন।</p>' +
+        '<a href="shop.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:#14213D;color:#fff;font-weight:600;text-decoration:none">' +
+        '<i class="fas fa-shop"></i> Shop করুন</a></div>';
+      return;
+    }
+
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">';
+    items.forEach(function(item){
+      // item may be a full object (from unified system) or a legacy id
+      var id = item.id || item;
+      var name  = item.name  || 'Product';
+      var now   = item.now   || item.price || 0;
+      var old   = item.old   || 0;
+      var img   = item.img   || '';
+      var cat   = item.cat   || '';
+      var link  = item.detailPage || item.url || ('#');
+      var discount = old && old > now ? Math.round((old-now)/old*100) : 0;
+
+      html += '<div style="background:#fff;box-shadow:0 8px 24px rgba(20,33,61,.08);position:relative">';
+      if(discount){ html += '<span style="position:absolute;top:10px;left:10px;background:#FCA311;color:#fff;padding:3px 10px;font-size:12px;font-weight:700;z-index:2">-'+discount+'%</span>'; }
+      html += '<button onclick="removeItem('+JSON.stringify(id)+')" title="Remove" style="position:absolute;top:10px;right:10px;width:32px;height:32px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.1)"><i class="fas fa-xmark" style="color:#ef4444"></i></button>';
+      if(img){
+        html += '<a href="'+link+'"><img src="'+img+'" alt="'+name+'" style="width:100%;height:200px;object-fit:cover;display:block"/></a>';
+      } else {
+        html += '<a href="'+link+'"><div style="width:100%;height:200px;background:linear-gradient(135deg,#F5F7FA,#e5eaf1);display:flex;align-items:center;justify-content:center;font-size:48px;color:#cbd5e1"><i class="fas fa-box"></i></div></a>';
+      }
+      html += '<div style="padding:16px">';
+      if(cat){ html += '<span style="font-size:11px;color:#FCA311;text-transform:uppercase;font-weight:700;letter-spacing:1px">'+cat+'</span>'; }
+      html += '<a href="'+link+'" style="text-decoration:none;color:inherit"><h4 style="font-size:15px;font-weight:700;color:#14213D;margin:6px 0;line-height:1.3">'+name+'</h4></a>';
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
+      html += '<span style="font-size:18px;font-weight:800;color:#FCA311">'+fmt(now)+'</span>';
+      if(old&&old>now){ html += '<span style="font-size:13px;color:#94a3b8;text-decoration:line-through">'+fmt(old)+'</span>'; }
+      html += '</div>';
+      html += '<div style="display:flex;gap:8px">';
+      html += '<button onclick="addItemToCart('+JSON.stringify(item)+')" style="flex:1;background:#14213D;color:#fff;padding:10px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="fas fa-shopping-cart"></i> Add to Cart</button>';
+      html += '<a href="'+link+'" style="background:#FCA311;color:#fff;padding:10px 14px;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center" title="View Details"><i class="fas fa-eye"></i></a>';
+      html += '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+    html += '<div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">';
+    html += '<span style="color:#64748b;font-size:14px">মোট '+items.length+' টি পণ্য wishlist-এ আছে</span>';
+    html += '<button onclick="clearWishlist()" style="background:#fff;border:1.5px solid #ef4444;color:#ef4444;padding:8px 18px;font-weight:600;font-size:13px;cursor:pointer"><i class="fas fa-trash"></i> সব মুছুন</button>';
+    html += '</div>';
+    box.innerHTML = html;
+  }
+
+  window.removeItem = removeItem;
+  window.clearWishlist = function(){
+    if(!confirm('সব wishlist আইটেম মুছে ফেলবেন?')) return;
+    saveWL([]); renderWishlist(); syncBadges();
+  };
+  window.addItemToCart = addItemToCart;
+
+  // Try to enrich items from API if they are legacy (just IDs)
+  async function enrichAndRender(){
+    var items = readWL();
+    var hasLegacy = items.some(function(x){ return typeof x !== 'object'; });
+    if(hasLegacy && items.length > 0){
+      try{
+        var res = await fetch(API_BASE + '/products?limit=200');
+        if(res.ok){
+          var products = await res.json();
+          var enriched = items.map(function(x){
+            if(typeof x === 'object') return x;
+            var p = products.find(function(pp){ return pp._id===x || pp.id===x || pp.sku===String(x); });
+            return p ? {id:p.id||p._id, sku:p.sku, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat, detailPage:p.detailPage} : {id:x, name:'Unknown Product'};
+          });
+          saveWL(enriched);
+        }
+      } catch(e){}
+    }
+    renderWishlist();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', enrichAndRender);
+  } else {
+    enrichAndRender();
+  }
+})();
+</script>
 </body>
 </html>
