@@ -447,7 +447,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
   <div class="login-box">
     <div class="login-logo">
       <img src="logo.jpg" alt="BS Collection BD">
-      <h2>BS Collection BD</h2>
       <p>Admin Panel — লগইন করুন</p>
     </div>
     <div class="form-group">
@@ -777,7 +776,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
   <div class="modal wide">
     <div class="modal-head">
       <h3 id="productModalTitle">Add Product</h3>
-      <button class="modal-close" id="productModalClose">✕</button>
+      <button class="modal-close" id="productModalClose"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="pEditId">
@@ -800,7 +799,11 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       <div class="form-group2"><label>Description</label><textarea id="pDesc" placeholder="পণ্যের বিবরণ..."></textarea></div>
       <div class="form-group2">
         <label>Product Image</label>
-        <input type="file" id="pImgFile" accept="image/*">
+        <div class="bs-ext-dropzone" id="pImgDropzone">
+          <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
+          <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
+          <input type="file" id="pImgFile" accept="image/*" style="display:none">
+        </div>
         <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadBar"></div></div>
         <span class="upload-hint">অথবা সরাসরি URL দিন:</span>
         <input type="url" id="pImg" placeholder="https://..." style="margin-top:6px;">
@@ -819,7 +822,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
   <div class="modal wide">
     <div class="modal-head">
       <h3 id="orderModalTitle">Order Details</h3>
-      <button class="modal-close" id="orderModalClose">✕</button>
+      <button class="modal-close" id="orderModalClose"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body" id="orderModalBody"></div>
     <div class="modal-footer">
@@ -834,13 +837,24 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
   <div class="modal">
     <div class="modal-head">
       <h3 id="catModalTitle">Add Category</h3>
-      <button class="modal-close" id="catModalClose">✕</button>
+      <button class="modal-close" id="catModalClose"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="catEditId">
       <div class="form-group2"><label>Category Name *</label><input type="text" id="catName" placeholder="Ceiling Fans"></div>
       <div class="form-group2"><label>Slug *</label><input type="text" id="catSlug" placeholder="ceiling-fans"></div>
-      <div class="form-group2"><label>Image URL</label><input type="url" id="catImg" placeholder="https://..."></div>
+      <div class="form-group2">
+        <label>Category Image</label>
+        <div class="bs-ext-dropzone" id="catImgDropzone">
+          <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
+          <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
+          <input type="file" id="catImgFile" accept="image/*" style="display:none">
+        </div>
+        <div class="upload-progress" id="catUploadProgress"><div class="upload-progress-bar" id="catUploadBar"></div></div>
+        <span class="upload-hint">অথবা সরাসরি URL দিন:</span>
+        <input type="url" id="catImg" placeholder="https://..." style="margin-top:6px;">
+        <img id="catImgPreview" class="img-preview" alt="Preview">
+      </div>
     </div>
     <div class="modal-footer">
       <button class="cancel-btn" id="catModalCancel">বাতিল</button>
@@ -852,7 +866,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 <!-- ==================== CONFIRM DELETE MODAL ==================== -->
 <div class="modal-overlay hidden" id="confirmModal">
   <div class="modal" style="width:380px;">
-    <div class="modal-head"><h3>নিশ্চিত করুন</h3><button class="modal-close" id="confirmClose">✕</button></div>
+    <div class="modal-head"><h3>নিশ্চিত করুন</h3><button class="modal-close" id="confirmClose"><i class="fas fa-xmark"></i></button></div>
     <div class="modal-body"><p id="confirmMsg" style="font-size:14px;line-height:1.6;color:var(--text-mid);"></p></div>
     <div class="modal-footer">
       <button class="cancel-btn" id="confirmCancel">বাতিল</button>
@@ -1033,7 +1047,7 @@ async function loadStats(){
     document.getElementById('pendingPercent').textContent = pPct + '%';
     document.getElementById('pendingCount').textContent = d.pendingOrders||0;
     document.getElementById('completedCount').textContent = d.completedOrders||0;
-    document.getElementById('pendingNote').textContent = pPct > 30 ? '⚠️ অনেক Pending অর্ডার!' : '✅ Pending স্বাভাবিক';
+    document.getElementById('pendingNote').innerHTML = pPct > 30 ? '<i class="fas fa-triangle-exclamation"></i> অনেক Pending অর্ডার!' : '<i class="fas fa-circle-check"></i> Pending স্বাভাবিক';
     // Stock bar
     const total = (d.inStock||0)+(d.lowStock||0)+(d.outOfStock||0)||1;
     document.getElementById('inStockCount').textContent = d.inStock||0;
@@ -1255,8 +1269,8 @@ function renderProductGrid(){
         <span class="stock-dot ${stockClass}">${stockLabel}</span>
       </div>
       <div class="product-actions">
-        <button class="act-btn" onclick="openEditProduct('${p._id}')">✏️ Edit</button>
-        <button class="act-btn danger" onclick="confirmDeleteProduct('${p._id}', '${esc(p.name).replace(/'/g,"\\'")}')">🗑️ Delete</button>
+        <button class="act-btn" onclick="openEditProduct('${p._id}')"><i class="fas fa-pen"></i> Edit</button>
+        <button class="act-btn danger" onclick="confirmDeleteProduct('${p._id}', '${esc(p.name).replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i> Delete</button>
       </div>
     </div>`;
   }).join('');
@@ -1327,29 +1341,50 @@ async function populateCatSelect(){
   } catch(e){}
 }
 
-// Image file upload
-document.getElementById('pImgFile').addEventListener('change', async function(){
-  const file = this.files[0];
-  if(!file) return;
-  const progress = document.getElementById('uploadProgress');
-  const bar = document.getElementById('uploadBar');
-  progress.classList.add('show'); bar.style.width='30%';
-  try{
-    const fd = new FormData(); fd.append('image', file);
-    const r = await apiFetch('/products/upload', { method:'POST', body:fd });
-    bar.style.width='100%';
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error);
-    document.getElementById('pImg').value = d.url;
-    document.getElementById('pImgPreview').src = d.url;
-    document.getElementById('pImgPreview').classList.add('show');
-    showToast('ছবি আপলোড হয়েছে','success');
-  } catch(e){ showToast('ছবি আপলোড ব্যর্থ: '+e.message,'error'); }
-  finally{ setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
-});
-document.getElementById('pImg').addEventListener('input', function(){
-  if(this.value){ document.getElementById('pImgPreview').src=this.value; document.getElementById('pImgPreview').classList.add('show'); }
-  else document.getElementById('pImgPreview').classList.remove('show');
+// ── Reusable single-image drag-and-drop uploader ──────────────
+// Wires a dropzone (click-to-browse + drag&drop) to upload a single image
+// via /products/upload and fill a URL input + live preview.
+function bsWireImageDropzone({ dropzoneId, fileInputId, urlInputId, previewId, progressId, barId }){
+  const dz = document.getElementById(dropzoneId);
+  const fileInput = document.getElementById(fileInputId);
+  const urlInput = document.getElementById(urlInputId);
+  const preview = previewId ? document.getElementById(previewId) : null;
+  const progress = progressId ? document.getElementById(progressId) : null;
+  const bar = barId ? document.getElementById(barId) : null;
+  if(!dz || !fileInput || !urlInput) return;
+
+  async function upload(file){
+    if(!file) return;
+    if(progress && bar){ progress.classList.add('show'); bar.style.width='30%'; }
+    try{
+      const fd = new FormData(); fd.append('image', file);
+      const r = await apiFetch('/products/upload', { method:'POST', body:fd });
+      if(bar) bar.style.width='100%';
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error);
+      urlInput.value = d.url;
+      if(preview){ preview.src = d.url; preview.classList.add('show'); }
+      showToast('ছবি আপলোড হয়েছে','success');
+    } catch(e){ showToast('ছবি আপলোড ব্যর্থ: '+e.message,'error'); }
+    finally{ if(progress && bar) setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
+  }
+
+  dz.addEventListener('click', ()=> fileInput.click());
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
+  dz.addEventListener('drop', (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); upload(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function(){ upload(this.files[0]); });
+
+  urlInput.addEventListener('input', function(){
+    if(!preview) return;
+    if(this.value){ preview.src=this.value; preview.classList.add('show'); }
+    else preview.classList.remove('show');
+  });
+}
+
+bsWireImageDropzone({
+  dropzoneId:'pImgDropzone', fileInputId:'pImgFile', urlInputId:'pImg',
+  previewId:'pImgPreview', progressId:'uploadProgress', barId:'uploadBar'
 });
 
 document.getElementById('productModalClose').addEventListener('click', ()=>document.getElementById('productModal').classList.add('hidden'));
@@ -1433,8 +1468,8 @@ function renderCategoriesTable(){
     <td><code style="font-size:12px;background:var(--bg);padding:3px 7px;border-radius:5px;">${esc(c.slug)}</code></td>
     <td>${c.count||0}</td>
     <td><div style="display:flex;gap:6px;">
-      <button class="act-btn" onclick="openEditCat('${c._id}')">✏️ Edit</button>
-      <button class="act-btn danger" onclick="confirmDeleteCat('${c._id}','${esc(c.name).replace(/'/g,"\\'")}')">🗑️ Delete</button>
+      <button class="act-btn" onclick="openEditCat('${c._id}')"><i class="fas fa-pen"></i> Edit</button>
+      <button class="act-btn danger" onclick="confirmDeleteCat('${c._id}','${esc(c.name).replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i> Delete</button>
     </div></td>
   </tr>`).join('');
 }
@@ -1727,7 +1762,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     root.innerHTML = `
       <div style="padding:0 20px;margin-top:24px">
         <h2 style="color:#14213D;font-size:20px;margin:0 0 4px">
-          <i class="fas fa-cogs" style="color:#FCA311"></i> এডভান্সড অপশন
+          <i class="fas fa-cogs" style="color:#FCA311"></i> Advanced Options
         </h2>
         <p style="color:#64748b;font-size:13px;margin:0 0 8px">রিভিউ, ফেক অর্ডার, প্লেসমেন্ট, পেজ সেটিংস</p>
       </div>
@@ -1773,7 +1808,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <tr>
           <td><b>${esc(r.productName || r.productId)}</b><br><small style="color:#64748b">${esc(r.productId)}</small></td>
           <td>${esc(r.user)}<br><small style="color:#64748b">${esc(r.email || '')}</small></td>
-          <td><span style="color:#FCA311">${'★'.repeat(r.rating || 5)}</span><br><small>${new Date(r.createdAt).toLocaleString('en-GB')}</small></td>
+          <td><span style="color:#FCA311">${'<i class=\"fas fa-star\"></i>'.repeat(r.rating || 5)}</span><br><small>${new Date(r.createdAt).toLocaleString('en-GB')}</small></td>
           <td>${r.type === 'question' ? '<span class="bs-ext-badge warn">প্রশ্ন</span>' : '<span class="bs-ext-badge ok">রিভিউ</span>'}<br><span class="bs-ext-badge ${r.visible ? 'ok' : 'hide'}">${r.visible ? 'দৃশ্যমান' : 'লুকানো'}</span></td>
           <td style="max-width:300px">${esc(r.text)}</td>
           <td>
