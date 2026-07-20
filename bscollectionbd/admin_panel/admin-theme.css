@@ -1,0 +1,67 @@
+/* ============================================================
+   BS Collection BD — Admin Panel Theme Override
+   Retheme to match storefront: Navy (#14213D) + Orange (#FCA311)
+   ============================================================ */
+body{
+  --orange:#FCA311!important; --orange-light:#FCD79E!important;
+  --orange-bg:#FFF7ED!important; --orange-bg-2:#FEE4C7!important;
+  --navy:#14213D!important;
+  --primary:#14213D; --accent:#FCA311;
+}
+body{background:#f6f7fb!important;color:#0f172a!important}
+.sidebar,#sidebar,.side-nav,aside.sidebar{background:#14213D!important;color:#fff!important}
+.sidebar .brand,.sidebar h1,.sidebar h2{color:#fff!important}
+.sidebar .nav a,.sidebar a{color:#cbd5e1!important}
+.sidebar .nav a.active,.sidebar a.active{background:#FCA311!important;color:#0b1526!important;border-radius:8px}
+.sidebar .nav a:hover{background:rgba(252,163,17,.15)!important;color:#fff!important}
+.topbar,.top-bar,header.topbar{background:#fff!important;border-bottom:1px solid #e2e8f0!important}
+.btn-primary,.button.primary,button.primary{background:#14213D!important;color:#fff!important;border:0!important}
+.btn-primary:hover,.button.primary:hover,button.primary:hover{background:#FCA311!important;color:#0b1526!important}
+.btn-orange,button.orange,.button.orange{background:#FCA311!important;color:#0b1526!important;border:0!important}
+.stat-card,.card,.data-card{border:1px solid #e2e8f0!important;border-radius:14px!important;background:#fff!important}
+.stat-card .num,.stat-card .value{color:#14213D!important}
+.stat-card.highlight{background:#fff7ed!important;border-color:#FCD79E!important}
+a{color:#14213D}
+a:hover{color:#FCA311}
+.badge.orange,.badge-orange{background:#FCA311!important;color:#0b1526!important}
+.badge.navy,.badge-navy{background:#14213D!important;color:#fff!important}
+#loginScreen{background:linear-gradient(135deg,#14213D 0%,#0b1526 100%)!important}
+#loginScreen .login-box .brand,#loginScreen h1{color:#FCA311!important}
+input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:none!important;box-shadow:0 0 0 3px rgba(252,163,17,.15)!important}
+.tab.active,.tab-active,[role=tab][aria-selected=true]{color:#FCA311!important;border-color:#FCA311!important}
+/* Admin extensions styles */
+.bs-ext-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;padding:0 20px}
+.bs-ext-tabs button{padding:8px 14px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#334155}
+.bs-ext-tabs button.active{background:#14213D;color:#fff;border-color:#14213D}
+.bs-ext-panel{padding:20px;background:#fff;border-radius:14px;margin:0 20px 20px;border:1px solid #e2e8f0}
+.bs-ext-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.bs-ext-table th{background:#f8fafc;padding:10px 12px;text-align:left;color:#64748b;font-weight:700;font-size:12px;text-transform:uppercase;border-bottom:1px solid #e2e8f0}
+.bs-ext-table td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.bs-ext-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.bs-ext-badge.ok{background:#dcfce7;color:#166534}
+.bs-ext-badge.hide{background:#fee2e2;color:#991b1b}
+.bs-ext-badge.warn{background:#fef3c7;color:#92400e}
+.bs-ext-btn{padding:6px 12px;border:0;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;margin-right:4px}
+.bs-ext-btn.primary{background:#14213D;color:#fff}
+.bs-ext-btn.orange{background:#FCA311;color:#0b1526}
+.bs-ext-btn.danger{background:#dc2626;color:#fff}
+.bs-ext-btn.ghost{background:#f1f5f9;color:#334155}
+.bs-ext-fake-row{background:#fef2f2}
+.bs-ext-fake-badge{display:inline-block;padding:3px 8px;background:#dc2626;color:#fff;border-radius:6px;font-size:10px;font-weight:700;margin-left:6px}
+.bs-ext-form label{display:block;margin-bottom:14px;font-size:13px;color:#334155;font-weight:600}
+.bs-ext-form input,.bs-ext-form textarea,.bs-ext-form select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:14px;margin-top:6px;outline:none}
+.bs-ext-form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bs-ext-form .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.bs-ext-dropzone{border:2px dashed #e2e8f0;padding:24px;border-radius:12px;text-align:center;background:#f8fafc;cursor:pointer;transition:.2s}
+.bs-ext-dropzone.dragover{background:#fff7ed;border-color:#FCA311}
+.bs-ext-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.bs-ext-thumbs .thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;background:#f1f5f9}
+.bs-ext-thumbs .thumb img{width:100%;height:100%;object-fit:cover}
+.bs-ext-thumbs .thumb button{position:absolute;top:2px;right:2px;background:#dc2626;color:#fff;border:0;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:11px}
+.bs-ext-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.bs-ext-modal.show{display:flex}
+.bs-ext-modal .box{background:#fff;padding:24px;border-radius:14px;width:100%;max-width:720px;max-height:90vh;overflow:auto}
+.bs-ext-modal .close{float:right;background:transparent;border:0;font-size:24px;cursor:pointer;color:#64748b}
+.bs-ext-placements{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.bs-ext-placements label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f1f5f9;border-radius:20px;font-size:13px;cursor:pointer;font-weight:500;color:#334155}
+.bs-ext-placements input{margin:0}

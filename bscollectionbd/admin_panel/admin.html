@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BS Collection BD | Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --orange:#F97316;
+  --orange-light:#FDBA74;
+  --orange-bg:#FFF1E4;
+  --orange-bg-2:#FFE8D1;
+  --bg:#F7F7F8;
+  --card:#ffffff;
+  --border:#EDEDF0;
+  --text:#16181D;
+  --text-soft:#8A8D98;
+  --text-mid:#5B5E68;
+  --green:#12B76A;
+  --green-bg:#E7F9F0;
+  --red:#F04438;
+  --red-bg:#FDEDEB;
+  --blue:#2970FF;
+  --blue-bg:#EAF1FF;
+  --purple:#7A5AF8;
+  --purple-bg:#F2EEFF;
+  --navy:#01112A;
+  --radius:16px;
+  --sidebar-w:220px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .2s, color .2s;}
+
+/* Dark mode */
+body[data-theme="dark"]{--bg:#0F1115;--card:#181B21;--border:#262A32;--text:#F2F3F5;--text-soft:#8B8F99;--text-mid:#B7BAC3;}
+body[data-theme="dark"] .sidebar{background:#14161C;}
+body[data-theme="dark"] .nav a:hover{background:#20232B;}
+body[data-theme="dark"] .search{background:#181B21;}
+body[data-theme="dark"] table.data-table tbody tr:hover{background:#1D2027;}
+body[data-theme="dark"] .stat-card.highlight{background:#241B12; border-color:#3A2B18;}
+body[data-theme="dark"] .product-thumb{background:#241B12;}
+
+/* ==================== LOGIN SCREEN ==================== */
+#loginScreen{
+  position:fixed; inset:0;
+  background:linear-gradient(135deg,#01112A 0%,#1a2c4a 100%);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000;
+}
+#loginScreen.hidden{display:none;}
+.login-box{
+  background:#fff;
+  border-radius:20px;
+  padding:40px;
+  width:380px;
+  max-width:92vw;
+  box-shadow:0 30px 60px rgba(0,0,0,.3);
+}
+.login-logo{text-align:center; margin-bottom:28px;}
+.login-logo img{max-width:160px; height:auto;}
+.login-logo h2{font-size:22px; font-weight:800; margin-top:12px; color:var(--text);}
+.login-logo p{font-size:13px; color:var(--text-soft); margin-top:4px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px;}
+.form-group input{
+  width:100%; padding:11px 14px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  font-size:14px;
+  font-family:inherit;
+  outline:none;
+  transition:border-color .15s;
+}
+.form-group input:focus{border-color:var(--orange);}
+.login-btn{
+  width:100%; padding:13px;
+  background:var(--orange);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:700;
+  font-family:inherit;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.login-btn:hover{opacity:.9;}
+.login-btn:disabled{opacity:.6; cursor:not-allowed;}
+.login-error{
+  background:var(--red-bg);
+  color:var(--red);
+  font-size:13px;
+  font-weight:600;
+  padding:10px 14px;
+  border-radius:8px;
+  margin-top:14px;
+  display:none;
+}
+.login-error.show{display:block;}
+
+/* Sidebar */
+.sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);padding:0 16px 24px;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:45;transition:background .2s,border-color .2s;}
+.sidebar::-webkit-scrollbar{width:6px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+.logo{display:flex;align-items:center;justify-content:center;background:var(--navy);margin:0 -16px 20px;padding:16px 18px;position:sticky;top:0;z-index:2;}
+.logo img{width:100%;max-width:188px;height:auto;display:block;}
+.nav{list-style:none;display:flex;flex-direction:column;gap:2px;}
+.nav-section-gap{height:20px;}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--text-mid);text-decoration:none;font-size:14px;font-weight:500;transition:background .15s,color .15s;cursor:pointer;}
+.nav a svg{width:18px;height:18px;flex-shrink:0;}
+.nav a:hover{background:#F5F5F6;}
+.nav a.active{background:var(--orange);color:#fff;}
+
+/* Main */
+.main{margin-left:var(--sidebar-w);padding:0 28px 60px;min-width:0;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:22px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;}
+.topbar.scrolled{box-shadow:0 4px 14px rgba(20,20,30,.06);border-bottom:1px solid var(--border);}
+.topbar h1{font-size:24px;font-weight:800;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:background .15s;}
+body[data-theme="dark"] .icon-btn{background:var(--card);}
+.icon-btn:hover{background:#F5F5F6;}
+body[data-theme="dark"] .icon-btn:hover{background:#20232B;}
+.icon-btn svg{width:17px;height:17px;}
+.icon-btn .dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg);}
+.profile-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:5px 10px 5px 5px;cursor:pointer;font-family:inherit;}
+body[data-theme="dark"] .profile-btn{background:var(--card);}
+.profile-btn .avatar{width:28px;height:28px;font-size:11px;background:var(--orange);}
+.profile-btn span{font-size:13px;font-weight:600;color:var(--text);}
+.dropdown{position:relative;}
+.dropdown-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(20,20,30,.12);min-width:220px;padding:8px;display:none;z-index:60;}
+.dropdown-menu.open{display:block;}
+.dropdown-menu .dd-title{font-size:11.5px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px 6px;}
+.dropdown-menu a,.dropdown-menu .dd-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text);text-decoration:none;cursor:pointer;}
+.dropdown-menu a:hover,.dropdown-menu .dd-item:hover{background:var(--bg);}
+.dropdown-menu .dd-item svg,.dropdown-menu a svg{width:15px;height:15px;color:var(--text-soft);flex-shrink:0;}
+.dropdown-menu hr{border:none;border-top:1px solid var(--border);margin:6px 2px;}
+.notif-item .cell-sub{font-size:11px;margin-top:1px;}
+.notif-item .cell-main{font-size:12.5px;}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 14px;width:280px;color:var(--text-soft);font-size:13px;}
+.search svg{width:16px;height:16px;flex-shrink:0;color:var(--text-soft);}
+.search input{border:none;outline:none;font-size:13px;width:100%;background:transparent;font-family:inherit;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px;}
+.stats-row.cols-3{grid-template-columns:repeat(3,1fr);}
+.stat-card{display:flex;flex-direction:column;gap:20px;}
+.stat-card.highlight{background:var(--orange-bg);border-color:var(--orange-bg-2);}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.stat-label{font-size:13.5px;color:var(--text-mid);font-weight:500;}
+.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--orange);color:#fff;flex-shrink:0;}
+.stat-icon svg{width:16px;height:16px;}
+.stat-icon.gray{background:#fff;border:1px solid var(--border);color:var(--text-mid);}
+.stat-bottom{display:flex;justify-content:space-between;align-items:flex-end;}
+.stat-value{font-size:26px;font-weight:800;letter-spacing:-.5px;}
+.stat-change{font-size:12px;font-weight:600;text-align:right;}
+.stat-change.up{color:var(--green);}
+.stat-change.down{color:var(--red);}
+.stat-change span{display:block;color:var(--text-soft);font-weight:500;font-size:11px;margin-top:2px;}
+.mid-row{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px;}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.card-head h2{font-size:16px;font-weight:700;}
+.pill-btn{background:var(--orange);color:#fff;border:none;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit;}
+.pill-btn svg{width:12px;height:12px;}
+.pill-btn.ghost{background:#fff;color:var(--text-mid);border:1px solid var(--border);}
+.pill-btn.red-btn{background:var(--red);}
+body[data-theme="dark"] .pill-btn.ghost{background:var(--card);}
+.dots-btn{color:var(--text-soft);font-size:18px;font-weight:700;cursor:pointer;letter-spacing:1px;}
+.legend{display:flex;gap:18px;margin-bottom:14px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-mid);font-weight:500;}
+.legend-dot{width:10px;height:10px;border-radius:50%;background:var(--orange);}
+.legend-dot.dashed{background:transparent;border:2px dashed var(--orange-light);width:10px;height:10px;border-radius:50%;}
+.legend-dot.blue{background:var(--blue);}
+.legend-dot.green{background:var(--green);}
+.target-card{display:flex;flex-direction:column;}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0 10px;}
+.gauge-percent{font-size:30px;font-weight:800;margin-top:-58px;}
+.gauge-sub{font-size:11px;color:var(--green);font-weight:600;margin-bottom:6px;}
+.progress-note{text-align:center;margin-bottom:16px;}
+.progress-note strong{font-size:14px;font-weight:700;display:block;margin-bottom:4px;}
+.progress-note p{font-size:12px;color:var(--text-soft);line-height:1.5;}
+.progress-note b{color:var(--orange);font-weight:700;}
+.target-split{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);margin-top:auto;padding-top:14px;}
+.target-split div{text-align:center;padding:0 8px;}
+.target-split div:first-child{border-right:1px solid var(--border);}
+.target-split .t-label{font-size:11.5px;color:var(--text-soft);margin-bottom:4px;}
+.target-split .t-value{font-size:14px;font-weight:700;}
+.bottom-row{display:grid;grid-template-columns:1fr 1.7fr;gap:18px;}
+.active-user-value{font-size:26px;font-weight:800;margin-bottom:2px;}
+.active-user-change{font-size:12px;font-weight:600;color:var(--green);margin-bottom:2px;}
+.active-user-label{font-size:11px;color:var(--text-soft);margin-bottom:18px;}
+.country-row{margin-bottom:14px;}
+.country-row:last-child{margin-bottom:0;}
+.country-top{display:flex;justify-content:space-between;font-size:13px;font-weight:500;margin-bottom:7px;}
+.country-top span:last-child{font-weight:700;}
+.bar-track{height:6px;background:#F1F1F3;border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--orange);border-radius:4px;}
+.conv-select{background:var(--orange);color:#fff;border:none;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;cursor:pointer;}
+.conv-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.conv-col{display:flex;flex-direction:column;}
+.conv-head{font-size:12.5px;color:var(--text-mid);font-weight:500;line-height:1.35;min-height:34px;}
+.conv-value-row{display:flex;align-items:center;gap:8px;margin:8px 0 14px;}
+.conv-value{font-size:19px;font-weight:800;}
+.conv-badge{font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--green-bg);color:var(--green);width:fit-content;margin-bottom:10px;}
+.conv-badge.down{background:var(--red-bg);color:var(--red);}
+.conv-bar-track{flex:1;display:flex;align-items:flex-end;min-height:130px;}
+.conv-bar{width:100%;border-radius:8px 8px 0 0;background:var(--orange-light);}
+.conv-bar.full{background:var(--orange);}
+.chart-tooltip{position:absolute;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 14px;box-shadow:0 8px 20px rgba(20,20,30,.08);text-align:center;pointer-events:none;transform:translate(-50%,-100%);}
+.chart-tooltip .tt-label{font-size:10.5px;color:var(--text-soft);font-weight:500;}
+.chart-tooltip .tt-value{font-size:14px;font-weight:800;color:var(--text);}
+.chart-wrap{position:relative;}
+.hamburger{display:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:#fff;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.hamburger svg{width:18px;height:18px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,15,20,.4);z-index:40;}
+.overlay.show{display:block;}
+.filter-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.chip-group{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;color:var(--text-mid);cursor:pointer;white-space:nowrap;}
+.chip.active{background:var(--orange);color:#fff;border-color:var(--orange);}
+.table-wrap{overflow-x:auto;}
+table.data-table{width:100%;border-collapse:collapse;min-width:720px;}
+table.data-table thead th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-soft);font-weight:700;padding:0 14px 12px;border-bottom:1px solid var(--border);}
+table.data-table tbody td{padding:14px 14px;font-size:13.5px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle;}
+table.data-table tbody tr:last-child td{border-bottom:none;}
+table.data-table tbody tr:hover{background:#FAFAFB;}
+.cell-sub{color:var(--text-soft);font-size:12px;margin-top:2px;}
+.cell-main{font-weight:600;}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.badge.green{background:var(--green-bg);color:var(--green);}
+.badge.red{background:var(--red-bg);color:var(--red);}
+.badge.blue{background:var(--blue-bg);color:var(--blue);}
+.badge.orange{background:var(--orange-bg);color:var(--orange);}
+.badge.gray{background:#F1F1F3;color:var(--text-mid);}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;flex-shrink:0;}
+.row-flex{display:flex;align-items:center;gap:10px;}
+.pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap;}
+.pagination .p-info{font-size:12.5px;color:var(--text-soft);}
+.pagination .p-btns{display:flex;gap:6px;}
+.pagination button{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-mid);font-size:12.5px;font-weight:600;cursor:pointer;}
+.pagination button.active{background:var(--orange);color:#fff;border-color:var(--orange);}
+.pagination button:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Product grid */
+.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.product-card{display:flex;flex-direction:column;gap:12px;position:relative;}
+.product-thumb{width:100%;aspect-ratio:1.3/1;border-radius:12px;background:var(--orange-bg);display:flex;align-items:center;justify-content:center;color:var(--orange);overflow:hidden;}
+.product-thumb img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.product-thumb svg{width:38px;height:38px;}
+.product-cat{font-size:11px;color:var(--text-soft);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.product-name{font-size:14.5px;font-weight:700;line-height:1.3;}
+.product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.product-price{font-size:16px;font-weight:800;}
+.stock-dot{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;}
+.stock-dot::before{content:'';width:7px;height:7px;border-radius:50%;}
+.stock-dot.in::before{background:var(--green);}
+.stock-dot.low::before{background:#F5A524;}
+.stock-dot.out::before{background:var(--red);}
+.stock-dot.in{color:var(--green);}
+.stock-dot.low{color:#B54708;}
+.stock-dot.out{color:var(--red);}
+.product-actions{display:flex;gap:6px;margin-top:4px;}
+.act-btn{flex:1;padding:7px 0;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text-mid);transition:background .15s,color .15s;}
+.act-btn:hover{background:var(--orange-bg);color:var(--orange);border-color:var(--orange-light);}
+.act-btn.danger:hover{background:var(--red-bg);color:var(--red);border-color:#fbb;}
+body[data-theme="dark"] .act-btn{background:var(--card);}
+
+/* Reports */
+.report-list-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.report-list-item:last-child{border-bottom:none;}
+.report-icon{width:38px;height:38px;border-radius:10px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.report-icon svg{width:18px;height:18px;}
+.report-name{font-size:13.5px;font-weight:600;}
+.report-meta{font-size:11.5px;color:var(--text-soft);margin-top:2px;}
+.download-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--text-mid);cursor:pointer;}
+.download-btn svg{width:14px;height:14px;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* ==================== MODAL ==================== */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,20,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--card);border-radius:20px;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);}
+.modal.wide{width:720px;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 16px;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:17px;font-weight:700;}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text-soft);}
+body[data-theme="dark"] .modal-close{background:var(--card);}
+.modal-body{padding:22px 24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group2{margin-bottom:16px;}
+.form-group2 label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.form-group2 input,.form-group2 select,.form-group2 textarea{
+  width:100%;padding:10px 13px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  font-size:13.5px;font-family:inherit;outline:none;
+  background:var(--bg);color:var(--text);
+  transition:border-color .15s;
+}
+.form-group2 textarea{resize:vertical;min-height:80px;}
+.form-group2 input:focus,.form-group2 select:focus,.form-group2 textarea:focus{border-color:var(--orange);}
+.img-preview{margin-top:10px;width:100%;height:140px;border-radius:10px;object-fit:cover;display:none;border:1px solid var(--border);}
+.img-preview.show{display:block;}
+.upload-hint{font-size:11px;color:var(--text-soft);margin-top:5px;}
+.upload-progress{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:8px;display:none;}
+.upload-progress.show{display:block;}
+.upload-progress-bar{height:100%;background:var(--orange);border-radius:2px;width:0%;transition:width .3s;}
+.save-btn{background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:600;padding:10px 22px;border-radius:10px;cursor:pointer;font-family:inherit;}
+.cancel-btn{background:#fff;color:var(--text-mid);border:1px solid var(--border);font-size:14px;font-weight:600;padding:10px 22px;border-radius:10px;cursor:pointer;font-family:inherit;}
+body[data-theme="dark"] .cancel-btn{background:var(--card);}
+
+/* Order detail modal */
+.order-item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.order-item-row:last-child{border-bottom:none;}
+.order-img{width:50px;height:50px;border-radius:8px;object-fit:cover;background:var(--orange-bg);display:flex;align-items:center;justify-content:center;color:var(--orange);flex-shrink:0;}
+.order-item-name{font-weight:600;font-size:13.5px;}
+.order-item-meta{font-size:12px;color:var(--text-soft);}
+.status-select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--card);color:var(--text);cursor:pointer;outline:none;}
+.status-select:focus{border-color:var(--orange);}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:20px;height:20px;border:2.5px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-row{display:flex;justify-content:center;align-items:center;padding:40px;gap:10px;color:var(--text-soft);font-size:13px;}
+
+/* Category table */
+.cat-img-cell{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--orange-bg);display:flex;align-items:center;justify-content:center;color:var(--orange);overflow:hidden;}
+.cat-img-cell img{width:100%;height:100%;object-fit:cover;}
+
+/* RESPONSIVE */
+@media(max-width:1280px){.mid-row{grid-template-columns:1.6fr 1fr;}.product-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1080px){.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.15);}.sidebar.open{transform:translateX(0);}.hamburger{display:flex;}.main{margin-left:0;padding:0 18px 50px;}.topbar{padding:16px 0;}.stats-row{grid-template-columns:repeat(2,1fr);}.mid-row{grid-template-columns:1fr;}.bottom-row{grid-template-columns:1fr;}.product-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:860px){.conv-cols{grid-template-columns:repeat(3,1fr);row-gap:20px;}.search{width:220px;}.product-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:620px){.main{margin-left:0;padding:0 14px 50px;}.topbar{gap:10px;padding:12px 0;}.topbar h1{font-size:20px;}.topbar-right .profile-btn span{display:none;}.search{width:auto;flex:1;padding:8px 12px;}.search input{font-size:12.5px;}.stats-row{grid-template-columns:1fr 1fr;gap:10px;}.card{padding:16px;}.stat-value{font-size:22px;}.conv-cols{grid-template-columns:repeat(2,1fr);row-gap:18px;}.card-head h2{font-size:15px;}.pill-btn,.conv-select{font-size:11.5px;padding:6px 10px;}.gauge-wrap svg{width:180px;}.chart-wrap svg{height:210px;}.product-grid{grid-template-columns:1fr 1fr;}.filter-bar{flex-direction:column;align-items:stretch;}.search{width:100%;}.form-row{grid-template-columns:1fr;}}
+@media(max-width:380px){.conv-cols{grid-template-columns:1fr 1fr;}.stat-icon{width:30px;height:30px;}.product-grid{grid-template-columns:1fr;}}
+</style>
+
+<!-- BS_ADMIN_EXT -->
+<link rel="stylesheet" href="admin-theme.css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<script src="admin-extensions.js" defer></script>
+</head>
+<body>
+
+<!-- ==================== LOGIN SCREEN ==================== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://bscollectionbd.onrender.com/logo.png" onerror="this.style.display='none'" alt="">
+      <h2>BS Collection BD</h2>
+      <p>Admin Panel — লগইন করুন</p>
+    </div>
+    <div class="form-group">
+      <label>ব্যবহারকারী নাম</label>
+      <input type="text" id="loginUser" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>পাসওয়ার্ড</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="loginSubmitBtn">লগইন করুন</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div class="overlay" id="overlay"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50'%3E%3Ctext y='38' font-size='28' font-family='Inter,sans-serif' fill='%23F97316' font-weight='800'%3EBS%3C/text%3E%3Ctext x='44' y='38' font-size='18' font-family='Inter,sans-serif' fill='%23fff' font-weight='700'%3ECollection BD%3C/text%3E%3C/svg%3E" alt="BS Collection BD">
+  </div>
+  <ul class="nav">
+    <li><a class="active" data-page="dashboard" data-title="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a></li>
+    <li><a data-page="orders" data-title="Orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>Orders</a></li>
+    <li><a data-page="products" data-title="Products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.4 7.7 12 3 3.6 7.7v8.6L12 21l8.4-4.7z"/><path d="M3.6 7.7 12 12.4l8.4-4.7"/><path d="M12 21v-8.6"/></svg>Products</a></li>
+    <li><a data-page="categories" data-title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Categories</a></li>
+    <li><a data-page="customers" data-title="Customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Customers</a></li>
+    <li><a data-page="reports" data-title="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>Reports</a></li>
+    <li class="nav-section-gap"></li>
+    <li><a id="sidebarLogoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</a></li>
+  </ul>
+</aside>
+
+<main class="main" id="mainContent">
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburgerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+      <h1 id="pageTitle">Dashboard</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search…">
+      </div>
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <div class="dropdown">
+        <button class="icon-btn" id="notifBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dot"></span></button>
+        <div class="dropdown-menu" id="notifMenu" style="min-width:260px;">
+          <div class="dd-title">Notifications <a id="markAllRead" style="float:right;text-transform:none;font-weight:600;color:var(--orange);font-size:11px;cursor:pointer;">Mark all read</a></div>
+          <div class="dd-item notif-item"><div><div class="cell-main">নতুন অর্ডার এসেছে</div><div class="cell-sub">এইমাত্র</div></div></div>
+          <div class="dd-item notif-item"><div><div class="cell-main">স্টক কম — Rechargeable Fan</div><div class="cell-sub">২ মিনিট আগে</div></div></div>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="profile-btn" id="profileBtn">
+          <div class="avatar" style="background:var(--orange);font-size:11px;font-weight:700;" id="profileAvatar">AD</div>
+          <span id="profileName">Admin</span>
+        </button>
+        <div class="dropdown-menu" id="profileMenu" style="right:0;">
+          <div class="dd-title" id="profileMenuTitle">BS Collection BD</div>
+          <a id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD PAGE ===================== -->
+  <section class="page active" id="page-dashboard">
+    <div class="stats-row cols-3">
+      <div class="card stat-card highlight">
+        <div class="stat-top"><span class="stat-label">Total Revenue</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5c0-1.4-1.3-2.5-3-2.5s-3 1.1-3 2.5 1.3 2.3 3 2.5c1.7.2 3 1.1 3 2.5s-1.3 2.5-3 2.5-3-1.1-3-2.5"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="dashRevenue">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Total Orders</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="dashOrders">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Total Products</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.4 7.7 12 3 3.6 7.7v8.6L12 21l8.4-4.7z"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="dashProducts">—</span></div>
+      </div>
+    </div>
+    <div class="mid-row">
+      <div class="card">
+        <div class="card-head"><h2>Revenue Analytics</h2>
+          <div class="dropdown" id="revenuePeriodDropdown">
+            <button class="pill-btn" id="revenuePeriodBtn"><span class="btn-label">Last 8 Days</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="dropdown-menu" id="revenuePeriodMenu">
+              <div class="dd-item" data-value="8">Last 8 Days</div>
+              <div class="dd-item" data-value="14">Last 14 Days</div>
+              <div class="dd-item" data-value="30">Last 30 Days</div>
+            </div>
+          </div>
+        </div>
+        <div class="legend"><div class="legend-item"><span class="legend-dot"></span>Revenue</div><div class="legend-item"><span class="legend-dot dashed"></span>Order</div></div>
+        <div class="chart-wrap">
+          <svg id="revenueChart" viewBox="0 0 720 260" style="width:100%;height:260px;overflow:visible;display:block;"></svg>
+          <div class="chart-tooltip" id="chartTooltip"><div class="tt-label">Revenue</div><div class="tt-value">৳0</div></div>
+        </div>
+      </div>
+      <div class="card target-card">
+        <div class="card-head"><h2>Pending Orders</h2></div>
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 220 130" style="width:210px;">
+            <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="#FCE3CC" stroke-width="20" stroke-linecap="round"/>
+            <path id="pendingGaugePath" d="M 20 120 A 90 90 0 0 1 172 45" fill="none" stroke="#F97316" stroke-width="20" stroke-linecap="round"/>
+            <circle id="pendingGaugeDot" cx="172" cy="45" r="13" fill="#fff" stroke="#F97316" stroke-width="5"/>
+          </svg>
+          <div class="gauge-percent" id="pendingPercent">—%</div>
+          <div class="gauge-sub">Pending / Total</div>
+        </div>
+        <div class="progress-note">
+          <strong id="pendingNote">Loading...</strong>
+          <p>Pending orders waiting to be processed.</p>
+        </div>
+        <div class="target-split">
+          <div><div class="t-label">Pending</div><div class="t-value" id="pendingCount">—</div></div>
+          <div><div class="t-label">Completed</div><div class="t-value" id="completedCount">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="card">
+        <div class="card-head"><h2>Stock Status</h2></div>
+        <div style="margin-top:8px;">
+          <div class="country-row">
+            <div class="country-top"><span>In Stock</span><span id="inStockCount">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="inStockBar" style="width:0%;background:var(--green);"></div></div>
+          </div>
+          <div class="country-row">
+            <div class="country-top"><span>Low Stock</span><span id="lowStockCount">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="lowStockBar" style="width:0%;background:#F5A524;"></div></div>
+          </div>
+          <div class="country-row">
+            <div class="country-top"><span>Out of Stock</span><span id="outStockCount">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="outStockBar" style="width:0%;background:var(--red);"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Conversion Rate</h2>
+          <div class="dropdown" id="convPeriodDropdown">
+            <button class="conv-select" id="convPeriodBtn"><span class="btn-label">This Week</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:12px;height:12px;"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="dropdown-menu" id="convPeriodMenu"><div class="dd-item" data-value="week">This Week</div><div class="dd-item" data-value="month">This Month</div><div class="dd-item" data-value="quarter">This Quarter</div></div>
+          </div>
+        </div>
+        <div class="conv-cols" id="convCols">
+          <div class="conv-col"><div class="conv-head">Product Views</div><div class="conv-value-row"><span class="conv-value" data-metric="views">25,000</span></div><span class="conv-badge" data-badge="views">+9%</span><div class="conv-bar-track"><div class="conv-bar" data-bar="views" style="height:100%;"></div></div></div>
+          <div class="conv-col"><div class="conv-head">Add to Cart</div><div class="conv-value-row"><span class="conv-value" data-metric="cart">12,000</span></div><span class="conv-badge" data-badge="cart">+6%</span><div class="conv-bar-track"><div class="conv-bar" data-bar="cart" style="height:78%;"></div></div></div>
+          <div class="conv-col"><div class="conv-head">Checkout</div><div class="conv-value-row"><span class="conv-value" data-metric="checkout">8,500</span></div><span class="conv-badge" data-badge="checkout">+4%</span><div class="conv-bar-track"><div class="conv-bar" data-bar="checkout" style="height:58%;"></div></div></div>
+          <div class="conv-col"><div class="conv-head">Completed</div><div class="conv-value-row"><span class="conv-value" data-metric="completed">6,200</span></div><span class="conv-badge" data-badge="completed">+7%</span><div class="conv-bar-track"><div class="conv-bar" data-bar="completed" style="height:42%;"></div></div></div>
+          <div class="conv-col"><div class="conv-head">Abandoned</div><div class="conv-value-row"><span class="conv-value" data-metric="abandoned">3,000</span></div><span class="conv-badge down" data-badge="abandoned">-5%</span><div class="conv-bar-track"><div class="conv-bar full" data-bar="abandoned" style="height:24%;"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ORDERS PAGE ===================== -->
+  <section class="page" id="page-orders">
+    <div class="stats-row">
+      <div class="card stat-card highlight">
+        <div class="stat-top"><span class="stat-label">Total Orders</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="ordTotalVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Pending</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="ordPendingVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Completed</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="ordCompletedVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Cancelled</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="ordCancelledVal">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>All Orders</h2>
+        <button class="pill-btn ghost" id="refreshOrdersBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
+      </div>
+      <div class="filter-bar">
+        <div class="chip-group" id="orderChips">
+          <span class="chip active" data-status="">All</span>
+          <span class="chip" data-status="Pending">Pending</span>
+          <span class="chip" data-status="Processing">Processing</span>
+          <span class="chip" data-status="Shipped">Shipped</span>
+          <span class="chip" data-status="Completed">Completed</span>
+          <span class="chip" data-status="Cancelled">Cancelled</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="ordersTableBody"><tr><td colspan="8"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="ordersPagination" style="display:none;">
+        <span class="p-info" id="ordersInfo"></span>
+        <div class="p-btns" id="ordersPagBtns"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUCTS PAGE ===================== -->
+  <section class="page" id="page-products">
+    <div class="stats-row">
+      <div class="card stat-card highlight">
+        <div class="stat-top"><span class="stat-label">Total Products</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.4 7.7 12 3 3.6 7.7v8.6L12 21l8.4-4.7z"/><path d="M3.6 7.7 12 12.4l8.4-4.7"/><path d="M12 21v-8.6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="prodTotalVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">In Stock</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="prodInStockVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Low Stock</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="prodLowStockVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Out of Stock</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="prodOutStockVal">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>Product Catalog</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="pill-btn ghost" id="refreshProductsBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
+          <button class="pill-btn" id="addProductBtn">Add Product <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="chip-group" id="productCatChips">
+          <span class="chip active" data-cat="">All Categories</span>
+        </div>
+        <div class="dropdown" id="productSortDropdown">
+          <button class="pill-btn ghost" id="productSortBtn"><span class="btn-label">Sort: Newest</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="dropdown-menu" id="productSortMenu">
+            <div class="dd-item" data-value="newest">Newest</div>
+            <div class="dd-item" data-value="price-low">Price: Low to High</div>
+            <div class="dd-item" data-value="price-high">Price: High to Low</div>
+            <div class="dd-item" data-value="name">Name: A–Z</div>
+          </div>
+        </div>
+      </div>
+      <div class="product-grid" id="productGrid"><div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div>লোড হচ্ছে...</div></div>
+      <div class="pagination" id="productsPagination" style="margin-top:18px;"><span class="p-info" id="productsInfo"></span></div>
+    </div>
+  </section>
+
+  <!-- ===================== CATEGORIES PAGE ===================== -->
+  <section class="page" id="page-categories">
+    <div class="card">
+      <div class="card-head">
+        <h2>Categories</h2>
+        <button class="pill-btn" id="addCatBtn">Add Category <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Image</th><th>Name</th><th>Slug</th><th>Products</th><th>Actions</th></tr></thead>
+          <tbody id="categoriesTableBody"><tr><td colspan="5"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CUSTOMERS PAGE ===================== -->
+  <section class="page" id="page-customers">
+    <div class="card">
+      <div class="card-head"><h2>Customer Directory</h2><span style="font-size:12px;color:var(--text-soft);">Orders থেকে স্বয়ংক্রিয়ভাবে তৈরি</span></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Total Spent</th><th>Last Order</th></tr></thead>
+          <tbody id="customersTableBody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== REPORTS PAGE ===================== -->
+  <section class="page" id="page-reports">
+    <div class="stats-row">
+      <div class="card stat-card highlight">
+        <div class="stat-top"><span class="stat-label">Total Revenue</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M15 9.5c0-1.4-1.3-2.5-3-2.5s-3 1.1-3 2.5 1.3 2.3 3 2.5c1.7.2 3 1.1 3 2.5s-1.3 2.5-3 2.5-3-1.1-3-2.5"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="rptRevenue">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Total Orders</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="rptOrders">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Total Products</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.4 7.7 12 3 3.6 7.7v8.6L12 21l8.4-4.7z"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="rptProducts">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">Categories</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="rptCategories">—</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h2>Revenue vs Expenses</h2>
+        <div class="dropdown" id="reportsPeriodDropdown">
+          <button class="pill-btn ghost" id="reportsPeriodBtn"><span class="btn-label">Last 6 Months</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="dropdown-menu" id="reportsPeriodMenu"><div class="dd-item" data-value="6">Last 6 Months</div><div class="dd-item" data-value="12">Last 12 Months</div></div>
+        </div>
+      </div>
+      <div class="legend"><div class="legend-item"><span class="legend-dot"></span>Revenue</div><div class="legend-item"><span class="legend-dot blue"></span>Expenses</div></div>
+      <svg id="barChart" viewBox="0 0 900 260" style="width:100%;height:260px;overflow:visible;display:block;"></svg>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Generated Reports</h2></div>
+      <div class="report-list-item"><div class="row-flex"><span class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div><div class="report-name">Monthly Sales Report</div><div class="report-meta">Generated automatically</div></div></div><button class="download-btn" onclick="exportOrdersCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Export CSV</button></div>
+    </div>
+  </section>
+</main>
+
+<!-- ==================== PRODUCT MODAL ==================== -->
+<div class="modal-overlay hidden" id="productModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3 id="productModalTitle">Add Product</h3>
+      <button class="modal-close" id="productModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pEditId">
+      <div class="form-row">
+        <div class="form-group2"><label>Product Name *</label><input type="text" id="pName" placeholder="যেমন: Rechargeable Fan RS-2218"></div>
+        <div class="form-group2"><label>SKU</label><input type="text" id="pSku" placeholder="JY-2218"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group2"><label>Category</label><select id="pCat"><option value="">— Select Category —</option></select></div>
+        <div class="form-group2"><label>Category Slug</label><input type="text" id="pCatSlug" placeholder="rechargeable-fans"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group2"><label>Current Price (৳) *</label><input type="number" id="pNow" placeholder="1200" min="0"></div>
+        <div class="form-group2"><label>Old Price (৳)</label><input type="number" id="pOld" placeholder="1500" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group2"><label>Stock Qty</label><input type="number" id="pStock" placeholder="50" min="0"></div>
+        <div class="form-group2"><label>Featured?</label><select id="pFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
+      </div>
+      <div class="form-group2"><label>Description</label><textarea id="pDesc" placeholder="পণ্যের বিবরণ..."></textarea></div>
+      <div class="form-group2">
+        <label>Product Image</label>
+        <input type="file" id="pImgFile" accept="image/*">
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadBar"></div></div>
+        <span class="upload-hint">অথবা সরাসরি URL দিন:</span>
+        <input type="url" id="pImg" placeholder="https://..." style="margin-top:6px;">
+        <img id="pImgPreview" class="img-preview" alt="Preview">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="productModalCancel">বাতিল</button>
+      <button class="save-btn" id="productModalSave">সংরক্ষণ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ORDER DETAIL MODAL ==================== -->
+<div class="modal-overlay hidden" id="orderModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3 id="orderModalTitle">Order Details</h3>
+      <button class="modal-close" id="orderModalClose">✕</button>
+    </div>
+    <div class="modal-body" id="orderModalBody"></div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="orderModalCancel">বন্ধ করুন</button>
+      <button class="save-btn" id="orderModalSave">স্ট্যাটাস আপডেট</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CATEGORY MODAL ==================== -->
+<div class="modal-overlay hidden" id="catModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="catModalTitle">Add Category</h3>
+      <button class="modal-close" id="catModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="catEditId">
+      <div class="form-group2"><label>Category Name *</label><input type="text" id="catName" placeholder="Ceiling Fans"></div>
+      <div class="form-group2"><label>Slug *</label><input type="text" id="catSlug" placeholder="ceiling-fans"></div>
+      <div class="form-group2"><label>Image URL</label><input type="url" id="catImg" placeholder="https://..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="catModalCancel">বাতিল</button>
+      <button class="save-btn" id="catModalSave">সংরক্ষণ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CONFIRM DELETE MODAL ==================== -->
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal" style="width:380px;">
+    <div class="modal-head"><h3>নিশ্চিত করুন</h3><button class="modal-close" id="confirmClose">✕</button></div>
+    <div class="modal-body"><p id="confirmMsg" style="font-size:14px;line-height:1.6;color:var(--text-mid);"></p></div>
+    <div class="modal-footer">
+      <button class="cancel-btn" id="confirmCancel">বাতিল</button>
+      <button class="save-btn" style="background:var(--red);" id="confirmOk">মুছে ফেলুন</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const PROD_API = 'https://bscollectionbd.onrender.com/api';
+const LOCAL_API = 'http://localhost:5000/api';
+const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
+const API = isLocal ? LOCAL_API : PROD_API;
+
+/* ============================================================
+   AUTH STATE
+   ============================================================ */
+let _token = localStorage.getItem('bs_token') || '';
+let _username = localStorage.getItem('bs_user') || '';
+
+function authHeaders(){ return { 'Content-Type':'application/json', 'Authorization':'Bearer ' + _token }; }
+function isLoggedIn(){ return !!_token; }
+
+function saveSession(token, username){
+  _token = token; _username = username;
+  localStorage.setItem('bs_token', token);
+  localStorage.setItem('bs_user', username);
+}
+function clearSession(){
+  _token = ''; _username = '';
+  localStorage.removeItem('bs_token');
+  localStorage.removeItem('bs_user');
+}
+
+/* ============================================================
+   LOGIN SCREEN
+   ============================================================ */
+const loginScreen = document.getElementById('loginScreen');
+const loginUser = document.getElementById('loginUser');
+const loginPass = document.getElementById('loginPass');
+const loginBtn = document.getElementById('loginSubmitBtn');
+const loginError = document.getElementById('loginError');
+
+function showLoginScreen(){ loginScreen.classList.remove('hidden'); }
+function hideLoginScreen(){ loginScreen.classList.add('hidden'); }
+
+async function doLogin(){
+  const u = loginUser.value.trim();
+  const p = loginPass.value.trim();
+  if(!u || !p){ showError('ব্যবহারকারী নাম ও পাসওয়ার্ড দিন'); return; }
+  loginBtn.disabled = true; loginBtn.textContent = 'লোড হচ্ছে...';
+  loginError.classList.remove('show');
+  try{
+    const r = await fetch(API + '/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p}) });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'Login failed');
+    saveSession(d.token, d.username);
+    hideLoginScreen();
+    document.getElementById('profileName').textContent = d.username;
+    document.getElementById('profileAvatar').textContent = d.username.slice(0,2).toUpperCase();
+    initApp();
+  } catch(e){
+    showError(e.message);
+  } finally {
+    loginBtn.disabled = false; loginBtn.textContent = 'লগইন করুন';
+  }
+}
+function showError(msg){ loginError.textContent = msg; loginError.classList.add('show'); }
+
+loginBtn.addEventListener('click', doLogin);
+loginPass.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+loginUser.addEventListener('keydown', e => { if(e.key==='Enter') loginPass.focus(); });
+
+// Check existing session
+if(isLoggedIn()){
+  hideLoginScreen();
+  document.getElementById('profileName').textContent = _username;
+  document.getElementById('profileAvatar').textContent = (_username||'AD').slice(0,2).toUpperCase();
+} else {
+  showLoginScreen();
+}
+
+function doLogout(){
+  clearSession();
+  showLoginScreen();
+  loginUser.value=''; loginPass.value=''; loginError.classList.remove('show');
+}
+document.getElementById('logoutBtn').addEventListener('click', doLogout);
+document.getElementById('sidebarLogoutBtn').addEventListener('click', doLogout);
+
+/* ============================================================
+   API HELPERS
+   ============================================================ */
+async function apiFetch(path, opts={}){
+  const res = await fetch(API + path, {
+    ...opts,
+    headers:{ ...(opts.headers||{}), 'Authorization':'Bearer ' + _token }
+  });
+  if(res.status === 401){ doLogout(); return null; }
+  return res;
+}
+async function apiJSON(path, opts={}){
+  const r = await apiFetch(path, { ...opts, headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + _token } });
+  if(!r) return null;
+  return r.json();
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg, type='info'){
+  let container = document.getElementById('toastContainer');
+  if(!container){
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:88vw;';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  const bg = type==='error' ? '#F04438' : type==='success' ? '#12B76A' : '#151824';
+  toast.textContent = msg;
+  toast.style.cssText = `background:${bg};color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 10px 26px rgba(0,0,0,.25);opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;max-width:320px;`;
+  container.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity='1'; toast.style.transform='translateY(0)'; });
+  setTimeout(() => { toast.style.opacity='0'; toast.style.transform='translateY(8px)'; setTimeout(()=>toast.remove(),300); }, 3000);
+}
+
+/* ============================================================
+   PAGE NAVIGATION
+   ============================================================ */
+const navLinks = document.querySelectorAll('.nav a[data-page]');
+const pages = document.querySelectorAll('.page');
+const pageTitle = document.getElementById('pageTitle');
+
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    const target = link.getAttribute('data-page');
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
+    pageTitle.textContent = link.getAttribute('data-title');
+    closeMenu();
+    window.scrollTo({top:0,behavior:'instant'});
+    if(target === 'orders') loadOrders();
+    if(target === 'products') loadProducts();
+    if(target === 'categories') loadCategories();
+    if(target === 'customers') loadCustomers();
+    if(target === 'reports') loadStats();
+  });
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function initApp(){
+  loadStats();
+  renderRevenueChart(8);
+  renderBarChart(6);
+}
+if(isLoggedIn()) initApp();
+
+/* ============================================================
+   STATS
+   ============================================================ */
+async function loadStats(){
+  try{
+    const d = await apiJSON('/stats');
+    if(!d) return;
+    // Dashboard
+    document.getElementById('dashRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString('bn-BD');
+    document.getElementById('dashOrders').textContent = (d.totalOrders||0).toLocaleString();
+    document.getElementById('dashProducts').textContent = (d.totalProducts||0).toLocaleString();
+    const pPct = d.totalOrders ? Math.round((d.pendingOrders/d.totalOrders)*100) : 0;
+    document.getElementById('pendingPercent').textContent = pPct + '%';
+    document.getElementById('pendingCount').textContent = d.pendingOrders||0;
+    document.getElementById('completedCount').textContent = d.completedOrders||0;
+    document.getElementById('pendingNote').textContent = pPct > 30 ? '⚠️ অনেক Pending অর্ডার!' : '✅ Pending স্বাভাবিক';
+    // Stock bar
+    const total = (d.inStock||0)+(d.lowStock||0)+(d.outOfStock||0)||1;
+    document.getElementById('inStockCount').textContent = d.inStock||0;
+    document.getElementById('lowStockCount').textContent = d.lowStock||0;
+    document.getElementById('outStockCount').textContent = d.outOfStock||0;
+    document.getElementById('inStockBar').style.width = Math.round((d.inStock/total)*100)+'%';
+    document.getElementById('lowStockBar').style.width = Math.round((d.lowStock/total)*100)+'%';
+    document.getElementById('outStockBar').style.width = Math.round((d.outOfStock/total)*100)+'%';
+    // Orders page
+    document.getElementById('ordTotalVal').textContent = (d.totalOrders||0).toLocaleString();
+    document.getElementById('ordPendingVal').textContent = d.pendingOrders||0;
+    document.getElementById('ordCompletedVal').textContent = d.completedOrders||0;
+    document.getElementById('ordCancelledVal').textContent = d.cancelledOrders||0;
+    // Products page
+    document.getElementById('prodTotalVal').textContent = d.totalProducts||0;
+    document.getElementById('prodInStockVal').textContent = d.inStock||0;
+    document.getElementById('prodLowStockVal').textContent = d.lowStock||0;
+    document.getElementById('prodOutStockVal').textContent = d.outOfStock||0;
+    // Reports page
+    document.getElementById('rptRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString();
+    document.getElementById('rptOrders').textContent = d.totalOrders||0;
+    document.getElementById('rptProducts').textContent = d.totalProducts||0;
+    document.getElementById('rptCategories').textContent = d.totalCategories||0;
+  } catch(e){ console.warn('stats error', e); }
+}
+
+/* ============================================================
+   ORDERS
+   ============================================================ */
+let allOrders = [];
+let currentOrderFilter = '';
+let ordersPage = 1;
+const ORDERS_PER_PAGE = 15;
+
+async function loadOrders(filter){
+  if(filter !== undefined) currentOrderFilter = filter;
+  ordersPage = 1;
+  await fetchOrders();
+}
+
+async function fetchOrders(){
+  const tbody = document.getElementById('ordersTableBody');
+  tbody.innerHTML = '<tr><td colspan="8"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>';
+  try{
+    const qs = currentOrderFilter ? `?status=${currentOrderFilter}` : '';
+    const d = await apiJSON('/orders' + qs + (qs?'&':'?') + `limit=200`);
+    if(!d) return;
+    allOrders = d.orders || [];
+    renderOrdersTable();
+  } catch(e){
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:20px;">লোড করতে সমস্যা হয়েছে: ' + e.message + '</td></tr>';
+  }
+}
+
+const statusBadge = {
+  Pending:'gray', Processing:'orange', Shipped:'blue', Completed:'green', Cancelled:'red'
+};
+const avatarColors = ['#F97316','#2970FF','#7A5AF8','#12B76A','#F04438','#0EA5E9'];
+
+function renderOrdersTable(){
+  const tbody = document.getElementById('ordersTableBody');
+  if(!allOrders.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-soft);">কোনো অর্ডার নেই</td></tr>'; return; }
+  const start = (ordersPage-1)*ORDERS_PER_PAGE;
+  const slice = allOrders.slice(start, start+ORDERS_PER_PAGE);
+  tbody.innerHTML = slice.map(o => {
+    const initials = (o.customer?.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const color = avatarColors[Math.abs(hashStr(o.customer?.name||''))%avatarColors.length];
+    const date = new Date(o.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    const badge = statusBadge[o.status]||'gray';
+    const itemSummary = (o.items||[]).slice(0,1).map(i=>i.name||'item').join(', ') + (o.items?.length>1?' + '+(o.items.length-1)+' more':'');
+    return `<tr>
+      <td class="cell-main">${o.orderId||o._id?.slice(-6)}</td>
+      <td><div class="row-flex"><div class="avatar" style="background:${color};font-size:11px;">${initials}</div><div><div class="cell-main">${esc(o.customer?.name)}</div><div class="cell-sub">${esc(o.customer?.phone)}</div></div></div></td>
+      <td>${esc(itemSummary)}<div class="cell-sub">Qty: ${(o.items||[]).reduce((s,i)=>s+(i.qty||1),0)}</div></td>
+      <td>${date}</td>
+      <td class="cell-main">৳${(o.total||0).toLocaleString()}</td>
+      <td>${esc(o.paymentMethod||'COD')}</td>
+      <td><span class="badge ${badge}">${o.status}</span></td>
+      <td><button class="act-btn" onclick="openOrderModal('${o._id}')">Details</button></td>
+    </tr>`;
+  }).join('');
+  // Pagination
+  const total = allOrders.length;
+  const pages = Math.ceil(total/ORDERS_PER_PAGE);
+  document.getElementById('ordersInfo').textContent = `Showing ${start+1}–${Math.min(start+ORDERS_PER_PAGE,total)} of ${total}`;
+  document.getElementById('ordersPagination').style.display = pages>1 ? 'flex' : 'none';
+  if(pages>1){
+    let btns = `<button ${ordersPage===1?'disabled':''} onclick="changeOrderPage(${ordersPage-1})">‹</button>`;
+    for(let i=1;i<=pages;i++) btns += `<button class="${i===ordersPage?'active':''}" onclick="changeOrderPage(${i})">${i}</button>`;
+    btns += `<button ${ordersPage===pages?'disabled':''} onclick="changeOrderPage(${ordersPage+1})">›</button>`;
+    document.getElementById('ordersPagBtns').innerHTML = btns;
+  }
+}
+function changeOrderPage(p){ ordersPage=p; renderOrdersTable(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// Order filter chips
+document.querySelectorAll('#orderChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#orderChips .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    loadOrders(chip.dataset.status);
+  });
+});
+document.getElementById('refreshOrdersBtn').addEventListener('click', ()=>{ loadStats(); loadOrders(); });
+
+/* Order Modal */
+let currentOrderId = null;
+function openOrderModal(id){
+  const o = allOrders.find(x=>x._id===id);
+  if(!o) return;
+  currentOrderId = id;
+  document.getElementById('orderModalTitle').textContent = 'Order: ' + (o.orderId||id.slice(-6));
+  document.getElementById('orderModalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+      <div><div class="cell-sub">Customer</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.name)}</div></div>
+      <div><div class="cell-sub">Phone</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.phone)}</div></div>
+      <div style="grid-column:1/-1"><div class="cell-sub">Address</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.address)}</div></div>
+      ${o.customer?.email ? `<div><div class="cell-sub">Email</div><div style="margin-top:3px;">${esc(o.customer.email)}</div></div>` : ''}
+      ${o.note ? `<div style="grid-column:1/-1"><div class="cell-sub">Note</div><div style="margin-top:3px;">${esc(o.note)}</div></div>` : ''}
+    </div>
+    <div style="margin-bottom:18px;">
+      ${(o.items||[]).map(item=>`<div class="order-item-row">
+        <div class="order-img">${item.img ? `<img src="${item.img}" style="width:50px;height:50px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>`}</div>
+        <div style="flex:1"><div class="order-item-name">${esc(item.name||'Product')}</div><div class="order-item-meta">SKU: ${item.sku||'—'} · Qty: ${item.qty||1}</div></div>
+        <div class="cell-main">৳${((item.price||0)*(item.qty||1)).toLocaleString()}</div>
+      </div>`).join('')}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:6px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Subtotal</span><span>৳${(o.subtotal||o.total||0).toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Delivery</span><span>৳${(o.deliveryCharge||60).toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;"><span>Total</span><span>৳${(o.total||0).toLocaleString()}</span></div>
+    </div>
+    <div style="margin-top:18px;">
+      <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">Status পরিবর্তন করুন</label>
+      <select class="status-select" id="orderStatusSelect">
+        ${['Pending','Processing','Shipped','Completed','Cancelled'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>`;
+  document.getElementById('orderModal').classList.remove('hidden');
+}
+document.getElementById('orderModalClose').addEventListener('click', ()=>document.getElementById('orderModal').classList.add('hidden'));
+document.getElementById('orderModalCancel').addEventListener('click', ()=>document.getElementById('orderModal').classList.add('hidden'));
+document.getElementById('orderModalSave').addEventListener('click', async ()=>{
+  const status = document.getElementById('orderStatusSelect').value;
+  const btn = document.getElementById('orderModalSave');
+  btn.disabled=true; btn.textContent='আপডেট হচ্ছে...';
+  try{
+    const r = await apiFetch('/orders/'+currentOrderId, { method:'PATCH', headers:{...authHeaders()}, body:JSON.stringify({status}) });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    const idx = allOrders.findIndex(o=>o._id===currentOrderId);
+    if(idx>-1) allOrders[idx].status = status;
+    renderOrdersTable();
+    document.getElementById('orderModal').classList.add('hidden');
+    showToast('অর্ডার স্ট্যাটাস আপডেট হয়েছে','success');
+    loadStats();
+  } catch(e){ showToast('সমস্যা হয়েছে: '+e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='স্ট্যাটাস আপডেট'; }
+});
+
+/* ============================================================
+   PRODUCTS
+   ============================================================ */
+let allProducts = [];
+let productCurrentCat = '';
+let productSortMode = 'newest';
+
+async function loadProducts(){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '<div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div>লোড হচ্ছে...</div>';
+  try{
+    const data = await apiJSON('/products');
+    if(!data) return;
+    allProducts = Array.isArray(data) ? data : [];
+    buildProductCatChips();
+    renderProductGrid();
+    loadStats();
+  } catch(e){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--red);padding:20px;">লোড সমস্যা: '+e.message+'</div>';
+  }
+}
+document.getElementById('refreshProductsBtn').addEventListener('click', loadProducts);
+
+function buildProductCatChips(){
+  const chips = document.getElementById('productCatChips');
+  const slugs = [...new Set(allProducts.map(p=>p.categorySlug).filter(Boolean))];
+  chips.innerHTML = `<span class="chip active" data-cat="">All Categories</span>` +
+    slugs.map(s=>`<span class="chip" data-cat="${s}">${s}</span>`).join('');
+  chips.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      chips.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      productCurrentCat = c.dataset.cat;
+      renderProductGrid();
+    });
+  });
+}
+
+function renderProductGrid(){
+  const grid = document.getElementById('productGrid');
+  let products = productCurrentCat ? allProducts.filter(p=>p.categorySlug===productCurrentCat) : [...allProducts];
+  if(productSortMode==='price-low') products.sort((a,b)=>a.now-b.now);
+  else if(productSortMode==='price-high') products.sort((a,b)=>b.now-a.now);
+  else if(productSortMode==='name') products.sort((a,b)=>a.name.localeCompare(b.name));
+  else products.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('productsInfo').textContent = products.length + ' products';
+  if(!products.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text-soft);padding:30px;">কোনো প্রোডাক্ট নেই</div>'; return; }
+  const icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>`;
+  grid.innerHTML = products.map(p => {
+    const stockClass = p.stock > 5 ? 'in' : p.stock > 0 ? 'low' : 'out';
+    const stockLabel = p.stock > 5 ? `In Stock · ${p.stock}` : p.stock > 0 ? `Low Stock · ${p.stock}` : 'Out of Stock';
+    const thumbContent = p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.parentNode.innerHTML='${icon}'">` : icon;
+    return `<div class="card product-card" data-cat="${p.categorySlug||''}">
+      <div class="product-thumb">${thumbContent}</div>
+      <div class="product-cat">${esc(p.cat||p.categorySlug||'—')}</div>
+      <div class="product-name">${esc(p.name)}</div>
+      <div class="product-bottom">
+        <span class="product-price">৳${(p.now||0).toLocaleString()}</span>
+        <span class="stock-dot ${stockClass}">${stockLabel}</span>
+      </div>
+      <div class="product-actions">
+        <button class="act-btn" onclick="openEditProduct('${p._id}')">✏️ Edit</button>
+        <button class="act-btn danger" onclick="confirmDeleteProduct('${p._id}', '${esc(p.name).replace(/'/g,"\\'")}')">🗑️ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Sort dropdown
+setupDropdown('productSortBtn','productSortMenu');
+document.querySelectorAll('#productSortMenu .dd-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelector('#productSortBtn .btn-label').textContent = 'Sort: ' + item.textContent;
+    productSortMode = item.dataset.value;
+    renderProductGrid();
+    document.getElementById('productSortMenu').classList.remove('open');
+  });
+});
+
+/* Add / Edit Product Modal */
+let allCatsForModal = [];
+
+document.getElementById('addProductBtn').addEventListener('click', ()=>openProductModal());
+
+function openProductModal(id){
+  const modal = document.getElementById('productModal');
+  const isEdit = !!id;
+  document.getElementById('productModalTitle').textContent = isEdit ? 'Edit Product' : 'Add Product';
+  document.getElementById('pEditId').value = id || '';
+  if(!isEdit){
+    ['pName','pSku','pDesc','pImg'].forEach(f=>document.getElementById(f).value='');
+    ['pNow','pOld','pStock'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('pFeatured').value='false';
+    document.getElementById('pCat').value='';
+    document.getElementById('pCatSlug').value='';
+    document.getElementById('pImgPreview').classList.remove('show');
+    document.getElementById('pImgFile').value='';
+  } else {
+    const p = allProducts.find(x=>x._id===id);
+    if(p){
+      document.getElementById('pName').value = p.name||'';
+      document.getElementById('pSku').value = p.sku||'';
+      document.getElementById('pNow').value = p.now||'';
+      document.getElementById('pOld').value = p.old||'';
+      document.getElementById('pStock').value = p.stock||'';
+      document.getElementById('pDesc').value = p.description||'';
+      document.getElementById('pImg').value = p.img||'';
+      document.getElementById('pFeatured').value = p.featured?'true':'false';
+      document.getElementById('pCatSlug').value = p.categorySlug||'';
+      if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').classList.add('show'); }
+      else document.getElementById('pImgPreview').classList.remove('show');
+    }
+  }
+  // Populate category select
+  populateCatSelect();
+  modal.classList.remove('hidden');
+}
+function openEditProduct(id){ openProductModal(id); }
+
+async function populateCatSelect(){
+  try{
+    const cats = await apiJSON('/categories');
+    allCatsForModal = Array.isArray(cats) ? cats : [];
+    const sel = document.getElementById('pCat');
+    const cur = document.getElementById('pCatSlug').value;
+    sel.innerHTML = '<option value="">— Select —</option>' +
+      allCatsForModal.map(c=>`<option value="${c.slug}" ${c.slug===cur?'selected':''}>${c.name}</option>`).join('');
+    sel.addEventListener('change', ()=>{
+      document.getElementById('pCatSlug').value = sel.value;
+    });
+  } catch(e){}
+}
+
+// Image file upload
+document.getElementById('pImgFile').addEventListener('change', async function(){
+  const file = this.files[0];
+  if(!file) return;
+  const progress = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadBar');
+  progress.classList.add('show'); bar.style.width='30%';
+  try{
+    const fd = new FormData(); fd.append('image', file);
+    const r = await apiFetch('/products/upload', { method:'POST', body:fd });
+    bar.style.width='100%';
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    document.getElementById('pImg').value = d.url;
+    document.getElementById('pImgPreview').src = d.url;
+    document.getElementById('pImgPreview').classList.add('show');
+    showToast('ছবি আপলোড হয়েছে','success');
+  } catch(e){ showToast('ছবি আপলোড ব্যর্থ: '+e.message,'error'); }
+  finally{ setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
+});
+document.getElementById('pImg').addEventListener('input', function(){
+  if(this.value){ document.getElementById('pImgPreview').src=this.value; document.getElementById('pImgPreview').classList.add('show'); }
+  else document.getElementById('pImgPreview').classList.remove('show');
+});
+
+document.getElementById('productModalClose').addEventListener('click', ()=>document.getElementById('productModal').classList.add('hidden'));
+document.getElementById('productModalCancel').addEventListener('click', ()=>document.getElementById('productModal').classList.add('hidden'));
+document.getElementById('productModalSave').addEventListener('click', async ()=>{
+  const name = document.getElementById('pName').value.trim();
+  const now = parseFloat(document.getElementById('pNow').value);
+  if(!name || !now){ showToast('নাম ও দাম দিন','error'); return; }
+  const btn = document.getElementById('productModalSave');
+  btn.disabled=true; btn.textContent='সংরক্ষণ হচ্ছে...';
+  const body = {
+    name, sku:document.getElementById('pSku').value.trim()||undefined,
+    now, old:parseFloat(document.getElementById('pOld').value)||undefined,
+    stock:parseInt(document.getElementById('pStock').value)||0,
+    description:document.getElementById('pDesc').value.trim()||undefined,
+    img:document.getElementById('pImg').value.trim()||undefined,
+    featured:document.getElementById('pFeatured').value==='true',
+    cat:document.getElementById('pCat').options[document.getElementById('pCat').selectedIndex]?.text || undefined,
+    categorySlug:document.getElementById('pCatSlug').value.trim()||undefined,
+  };
+  const editId = document.getElementById('pEditId').value;
+  try{
+    const r = await apiFetch(editId ? '/products/id/'+editId : '/products', {
+      method:editId?'PUT':'POST', headers:authHeaders(), body:JSON.stringify(body)
+    });
+    const d = await r.json();
+    if(!r||!r.ok) throw new Error(d?.error||'error');
+    document.getElementById('productModal').classList.add('hidden');
+    showToast(editId ? 'প্রোডাক্ট আপডেট হয়েছে' : 'নতুন প্রোডাক্ট যোগ হয়েছে','success');
+    loadProducts();
+  } catch(e){ showToast('সমস্যা: '+e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='সংরক্ষণ করুন'; }
+});
+
+/* Delete Product */
+let deleteProductId = null;
+function confirmDeleteProduct(id, name){
+  deleteProductId = id;
+  document.getElementById('confirmMsg').textContent = `"${name}" প্রোডাক্টটি মুছে ফেলতে চান? এই কাজটি ফেরানো যাবে না।`;
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+document.getElementById('confirmClose').addEventListener('click',()=>document.getElementById('confirmModal').classList.add('hidden'));
+document.getElementById('confirmCancel').addEventListener('click',()=>document.getElementById('confirmModal').classList.add('hidden'));
+document.getElementById('confirmOk').addEventListener('click', async ()=>{
+  if(!deleteProductId) return;
+  const btn = document.getElementById('confirmOk');
+  btn.disabled=true; btn.textContent='মুছছে...';
+  try{
+    const r = await apiFetch('/products/id/'+deleteProductId, { method:'DELETE', headers:authHeaders() });
+    if(!r||!r.ok) throw new Error('delete failed');
+    document.getElementById('confirmModal').classList.add('hidden');
+    showToast('প্রোডাক্ট মুছে ফেলা হয়েছে','success');
+    loadProducts();
+  } catch(e){ showToast('মুছতে সমস্যা: '+e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='মুছে ফেলুন'; }
+});
+
+/* ============================================================
+   CATEGORIES
+   ============================================================ */
+let allCategories = [];
+async function loadCategories(){
+  const tbody = document.getElementById('categoriesTableBody');
+  tbody.innerHTML = '<tr><td colspan="5"><div class="loading-row"><div class="spinner"></div></div></td></tr>';
+  try{
+    const cats = await apiJSON('/categories');
+    if(!cats) return;
+    allCategories = Array.isArray(cats) ? cats : [];
+    renderCategoriesTable();
+  } catch(e){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--red);padding:20px;">'+e.message+'</td></tr>';
+  }
+}
+
+function renderCategoriesTable(){
+  const tbody = document.getElementById('categoriesTableBody');
+  if(!allCategories.length){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-soft);">কোনো ক্যাটাগরি নেই</td></tr>'; return; }
+  tbody.innerHTML = allCategories.map(c=>`<tr>
+    <td><div class="cat-img-cell">${c.img?`<img src="${c.img}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'">`:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;"><path d="M4 6h16M4 10h16M4 14h16"/></svg>'}</div></td>
+    <td class="cell-main">${esc(c.name)}</td>
+    <td><code style="font-size:12px;background:var(--bg);padding:3px 7px;border-radius:5px;">${esc(c.slug)}</code></td>
+    <td>${c.count||0}</td>
+    <td><div style="display:flex;gap:6px;">
+      <button class="act-btn" onclick="openEditCat('${c._id}')">✏️ Edit</button>
+      <button class="act-btn danger" onclick="confirmDeleteCat('${c._id}','${esc(c.name).replace(/'/g,"\\'")}')">🗑️ Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+document.getElementById('addCatBtn').addEventListener('click',()=>openCatModal());
+function openCatModal(id){
+  const isEdit=!!id;
+  document.getElementById('catModalTitle').textContent=isEdit?'Edit Category':'Add Category';
+  document.getElementById('catEditId').value=id||'';
+  if(!isEdit){ ['catName','catSlug','catImg'].forEach(f=>document.getElementById(f).value=''); }
+  else{
+    const c=allCategories.find(x=>x._id===id);
+    if(c){ document.getElementById('catName').value=c.name||''; document.getElementById('catSlug').value=c.slug||''; document.getElementById('catImg').value=c.img||''; }
+  }
+  document.getElementById('catModal').classList.remove('hidden');
+}
+function openEditCat(id){ openCatModal(id); }
+document.getElementById('catModalClose').addEventListener('click',()=>document.getElementById('catModal').classList.add('hidden'));
+document.getElementById('catModalCancel').addEventListener('click',()=>document.getElementById('catModal').classList.add('hidden'));
+document.getElementById('catName').addEventListener('input',function(){
+  if(!document.getElementById('catEditId').value) document.getElementById('catSlug').value=this.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+});
+document.getElementById('catModalSave').addEventListener('click', async ()=>{
+  const name=document.getElementById('catName').value.trim();
+  const slug=document.getElementById('catSlug').value.trim();
+  if(!name||!slug){ showToast('নাম ও Slug দিন','error'); return; }
+  const btn=document.getElementById('catModalSave');
+  btn.disabled=true; btn.textContent='সংরক্ষণ হচ্ছে...';
+  const body={ name, slug, img:document.getElementById('catImg').value.trim()||undefined };
+  const editId=document.getElementById('catEditId').value;
+  try{
+    const r=await apiFetch(editId?'/categories/'+editId:'/categories',{ method:editId?'PUT':'POST', headers:authHeaders(), body:JSON.stringify(body) });
+    const d=await r.json();
+    if(!r||!r.ok) throw new Error(d?.error||'error');
+    document.getElementById('catModal').classList.add('hidden');
+    showToast(editId?'ক্যাটাগরি আপডেট':'ক্যাটাগরি যোগ হয়েছে','success');
+    loadCategories();
+  } catch(e){ showToast('সমস্যা: '+e.message,'error'); }
+  finally{ btn.disabled=false; btn.textContent='সংরক্ষণ করুন'; }
+});
+
+let deleteCatId=null;
+function confirmDeleteCat(id,name){
+  deleteCatId=id;
+  document.getElementById('confirmMsg').textContent=`"${name}" ক্যাটাগরিটি মুছে ফেলতে চান?`;
+  document.getElementById('confirmOk').onclick=async ()=>{
+    const btn=document.getElementById('confirmOk');
+    btn.disabled=true; btn.textContent='মুছছে...';
+    try{
+      const r=await apiFetch('/categories/'+deleteCatId,{method:'DELETE',headers:authHeaders()});
+      if(!r||!r.ok) throw new Error('failed');
+      document.getElementById('confirmModal').classList.add('hidden');
+      showToast('ক্যাটাগরি মুছে ফেলা হয়েছে','success');
+      loadCategories();
+    } catch(e){ showToast('সমস্যা: '+e.message,'error'); }
+    finally{ btn.disabled=false; btn.textContent='মুছে ফেলুন'; }
+  };
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+/* ============================================================
+   CUSTOMERS (derived from orders)
+   ============================================================ */
+async function loadCustomers(){
+  const tbody=document.getElementById('customersTableBody');
+  tbody.innerHTML='<tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>';
+  try{
+    const d=await apiJSON('/orders?limit=500');
+    if(!d) return;
+    const map={};
+    (d.orders||[]).forEach(o=>{
+      const phone=o.customer?.phone||'unknown';
+      if(!map[phone]) map[phone]={ name:o.customer?.name||'—', phone, address:o.customer?.address||'—', orders:0, spent:0, last:o.createdAt };
+      map[phone].orders++;
+      map[phone].spent += o.total||0;
+      if(new Date(o.createdAt)>new Date(map[phone].last)) map[phone].last=o.createdAt;
+    });
+    const customers=Object.values(map).sort((a,b)=>new Date(b.last)-new Date(a.last));
+    if(!customers.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-soft);">কোনো কাস্টমার নেই</td></tr>'; return; }
+    const colors=['#F97316','#2970FF','#7A5AF8','#12B76A','#F04438','#0EA5E9'];
+    tbody.innerHTML=customers.map(c=>{
+      const init=(c.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const color=colors[Math.abs(hashStr(c.name))%colors.length];
+      const date=new Date(c.last).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      return `<tr>
+        <td><div class="row-flex"><div class="avatar" style="background:${color};font-size:11px;">${init}</div><div class="cell-main">${esc(c.name)}</div></div></td>
+        <td>${esc(c.phone)}</td>
+        <td style="font-size:12px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c.address)}</td>
+        <td>${c.orders}</td>
+        <td class="cell-main">৳${c.spent.toLocaleString()}</td>
+        <td>${date}</td>
+      </tr>`;
+    }).join('');
+  } catch(e){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--red);padding:20px;">'+e.message+'</td></tr>'; }
+}
+
+/* ============================================================
+   EXPORT CSV
+   ============================================================ */
+function exportOrdersCSV(){
+  if(!allOrders.length){ showToast('প্রথমে Orders পেজে যান','error'); return; }
+  const rows=[['Order ID','Customer','Phone','Address','Items','Total','Status','Date'],...allOrders.map(o=>[
+    o.orderId||o._id, o.customer?.name||'', o.customer?.phone||'', o.customer?.address||'',
+    (o.items||[]).map(i=>`${i.name}(${i.qty||1})`).join('; '),
+    o.total||0, o.status, new Date(o.createdAt).toLocaleDateString()
+  ])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='orders.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV ডাউনলোড শুরু হয়েছে','success');
+}
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+function buildRevenueSeries(n){
+  const end=new Date(2026,6,20);
+  const labels=[],revenue=[],order=[];
+  for(let i=n-1;i>=0;i--){
+    const d=new Date(end); d.setDate(d.getDate()-i);
+    labels.push(d.getDate()+' '+d.toLocaleString('en-US',{month:'short'}));
+    const idx=n-1-i;
+    const spike=(idx===Math.round(n*0.55))?3600:0;
+    revenue.push(Math.round(9200+Math.sin(idx/2.3)*2100+Math.sin(idx/5+1)*1400+spike));
+    order.push(Math.round(Math.max(2200,5200+Math.sin(idx/1.8+2)*1600)));
+  }
+  return {labels,revenue,order};
+}
+function renderRevenueChart(days){
+  const {labels,revenue,order}=buildRevenueSeries(days);
+  const svg=document.getElementById('revenueChart');
+  const w=720,h=260,padL=30,padR=10,padT=10,padB=30;
+  const maxVal=Math.max(...revenue,...order);
+  const maxY=Math.ceil(maxVal/4000)*4000+2000;
+  const stepX=(w-padL-padR)/(labels.length-1);
+  const yScale=v=>padT+(1-v/maxY)*(h-padT-padB);
+  function pathFor(data){
+    let d=''; const pts=data.map((v,i)=>[padL+i*stepX,yScale(v)]);
+    d+=`M ${pts[0][0]} ${pts[0][1]} `;
+    for(let i=0;i<pts.length-1;i++){const [x0,y0]=pts[i],[x1,y1]=pts[i+1];const cx=(x0+x1)/2;d+=`C ${cx} ${y0}, ${cx} ${y1}, ${x1} ${y1} `;}
+    return d;
+  }
+  let s='';
+  [0,maxY/4,maxY/2,maxY*3/4,maxY].forEach(v=>{const y=yScale(v);s+=`<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#EFEFF1" stroke-width="1"/>`;s+=`<text x="0" y="${y+4}" font-size="11" fill="#B3B5BE" font-family="Inter">${Math.round(v/1000)}K</text>`;});
+  const labelStep=labels.length>10?Math.ceil(labels.length/8):1;
+  labels.forEach((d,i)=>{if(i%labelStep!==0&&i!==labels.length-1)return;s+=`<text x="${padL+i*stepX}" y="${h-8}" font-size="11" fill="#B3B5BE" font-family="Inter" text-anchor="middle">${d}</text>`;});
+  const hiIdx=revenue.indexOf(Math.max(...revenue));
+  const hiX=padL+hiIdx*stepX;
+  s+=`<rect x="${hiX-stepX/2}" y="${padT}" width="${stepX}" height="${h-padT-padB}" fill="#FFF1E4"/>`;
+  s+=`<path d="${pathFor(order)}" fill="none" stroke="#FBCFA0" stroke-width="2.5" stroke-dasharray="5 5"/>`;
+  s+=`<path d="${pathFor(revenue)}" fill="none" stroke="#F97316" stroke-width="3"/>`;
+  s+=`<circle cx="${hiX}" cy="${yScale(revenue[hiIdx])}" r="5" fill="#fff" stroke="#F97316" stroke-width="3"/>`;
+  svg.innerHTML=s;
+  const tt=document.getElementById('chartTooltip');
+  tt.querySelector('.tt-value').textContent='৳'+revenue[hiIdx].toLocaleString('en-US');
+  tt.style.left=(hiX/w)*100+'%'; tt.style.top=(yScale(revenue[hiIdx])/h)*100-3+'%';
+}
+function renderBarChart(n){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const em=6,ey=2026; const monthArr=[],rev=[],exp=[];
+  for(let i=n-1;i>=0;i--){let m=em-i,y=ey; while(m<0){m+=12;y--;} monthArr.push(months[m]); const idx=n-1-i; const r=Math.round(560+idx*13+Math.sin(idx/2)*35); rev.push(r); exp.push(Math.round(r*0.42+Math.sin(idx/3+1)*12));}
+  const svg=document.getElementById('barChart'); const w=900,h=260,padL=34,padR=10,padT=10,padB=30;
+  const maxY=Math.ceil(Math.max(...rev)/250)*250+250;
+  const gW=(w-padL-padR)/monthArr.length; const bW=Math.min(22,gW/2-6);
+  const yS=v=>padT+(1-v/maxY)*(h-padT-padB);
+  let s='';
+  [0,maxY/4,maxY/2,maxY*3/4,maxY].forEach(v=>{const y=yS(v);s+=`<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#EFEFF1" stroke-width="1"/>`;s+=`<text x="0" y="${y+4}" font-size="11" fill="#B3B5BE" font-family="Inter">${Math.round(v)}K</text>`;});
+  monthArr.forEach((m,i)=>{const cx=padL+gW*i+gW/2; const rH=(h-padT-padB)-(yS(rev[i])-padT); const eH=(h-padT-padB)-(yS(exp[i])-padT);
+  s+=`<rect x="${cx-bW-4}" y="${yS(rev[i])}" width="${bW}" height="${rH}" rx="5" fill="#F97316"/>`;
+  s+=`<rect x="${cx+4}" y="${yS(exp[i])}" width="${bW}" height="${eH}" rx="5" fill="#2970FF"/>`;
+  s+=`<text x="${cx}" y="${h-8}" font-size="11" fill="#B3B5BE" font-family="Inter" text-anchor="middle">${m}</text>`;});
+  svg.innerHTML=s;
+}
+setupDropdown('revenuePeriodBtn','revenuePeriodMenu');
+document.querySelectorAll('#revenuePeriodMenu .dd-item').forEach(item=>{item.addEventListener('click',()=>{document.querySelector('#revenuePeriodBtn .btn-label').textContent=item.textContent;renderRevenueChart(Number(item.dataset.value));document.getElementById('revenuePeriodMenu').classList.remove('open');});});
+setupDropdown('reportsPeriodBtn','reportsPeriodMenu');
+document.querySelectorAll('#reportsPeriodMenu .dd-item').forEach(item=>{item.addEventListener('click',()=>{document.querySelector('#reportsPeriodBtn .btn-label').textContent=item.textContent;renderBarChart(Number(item.dataset.value));document.getElementById('reportsPeriodMenu').classList.remove('open');});});
+
+/* Conversion rate */
+const convPresets={week:{views:25000,cart:12000,checkout:8500,completed:6200,abandoned:3000,badges:{views:'+9%',cart:'+6%',checkout:'+4%',completed:'+7%',abandoned:'-5%'}},month:{views:104000,cart:49500,checkout:34200,completed:24800,abandoned:11600,badges:{views:'+14%',cart:'+11%',checkout:'+8%',completed:'+9%',abandoned:'-3%'}},quarter:{views:298000,cart:141000,checkout:97500,completed:70200,abandoned:35400,badges:{views:'+22%',cart:'+18%',checkout:'+15%',completed:'+12%',abandoned:'-1%'}}};
+function renderConvPeriod(period){const preset=convPresets[period];const max=preset.views;Object.keys(preset.badges).forEach(key=>{document.querySelector(`[data-metric="${key}"]`).textContent=preset[key].toLocaleString('en-US');const b=document.querySelector(`[data-badge="${key}"]`);b.textContent=preset.badges[key];b.classList.toggle('down',preset.badges[key].startsWith('-'));document.querySelector(`[data-bar="${key}"]`).style.height=Math.max(8,Math.round(preset[key]/max*100))+'%';});}
+setupDropdown('convPeriodBtn','convPeriodMenu');
+document.querySelectorAll('#convPeriodMenu .dd-item').forEach(item=>{item.addEventListener('click',()=>{document.querySelector('#convPeriodBtn .btn-label').textContent=item.textContent;renderConvPeriod(item.dataset.value);document.getElementById('convPeriodMenu').classList.remove('open');});});
+
+/* ============================================================
+   GLOBAL SEARCH
+   ============================================================ */
+document.getElementById('globalSearch').addEventListener('input', function(){
+  const term=this.value.trim().toLowerCase();
+  const activePage=document.querySelector('.page.active');
+  if(!activePage) return;
+  activePage.querySelectorAll('table.data-table tbody tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(term)?'':'none';});
+  activePage.querySelectorAll('.product-grid .product-card').forEach(pc=>{pc.style.display=pc.textContent.toLowerCase().includes(term)?'':'none';});
+});
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+const themeToggle=document.getElementById('themeToggle');
+const themeIcon=document.getElementById('themeIcon');
+const moonIcon='<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+const sunIcon='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+themeToggle.addEventListener('click',()=>{const isDark=document.body.getAttribute('data-theme')==='dark';if(isDark){document.body.removeAttribute('data-theme');themeIcon.innerHTML=moonIcon;}else{document.body.setAttribute('data-theme','dark');themeIcon.innerHTML=sunIcon;}});
+
+/* ============================================================
+   DROPDOWNS & NOTIFICATIONS
+   ============================================================ */
+function setupDropdown(btnId,menuId){
+  const btn=document.getElementById(btnId); const menu=document.getElementById(menuId);
+  if(!btn||!menu) return;
+  btn.addEventListener('click',e=>{e.stopPropagation();document.querySelectorAll('.dropdown-menu.open').forEach(m=>{if(m!==menu)m.classList.remove('open');});menu.classList.toggle('open');});
+}
+setupDropdown('notifBtn','notifMenu');
+setupDropdown('profileBtn','profileMenu');
+document.addEventListener('click',()=>document.querySelectorAll('.dropdown-menu.open').forEach(m=>m.classList.remove('open')));
+document.getElementById('markAllRead').addEventListener('click',e=>{e.preventDefault();document.querySelector('#notifBtn .dot')?.remove();document.getElementById('notifMenu').classList.remove('open');showToast('সব নোটিফিকেশন পড়া হয়েছে');});
+
+/* ============================================================
+   STICKY TOPBAR
+   ============================================================ */
+window.addEventListener('scroll',()=>{document.getElementById('topbar').classList.toggle('scrolled',window.scrollY>4);});
+
+/* ============================================================
+   MOBILE SIDEBAR
+   ============================================================ */
+const sidebar=document.getElementById('sidebar');
+const overlayEl=document.getElementById('overlay');
+const hamburgerBtn=document.getElementById('hamburgerBtn');
+function openMenu(){sidebar.classList.add('open');overlayEl.classList.add('show');}
+function closeMenu(){sidebar.classList.remove('open');overlayEl.classList.remove('show');}
+hamburgerBtn.addEventListener('click',openMenu);
+overlayEl.addEventListener('click',closeMenu);
+window.addEventListener('resize',()=>{if(window.innerWidth>1080)closeMenu();});
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function esc(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charCodeAt(i)|0;return Math.abs(h);}
+</script>
+</body>
+</html>
