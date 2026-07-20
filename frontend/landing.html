@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">লোড হচ্ছে... — BS Collection BD</title>
+<meta id="metaDesc" name="description" content="BS Collection BD — বাংলাদেশের সেরা মানের পণ্য সমূহ">
+<link rel="icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --navy:#14213D;
+  --orange:#FCA311;
+  --orange-light:#FCD79E;
+  --orange-bg:#FFF7ED;
+  --gray:#F8FAFC;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --text-mid:#475569;
+  --text-soft:#94A3B8;
+  --red:#EF4444;
+  --green:#22C55E;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Bengali','Hind Siliguri',sans-serif;background:#fff;color:var(--text);line-height:1.6}
+
+/* Header */
+.site-header{background:var(--navy);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo-wrap{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-wrap img{height:42px;width:auto;object-fit:contain}
+.logo-text{color:#fff;font-weight:700;font-size:17px;line-height:1.2}
+.logo-text span{color:var(--orange)}
+.header-actions{display:flex;align-items:center;gap:12px}
+.btn-cart{background:var(--orange);color:var(--navy);border:none;padding:9px 18px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:6px}
+.btn-cart:hover{background:#e8940e}
+
+/* Hero Section */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1e3566 100%);padding:60px 20px;min-height:480px;display:flex;align-items:center}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(252,163,17,.2);color:var(--orange);border:1px solid rgba(252,163,17,.3);padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;margin-bottom:18px;text-transform:uppercase;letter-spacing:.04em}
+.hero h1{font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff;line-height:1.2;margin-bottom:16px}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.78);margin-bottom:28px;line-height:1.7}
+.price-row{display:flex;align-items:center;gap:14px;margin-bottom:32px;flex-wrap:wrap}
+.price-now{font-size:38px;font-weight:800;color:var(--orange)}
+.price-old{font-size:20px;color:rgba(255,255,255,.45);text-decoration:line-through}
+.price-save{background:var(--orange);color:var(--navy);font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{background:var(--orange);color:var(--navy);border:none;padding:14px 30px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;border-radius:6px;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn-primary:hover{background:#e8940e;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4);padding:13px 24px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border-radius:6px;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn-outline:hover{border-color:var(--orange);color:var(--orange)}
+.hero-img-wrap{display:flex;justify-content:center;align-items:center}
+.hero-img-wrap img{max-width:100%;max-height:380px;object-fit:contain;border-radius:12px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.3))}
+.hero-img-placeholder{width:100%;height:340px;background:rgba(255,255,255,.08);border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:14px}
+
+/* Features Section */
+.section{padding:60px 20px}
+.section.alt{background:var(--gray)}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-label{display:inline-block;background:var(--orange-bg);color:#92400e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.section-title{font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--navy);margin-bottom:8px}
+.section-sub{color:var(--text-mid);font-size:14px;margin-bottom:40px;max-width:600px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+.feature-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:22px;display:flex;align-items:flex-start;gap:14px;transition:box-shadow .2s}
+.feature-card:hover{box-shadow:0 6px 24px rgba(20,33,61,.08)}
+.feature-icon{width:40px;height:40px;background:var(--orange-bg);color:var(--orange);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.feature-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+
+/* Specs Table */
+.specs-table{width:100%;border-collapse:collapse}
+.specs-table tr:nth-child(even){background:var(--gray)}
+.specs-table td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:14px}
+.specs-table td:first-child{font-weight:700;color:var(--navy);width:38%}
+.specs-table td:last-child{color:var(--text-mid)}
+
+/* Gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.gallery-item{aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;position:relative}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.gallery-item:hover img{transform:scale(1.06)}
+
+/* Reviews */
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.review-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:22px}
+.review-stars{color:var(--orange);font-size:16px;margin-bottom:10px}
+.review-text{font-size:14px;color:var(--text-mid);margin-bottom:14px;line-height:1.7;font-style:italic}
+.review-author{font-weight:700;font-size:13px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.review-author::before{content:'';width:28px;height:28px;background:var(--orange);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--navy);font-size:12px;font-weight:800}
+
+/* FAQ */
+.faq-list{max-width:760px}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;background:none;border:none;text-align:left;font-family:inherit;font-size:15px;font-weight:600;color:var(--navy);padding:18px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faq-q .fa-chevron-down{color:var(--orange);transition:transform .25s;flex-shrink:0}
+.faq-item.open .faq-q .fa-chevron-down{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;font-size:14px;color:var(--text-mid);line-height:1.7}
+.faq-item.open .faq-a{max-height:300px;padding-bottom:16px}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px}
+.lightbox-close{position:fixed;top:20px;right:24px;color:#fff;font-size:28px;cursor:pointer;background:none;border:none;z-index:10000}
+
+/* CTA Sticky */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;background:var(--navy);padding:14px 20px;z-index:80;display:none;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 -4px 16px rgba(0,0,0,.2)}
+.sticky-cta.show{display:flex}
+.sticky-cta .name{color:#fff;font-weight:700;font-size:15px}
+.sticky-cta .price{color:var(--orange);font-weight:800;font-size:22px}
+.sticky-cta .order-btn{background:var(--orange);color:var(--navy);border:none;padding:12px 28px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;border-radius:6px;white-space:nowrap;text-decoration:none;display:inline-block}
+.sticky-cta .order-btn:hover{background:#e8940e}
+
+/* Footer */
+.site-footer{background:var(--navy);color:rgba(255,255,255,.7);padding:40px 20px;text-align:center;font-size:13px}
+.site-footer a{color:var(--orange);text-decoration:none}
+.site-footer a:hover{text-decoration:underline}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-logo{font-size:20px;font-weight:800;color:#fff;margin-bottom:8px}
+.footer-logo span{color:var(--orange)}
+
+/* Loader */
+.page-loader{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--text-soft)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Error state */
+.error-box{max-width:480px;margin:60px auto;text-align:center;padding:40px 20px}
+.error-box .icon{font-size:48px;color:var(--orange);margin-bottom:16px}
+.error-box h2{font-size:22px;font-weight:700;margin-bottom:10px;color:var(--navy)}
+.error-box p{color:var(--text-mid);margin-bottom:24px}
+
+/* Trust badges */
+.trust-row{display:flex;flex-wrap:wrap;gap:20px;margin-top:28px}
+.trust-item{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.85);font-size:13px;font-weight:500}
+.trust-item i{color:var(--orange);font-size:16px}
+
+/* Responsive */
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr;gap:28px}
+  .hero-img-wrap{order:-1}
+  .hero-img-wrap img,.hero-img-placeholder{max-height:240px}
+  .hero{padding:36px 16px}
+  .price-now{font-size:30px}
+  .sticky-cta{flex-direction:column;gap:10px;text-align:center}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .reviews-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .features-grid{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo-wrap">
+      <img src="logo.jpg" alt="BS Collection BD" onerror="this.style.display='none'">
+      <div class="logo-text">BS Collection <span>BD</span></div>
+    </a>
+    <div class="header-actions">
+      <a href="cart.html" class="btn-cart"><i class="fas fa-shopping-cart"></i> কার্ট</a>
+    </div>
+  </div>
+</header>
+
+<!-- Main content will be rendered here -->
+<div id="mainContent">
+  <div class="page-loader">
+    <div class="spinner"></div>
+    <p>পেজ লোড হচ্ছে...</p>
+  </div>
+</div>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <div>
+    <div class="name" id="stickyName">পণ্যের নাম</div>
+    <div class="price" id="stickyPrice">—</div>
+  </div>
+  <a href="#order-section" class="order-btn" id="stickyOrderBtn">
+    <i class="fas fa-shopping-bag"></i> এখনই অর্ডার করুন
+  </a>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-xmark"></i></button>
+  <img id="lightboxImg" src="" alt="ছবি">
+</div>
+
+<!-- Footer -->
+<footer class="site-footer" id="siteFooter" style="display:none">
+  <div class="footer-inner">
+    <div class="footer-logo">BS Collection <span>BD</span></div>
+    <p style="margin-bottom:16px">বাংলাদেশের বিশ্বস্ত অনলাইন শপ | সারাদেশে ডেলিভারি</p>
+    <p><a href="index.html">হোম</a> · <a href="cart.html">কার্ট</a> · <a href="account.html">অ্যাকাউন্ট</a></p>
+    <p style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.4)">© 2025 BS Collection BD. সর্বস্বত্ব সংরক্ষিত।</p>
+  </div>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   Config
+───────────────────────────────────────────────────────── */
+const API = ['localhost','127.0.0.1'].includes(location.hostname)
+  ? 'http://localhost:5000/api'
+  : 'https://bscollectionbd.onrender.com/api';
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function stars(n){ return '★'.repeat(Math.max(1,Math.min(5,n||5)))+'☆'.repeat(5-Math.max(1,Math.min(5,n||5))); }
+
+/* ─────────────────────────────────────────────────────────
+   Load & Render
+───────────────────────────────────────────────────────── */
+async function init(){
+  const params = new URLSearchParams(location.search);
+  const slug = params.get('slug');
+  if(!slug){ renderError('Slug নেই','URL-এ ?slug=xxx দিতে হবে।'); return; }
+
+  try{
+    const res = await fetch(API + '/landing-pages/' + encodeURIComponent(slug));
+    if(!res.ok){ throw new Error('পেজ পাওয়া যায়নি ('+res.status+')'); }
+    const page = await res.json();
+    if(page.active === false){ renderError('পেজটি অনুপলব্ধ','এই পেজটি এই মুহূর্তে সক্রিয় নেই।'); return; }
+    renderPage(page);
+  } catch(e){
+    renderError('পেজ লোড ব্যর্থ', e.message);
+  }
+}
+
+function renderPage(p){
+  document.getElementById('pageTitle').textContent = (p.title || p.slug) + ' — BS Collection BD';
+  if(p.metaDescription) document.getElementById('metaDesc').setAttribute('content', p.metaDescription);
+
+  const hero = p.hero || {};
+  const priceSave = hero.priceNow && hero.priceOld ? Math.round((1-(hero.priceNow/hero.priceOld))*100) : 0;
+  const ctaHref = hero.ctaLink || 'cart.html';
+  const ctaLabel = hero.ctaLabel || 'এখনই অর্ডার করুন';
+
+  let html = '';
+
+  /* ── Hero ── */
+  html += `<section class="hero" id="order-section">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge"><i class="fas fa-bolt"></i> সীমিত সময়ের অফার</div>
+        <h1>${esc(hero.headline || p.title || p.slug)}</h1>
+        ${hero.subheadline ? `<p class="hero-sub">${esc(hero.subheadline)}</p>` : ''}
+        ${(hero.priceNow||hero.priceOld) ? `
+        <div class="price-row">
+          ${hero.priceNow ? `<span class="price-now">৳${Number(hero.priceNow).toLocaleString('bn-BD')}</span>` : ''}
+          ${hero.priceOld ? `<span class="price-old">৳${Number(hero.priceOld).toLocaleString('bn-BD')}</span>` : ''}
+          ${priceSave > 0 ? `<span class="price-save">${priceSave}% ছাড়</span>` : ''}
+        </div>` : ''}
+        <div class="hero-btns">
+          <a href="${esc(ctaHref)}" class="btn-primary" id="heroOrderBtn">
+            <i class="fas fa-shopping-bag"></i> ${esc(ctaLabel)}
+          </a>
+          <a href="#features-section" class="btn-outline">
+            <i class="fas fa-info-circle"></i> বৈশিষ্ট্য দেখুন
+          </a>
+        </div>
+        <div class="trust-row">
+          <span class="trust-item"><i class="fas fa-truck"></i> দ্রুত ডেলিভারি</span>
+          <span class="trust-item"><i class="fas fa-shield-halved"></i> ১০০% অরিজিনাল</span>
+          <span class="trust-item"><i class="fas fa-rotate-left"></i> রিটার্ন গ্যারান্টি</span>
+        </div>
+      </div>
+      <div class="hero-img-wrap">
+        ${hero.image
+          ? `<img src="${esc(hero.image)}" alt="${esc(hero.headline||p.title)}" onerror="this.parentElement.innerHTML='<div class=\\"hero-img-placeholder\\"><i class=\\"fas fa-box\\" style=\\"font-size:48px;margin-right:12px\\"></i> ছবি নেই</div>'">`
+          : '<div class="hero-img-placeholder"><i class="fas fa-box" style="font-size:48px;margin-right:12px"></i> ছবি নেই</div>'}
+      </div>
+    </div>
+  </section>`;
+
+  /* ── Features ── */
+  const features = (p.features||[]).filter(Boolean);
+  if(features.length){
+    const icons = ['fas fa-check-circle','fas fa-star','fas fa-bolt','fas fa-shield-halved','fas fa-truck','fas fa-battery-full','fas fa-wind','fas fa-leaf','fas fa-thumbs-up','fas fa-award'];
+    html += `<section class="section" id="features-section">
+      <div class="section-inner">
+        <span class="section-label">বৈশিষ্ট্যসমূহ</span>
+        <h2 class="section-title">কেন এই পণ্যটি বেছে নেবেন?</h2>
+        <div class="features-grid">
+          ${features.map((f,i)=>`<div class="feature-card">
+            <div class="feature-icon"><i class="${icons[i%icons.length]}"></i></div>
+            <div class="feature-text">${esc(f)}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  /* ── Gallery ── */
+  const gallery = (p.gallery||[]).filter(Boolean);
+  if(gallery.length){
+    html += `<section class="section alt">
+      <div class="section-inner">
+        <span class="section-label">গ্যালারি</span>
+        <h2 class="section-title">পণ্যের ছবি</h2>
+        <p class="section-sub">ক্লিক করলে বড় করে দেখতে পাবেন।</p>
+        <div class="gallery-grid">
+          ${gallery.map(url=>`<div class="gallery-item" onclick="openLightbox('${esc(url)}')">
+            <img src="${esc(url)}" alt="ছবি" loading="lazy">
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  /* ── Specs ── */
+  const specs = (p.specs||[]).filter(s=>s.label);
+  if(specs.length){
+    html += `<section class="section ${gallery.length?'':'alt'}">
+      <div class="section-inner">
+        <span class="section-label">স্পেসিফিকেশন</span>
+        <h2 class="section-title">টেকনিক্যাল বিবরণ</h2>
+        <table class="specs-table">
+          <tbody>
+            ${specs.map(s=>`<tr><td>${esc(s.label)}</td><td>${esc(s.value)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+  }
+
+  /* ── Reviews ── */
+  const reviews = (p.reviews||[]).filter(r=>r.name||r.text);
+  if(reviews.length){
+    const avg = (reviews.reduce((a,r)=>a+(r.rating||5),0)/reviews.length).toFixed(1);
+    html += `<section class="section alt">
+      <div class="section-inner">
+        <span class="section-label">গ্রাহকদের মতামত</span>
+        <h2 class="section-title">গ্রাহকরা কী বলছেন?</h2>
+        <p class="section-sub">গড় রেটিং: <b style="color:var(--orange)">${avg}/5</b> · ${reviews.length}টি রিভিউ</p>
+        <div class="reviews-grid">
+          ${reviews.map(r=>`<div class="review-card">
+            <div class="review-stars" title="${r.rating||5} তারা">${stars(r.rating||5)}</div>
+            <p class="review-text">${esc(r.text||'চমৎকার পণ্য!')}</p>
+            <div class="review-author">${esc(r.name||'গ্রাহক')}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  /* ── FAQ ── */
+  const faq = (p.faq||[]).filter(f=>f.q);
+  if(faq.length){
+    html += `<section class="section">
+      <div class="section-inner">
+        <span class="section-label">প্রশ্নোত্তর</span>
+        <h2 class="section-title">সাধারণ জিজ্ঞাসা (FAQ)</h2>
+        <div class="faq-list" id="faqList">
+          ${faq.map((f,i)=>`<div class="faq-item" id="faq-${i}">
+            <button class="faq-q" onclick="toggleFaq(${i})">
+              <span>${esc(f.q)}</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="faq-a">${esc(f.a||'')}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+  }
+
+  /* ── Bottom CTA ── */
+  html += `<section class="section" style="background:var(--navy);text-align:center">
+    <div class="section-inner">
+      <h2 style="color:#fff;font-size:clamp(22px,3vw,34px);font-weight:800;margin-bottom:12px">দেরি না করে এখনই অর্ডার করুন!</h2>
+      <p style="color:rgba(255,255,255,.75);margin-bottom:28px;font-size:15px">সীমিত স্টক · দ্রুত ডেলিভারি · ক্যাশ অন ডেলিভারি উপলব্ধ</p>
+      ${(hero.priceNow||hero.priceOld) ? `<div style="margin-bottom:24px"><span style="font-size:36px;font-weight:800;color:var(--orange)">৳${Number(hero.priceNow||0).toLocaleString('bn-BD')}</span>${hero.priceOld?`<span style="font-size:18px;color:rgba(255,255,255,.45);text-decoration:line-through;margin-left:12px">৳${Number(hero.priceOld).toLocaleString('bn-BD')}</span>`:''}</div>` : ''}
+      <a href="${esc(ctaHref)}" class="btn-primary" style="font-size:16px;padding:16px 36px">
+        <i class="fas fa-shopping-bag"></i> ${esc(ctaLabel)}
+      </a>
+      <div style="display:flex;justify-content:center;gap:24px;margin-top:24px;flex-wrap:wrap">
+        <span style="color:rgba(255,255,255,.7);font-size:13px"><i class="fas fa-phone" style="color:var(--orange)"></i> কল করুন: <a href="tel:01XXXXXXXXX" style="color:var(--orange)">01XXXXXXXXX</a></span>
+        <span style="color:rgba(255,255,255,.7);font-size:13px"><i class="fab fa-whatsapp" style="color:var(--orange)"></i> WhatsApp-এ অর্ডার করুন</span>
+      </div>
+    </div>
+  </section>`;
+
+  document.getElementById('mainContent').innerHTML = html;
+  document.getElementById('siteFooter').style.display = 'block';
+
+  /* Sticky CTA */
+  if(hero.priceNow){
+    document.getElementById('stickyName').textContent = hero.headline || p.title || '';
+    document.getElementById('stickyPrice').textContent = '৳' + Number(hero.priceNow).toLocaleString('bn-BD');
+    document.getElementById('stickyOrderBtn').href = ctaHref;
+  }
+
+  /* Scroll → show sticky CTA after hero */
+  const stickyCta = document.getElementById('stickyCta');
+  window.addEventListener('scroll', ()=>{
+    const heroH = document.querySelector('.hero')?.offsetHeight || 400;
+    stickyCta.classList.toggle('show', window.scrollY > heroH);
+  }, {passive:true});
+}
+
+function renderError(title, msg){
+  document.getElementById('mainContent').innerHTML = `
+    <div class="error-box">
+      <div class="icon"><i class="fas fa-exclamation-circle"></i></div>
+      <h2>${esc(title)}</h2>
+      <p>${esc(msg)}</p>
+      <a href="index.html" class="btn-primary"><i class="fas fa-home"></i> হোমে ফিরুন</a>
+    </div>`;
+  document.getElementById('siteFooter').style.display = 'block';
+}
+
+/* ─────────────────────────────────────────────────────────
+   Lightbox
+───────────────────────────────────────────────────────── */
+function openLightbox(url){
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('show');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
+
+/* ─────────────────────────────────────────────────────────
+   FAQ Toggle
+───────────────────────────────────────────────────────── */
+function toggleFaq(i){
+  const item = document.getElementById('faq-'+i);
+  if(!item) return;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+/* Start */
+init();
+</script>
+</body>
+</html>

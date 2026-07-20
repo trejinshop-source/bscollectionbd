@@ -124,6 +124,7 @@ const OrderSchema = new mongoose.Schema({
     referer: String,
     duplicateCount: { type: Number, default: 0 },
   },
+  userId: { type: String, index: true },
   fakeScore: { type: Number, default: 0 },
   fakeReasons: [String],
   isFake: { type: Boolean, default: false },
@@ -348,9 +349,11 @@ app.put("/api/customer/profile", authUser, async (req, res) => {
 app.get("/api/customer/orders", authUser, async (req, res) => {
   try {
     const email = req.user.email;
-    const user = await User.findById(req.user.userId);
-    // Match orders by email or phone
+    const userId = req.user.userId;
+    const user = await User.findById(userId);
+    // Match orders by userId, email, or phone
     const query = [];
+    if (userId) query.push({ userId });
     if (email) query.push({ "customer.email": email });
     if (user?.phone) query.push({ "customer.phone": user.phone });
     const orders = await Order.find(query.length ? { $or: query } : { _id: null })
@@ -529,7 +532,7 @@ app.post("/api/categories/upload", authAdmin, upload.single("image"), async (req
 
 // ORDERS
 // ═════════════════════════════════════════════════════════════════════════════
-app.post("/api/orders", async (req, res) => {
+app.post("/api/orders", optionalUser, async (req, res) => {
   try {
     const body = req.body || {};
     const { customer, items, subtotal, deliveryCharge, deliveryFee, total, paymentMethod, source, note } = body;
@@ -563,6 +566,7 @@ app.post("/api/orders", async (req, res) => {
       total: Number(total) || 0,
       paymentMethod: paymentMethod || "COD",
       source: source || "site",
+      userId: req.user?.userId || "",
       note: note || "",
       meta: {
         ip: req.ip,
@@ -1037,6 +1041,76 @@ app.get("/api/stats", authAdmin, async (req, res) => {
       totalRevenue: revenueAgg[0]?.total || 0,
       inStock, lowStock, outOfStock,
     });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
+// ─── Landing Page Schema ──────────────────────────────────────────────────────
+const LandingPageSchema = new mongoose.Schema({
+  slug: { type: String, required: true, unique: true },
+  title: String,
+  metaDescription: String,
+  metaKeywords: String,
+  active: { type: Boolean, default: true },
+  hero: {
+    headline: String,
+    subheadline: String,
+    image: String,
+    priceNow: Number,
+    priceOld: Number,
+    ctaLabel: { type: String, default: 'এখনই অর্ডার করুন' },
+    ctaLink: String,
+    productId: String,
+  },
+  features: [String],
+  specs: [{ label: String, value: String }],
+  gallery: [String],
+  reviews: [{ name: String, rating: Number, text: String }],
+  faq: [{ q: String, a: String }],
+  extraHtml: String,
+}, { timestamps: true });
+const LandingPage = mongoose.model("LandingPage", LandingPageSchema);
+
+// ═════════════════════════════════════════════════════════════════════════════
+// LANDING PAGES
+// ═════════════════════════════════════════════════════════════════════════════
+app.get("/api/landing-pages", async (req, res) => {
+  try {
+    const pages = await LandingPage.find().sort({ createdAt: -1 });
+    res.json(pages);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post("/api/landing-pages", authAdmin, async (req, res) => {
+  try {
+    const page = await LandingPage.create(req.body);
+    res.status(201).json(page);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.get("/api/landing-pages/:slug", async (req, res) => {
+  try {
+    const page = await LandingPage.findOne({ slug: req.params.slug });
+    if (!page) return res.status(404).json({ error: "পেজ পাওয়া যায়নি" });
+    res.json(page);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put("/api/landing-pages/:slug", authAdmin, async (req, res) => {
+  try {
+    const page = await LandingPage.findOneAndUpdate(
+      { slug: req.params.slug },
+      { ...req.body, slug: req.params.slug },
+      { new: true, upsert: true, runValidators: true }
+    );
+    res.json(page);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
+app.delete("/api/landing-pages/:slug", authAdmin, async (req, res) => {
+  try {
+    await LandingPage.findOneAndDelete({ slug: req.params.slug });
+    res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

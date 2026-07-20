@@ -475,6 +475,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     <li><a data-page="categories" data-title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Categories</a></li>
     <li><a data-page="customers" data-title="Customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Customers</a></li>
     <li><a data-page="reports" data-title="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>Reports</a></li>
+    <li><a data-page="landingpages" data-title="ল্যান্ডিং পেজ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>ল্যান্ডিং পেজ</a></li>
     <li><a data-page="advanced" data-title="Advanced Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Advanced Options</a></li>
     <li class="nav-section-gap"></li>
     <li><a id="sidebarLogoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</a></li>
@@ -763,6 +764,46 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     <div class="card">
       <div class="card-head"><h2>Generated Reports</h2></div>
       <div class="report-list-item"><div class="row-flex"><span class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div><div class="report-name">Monthly Sales Report</div><div class="report-meta">Generated automatically</div></div></div><button class="download-btn" onclick="exportOrdersCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Export CSV</button></div>
+    </div>
+  </section>
+
+
+  <!-- ===================== LANDING PAGES PAGE ===================== -->
+  <section class="page" id="page-landingpages">
+    <div class="card">
+      <div class="card-head">
+        <h2><i class="fas fa-file-alt" style="color:#FCA311"></i> ল্যান্ডিং পেজ ব্যবস্থাপনা</h2>
+        <button class="pill-btn" id="addLandingPageBtn" onclick="openLandingPageModal()">
+          নতুন পেজ তৈরি করুন <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+      <p style="color:#64748b;font-size:13px;margin-bottom:18px">প্রতিটি পণ্যের জন্য একটি কাস্টম ল্যান্ডিং পেজ তৈরি করুন। পণ্য কার্ডে ক্লিক করলে সেই পেজে নিয়ে যাবে।</p>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>পেজের নাম / Slug</th>
+              <th>হেডলাইন</th>
+              <th>পেজ URL</th>
+              <th>স্ট্যাটাস</th>
+              <th>তৈরির তারিখ</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="landingPagesTableBody">
+            <tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;background:#fff7ed;border-color:#FCD79E;">
+      <h3 style="color:#92400e;margin-bottom:10px"><i class="fas fa-info-circle"></i> কিভাবে ব্যবহার করবেন</h3>
+      <ol style="color:#78350f;font-size:13.5px;line-height:2;padding-left:20px">
+        <li>উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন এবং পণ্যের তথ্য দিয়ে পেজ তৈরি করুন।</li>
+        <li>পেজ তৈরি হলে <b>Products</b> ট্যাবে যান → পণ্য এডিট করুন।</li>
+        <li><b>"বিস্তারিত পেজ"</b> ফিল্ডে <code>landing.html?slug=আপনার-স্লাগ</code> লিখুন এবং "বিস্তারিত পেজ আছে" চেক করুন।</li>
+        <li>এখন পণ্য কার্ডে ক্লিক করলে ঐ ল্যান্ডিং পেজে নিয়ে যাবে।</li>
+      </ol>
     </div>
   </section>
 
@@ -2820,5 +2861,89 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
 })();
 
 </script>
+
+<!-- ==================== LANDING PAGE MODAL ==================== -->
+<div class="modal-overlay hidden" id="landingPageModal">
+  <div class="modal wide" style="max-width:800px">
+    <div class="modal-head">
+      <h3 id="lpModalTitle">নতুন ল্যান্ডিং পেজ তৈরি করুন</h3>
+      <button class="modal-close" onclick="document.getElementById('landingPageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="lpEditSlug">
+      <!-- Basic Info -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-info-circle" style="color:#FCA311"></i> মূল তথ্য</h4>
+        <div class="form-row">
+          <div class="form-group2"><label>পেজের নাম (Title) *</label><input type="text" id="lpTitle" placeholder="JY-2570 Rechargeable Fan — বিশেষ অফার"/></div>
+          <div class="form-group2">
+            <label>Slug * <small style="color:#94a3b8;font-weight:400">(ইউনিক আইডি, URL-এ ব্যবহৃত হবে)</small></label>
+            <input type="text" id="lpSlug" placeholder="product-jy2570" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
+          </div>
+        </div>
+        <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="এই পণ্য সম্পর্কে সংক্ষিপ্ত বিবরণ (160 অক্ষর পর্যন্ত)"/></div>
+      </div>
+      <!-- Hero Section -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> Hero সেকশন</h4>
+        <div class="form-group2"><label>মূল হেডলাইন *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
+        <div class="form-group2"><label>সাব-হেডলাইন</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
+        <div class="form-row">
+          <div class="form-group2"><label>বর্তমান দাম (৳)</label><input type="number" id="lpHeroPriceNow" placeholder="2150"/></div>
+          <div class="form-group2"><label>পুরনো দাম (৳)</label><input type="number" id="lpHeroPriceOld" placeholder="2550"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group2"><label>CTA বাটন লেখা</label><input type="text" id="lpHeroCtaLabel" placeholder="এখনই অর্ডার করুন"/></div>
+          <div class="form-group2"><label>CTA লিংক (খালি রাখলে Cart-এ যাবে)</label><input type="text" id="lpHeroCtaLink" placeholder="cart.html অথবা #order-form"/></div>
+        </div>
+        <div class="form-group2"><label>Hero ছবির URL</label><input type="url" id="lpHeroImage" placeholder="https://..." oninput="document.getElementById('lpHeroImgPreview').src=this.value;document.getElementById('lpHeroImgPreview').style.display='block'"/></div>
+        <img id="lpHeroImgPreview" style="display:none;max-height:160px;margin-top:8px;object-fit:contain;border:1px solid #e2e8f0;padding:4px;background:#fff" alt="Hero preview"/>
+      </div>
+      <!-- Features -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-check-circle" style="color:#FCA311"></i> বৈশিষ্ট্য (Features)</h4>
+        <div id="lpFeaturesContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFeature()"><i class="fas fa-plus"></i> বৈশিষ্ট্য যোগ করুন</button>
+      </div>
+      <!-- Specs -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-list-ul" style="color:#FCA311"></i> স্পেসিফিকেশন (Specs)</h4>
+        <div id="lpSpecsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSpec()"><i class="fas fa-plus"></i> স্পেক যোগ করুন</button>
+      </div>
+      <!-- Gallery -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> গ্যালারি (ছবির URL, এক লাইনে একটি)</h4>
+        <textarea id="lpGallery" rows="4" style="width:100%;padding:10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg"></textarea>
+      </div>
+      <!-- Reviews -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> রিভিউ</h4>
+        <div id="lpReviewsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddReview()"><i class="fas fa-plus"></i> রিভিউ যোগ করুন</button>
+      </div>
+      <!-- FAQ -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-question-circle" style="color:#FCA311"></i> প্রশ্নোত্তর (FAQ)</h4>
+        <div id="lpFaqContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFaq()"><i class="fas fa-plus"></i> FAQ যোগ করুন</button>
+      </div>
+      <!-- Status -->
+      <div class="form-group2">
+        <label><input type="checkbox" id="lpActive" checked style="width:auto;margin-right:6px"> পেজটি সক্রিয় রাখুন (Active)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="margin-right:auto">
+        <a id="lpPreviewLink" href="#" target="_blank" class="bs-ext-btn ghost" style="text-decoration:none">
+          <i class="fas fa-eye"></i> প্রিভিউ করুন
+        </a>
+      </div>
+      <button class="cancel-btn" onclick="document.getElementById('landingPageModal').classList.add('hidden')">বাতিল</button>
+      <button class="save-btn" id="lpSaveBtn" onclick="saveLandingPage()"><i class="fas fa-save"></i> সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

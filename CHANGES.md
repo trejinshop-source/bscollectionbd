@@ -1,48 +1,90 @@
-# BS Collection BD — এই প্যাকেজের পরিবর্তনসমূহ
+# BS Collection BD — আপডেট পরিবর্তনের তালিকা
 
-## Backend (backend/sarver.js) — সম্পূর্ণ রিরাইট
-নতুন এন্ডপয়েন্ট:
-- `/api/customer/{signup,login,forgot,reset,me}` — গ্রাহক অ্যাকাউন্ট (OTP পাসওয়ার্ড রিসেট)
-- `/api/reviews/:productId` (GET) — পাবলিক রিভিউ তালিকা
-- `/api/reviews` (POST, auth) — রিভিউ/প্রশ্ন সাবমিট
-- `/api/admin/reviews` (GET/PATCH/DELETE) — রিভিউ মডারেশন
-- `/api/products` — placement (shop/homePopular/homeBestseller/homeNew) সাপোর্ট + auto detailPage
-- `/api/products/upload` — মাল্টি-ইমেজ আপলোড
-- `/api/products/:id/decrement-stock` — ডেলিভারিতে স্টক কমানো
-- `/api/orders` — **ফেক অর্ডার ডিটেকশন** (ফোন/IP/ইমেইল/অ্যামাউন্ট heuristics; fakeScore + reasons)
-- `/api/orders/:id/mark-fake`
-- `/api/page-settings` (per-page CMS)
-- `/api/users` (admin)
-- সব নতুন অর্ডারে Apps Script → জিমেইলে নোটিফিকেশন
+তারিখ: ২০ জুলাই ২০২৫
 
-## Frontend
-নতুন ফাইল:
-- `js/bs-shared.js` — সব পেজে floating-cart, cart-sidebar-overlay, order-modal-overlay, main-header (fallback), গ্লোবাল সার্চ, active menu হাইলাইট অটো ইনজেক্ট
-- `js/product-extras.js` — রিভিউ/প্রশ্ন সাবমিট (লগইন না থাকলে redirect), তুলনা, শেয়ার, ক্যাশ অন ডেলিভারি
-- `js/auth-backend.js` — signup/login/forgot/reset → MongoDB backend
-- `forgot-password.html`, `reset-password.html` — OTP flow পেজ
-- `apps-script.gs` — ইমোজি-মুক্ত সুন্দর HTML ইমেইল টেমপ্লেট (OTP + newOrder + contact)
+---
 
-সব ১৫টি HTML পেজে ইনজেক্ট: `bs-shared.js` + `auth-backend.js` (এবং product পেজে `product-extras.js`)।
-`bs-app.js`-এ APPS_SCRIPT_URL সেট করা হয়েছে।
+## Fix 1 — Forgot Password / OTP (Backend ব্যবহারকারীদের জন্য)
 
-## Admin Panel (admin_panel/)
-- `admin-theme.css` — Navy (#14213D) + Orange (#FCA311) রিথিম, frontend এর সাথে ম্যাচ
-- `admin-extensions.js` — নতুন ট্যাব:
-  1. **রিভিউ** — দেখানো/লুকানো/মুছুন
-  2. **ফেক অর্ডার** — অটো-স্কোর সহ সন্দেহজনক অর্ডার
-  3. **এডভান্সড পন্য** — ড্র্যাগ-অ্যান্ড-ড্রপ মাল্টি ইমেজ, placement checkbox (Shop/Popular/Bestseller/New), specs, auto detail page
-  4. **পেজ সেটিংস** — প্রতিটি frontend পেজের জন্য title/meta/hero/content
-  5. **গ্রাহক** — user তালিকা ও ডিলিট
+**সমস্যা:** `account.html`-এর forgot password শুধু localStorage খুঁজত। MongoDB-তে রেজিস্টার করা ব্যবহারকারীরা "এই জিমেইলে কোন একাউন্ট নেই" এরর পেত।
 
-## ⚠️ ডেপ্লয়ের আগে যা করতে হবে
-1. **Apps Script deploy**: `frontend/apps-script.gs` কপি করে script.google.com এ পেস্ট করে Deploy → Web app → URL কপি করুন → Render Environment এ `APPS_SCRIPT_URL` সেট করুন। (বর্তমান .env এর URL ব্যবহার করা হয়েছে; নতুন করে deploy করলে URL আপডেট করুন)
-2. **Render redeploy**: backend/sarver.js নতুন কোড push করার পর Render থেকে redeploy। নতুন Mongoose collections (users, reviews, pagesettings) অটো তৈরি হবে।
-3. **Cloudinary**: বিদ্যমান credentials ব্যবহৃত।
-4. **Node package**: sarver.js নতুন dependency ছাড়াই চলবে (bcrypt বাদ দিয়ে built-in crypto ব্যবহার)।
+**সমাধান:** `account.html`-এ `doForgot` ও `doReset` function override করা হয়েছে:
+- Email দিয়ে forgot করলে backend API (`/api/customer/forgot`) call করে
+- OTP verify করতে backend API (`/api/customer/reset`) call করে
+- Phone number দিয়ে forgot করলে আগের local flow কাজ করে
+- সফল OTP পাঠালে banner দেখায়: "আপনার email-এ OTP পাঠানো হয়েছে"
 
-## নোট (যা আপনি বলেননি কিন্তু যোগ করা হয়েছে)
-- ফেক অর্ডার হিউরিস্টিকস: ফোন/IP duplicate, invalid BD phone, temp email, বড় qty/amount → fakeScore + reasons
-- OTP 10 মিনিটের জন্য valid
-- গ্রাহক টোকেন `bs_customer_token`, admin টোকেন আগের মতোই
-- ছবি আপলোড 5MB পর্যন্ত, একসাথে 10টি পর্যন্ত
+**পরিবর্তিত ফাইল:** `frontend/account.html`
+
+---
+
+## Fix 2 — Profile-এ Orders দেখানো (userId দিয়ে match)
+
+**সমস্যা:** `/api/customer/orders` শুধু email ও phone দিয়ে খুঁজত। অনেক অর্ডারে email/phone ছিল না, তাই profile-এ দেখাত না।
+
+**সমাধান:**
+- `OrderSchema`-এ `userId` field যোগ করা হয়েছে (indexed)
+- POST `/api/orders`-এ `optionalUser` middleware যোগ করা হয়েছে — লগইন থাকলে `userId` automatically অর্ডারে save হয়
+- GET `/api/customer/orders`-এ `userId` দিয়েও match করে (`$or: [userId, email, phone]`)
+
+**পরিবর্তিত ফাইল:** `backend/server.js`
+
+---
+
+## Fix 3 — Admin থেকে Landing Page তৈরি করা
+
+**সমস্যা:** Admin থেকে নতুন product landing page তৈরির কোনো উপায় ছিল না। Static HTML file manually edit করতে হত।
+
+**সমাধান:**
+
+### backend/server.js
+- নতুন `LandingPage` Mongoose schema যোগ করা হয়েছে:
+  - `slug`, `title`, `metaDescription`, `active`
+  - `hero` (headline, subheadline, image, priceNow, priceOld, ctaLabel, ctaLink)
+  - `features[]`, `specs[]`, `gallery[]`, `reviews[]`, `faq[]`
+- নতুন API routes:
+  - `GET /api/landing-pages` — সব পেজের list (public)
+  - `GET /api/landing-pages/:slug` — একটি পেজের data (public)
+  - `POST /api/landing-pages` — নতুন পেজ তৈরি (admin only)
+  - `PUT /api/landing-pages/:slug` — পেজ আপডেট (admin only, upsert)
+  - `DELETE /api/landing-pages/:slug` — পেজ মুছে ফেলা (admin only)
+
+### admin_panel/admin.html
+- Sidebar-এ নতুন **"ল্যান্ডিং পেজ"** nav item যোগ করা হয়েছে
+- নতুন **Landing Pages management page** (`#page-landingpages`):
+  - সব পেজের table (নাম, headline, URL, status, তারিখ)
+  - Copy URL বাটন (clipboard-এ কপি হয়)
+  - Preview বাটন, Edit বাটন, Delete বাটন
+  - ব্যবহারের নির্দেশনা (কিভাবে পণ্যের সাথে লিংক করবেন)
+- নতুন **Landing Page Modal** (create/edit):
+  - মূল তথ্য: Title, Slug, Meta Description
+  - Hero সেকশন: Headline, Sub-headline, দাম, CTA বাটন, ছবি URL
+  - বৈশিষ্ট্য (Features): dynamic add/remove
+  - স্পেসিফিকেশন (Specs): label-value pairs
+  - গ্যালারি: multi-line URL input
+  - রিভিউ: নাম, rating, text
+  - FAQ: প্রশ্ন-উত্তর pairs
+  - Active toggle
+
+### frontend/landing.html (নতুন ফাইল)
+- Dynamic landing page renderer
+- URL থেকে `?slug=` পড়ে backend থেকে data fetch করে
+- Sections render করে: Hero, Features, Gallery, Specs, Reviews, FAQ, Bottom CTA
+- Sticky order button (scroll করলে দেখা যায়)
+- Image lightbox (gallery ছবি click করলে বড় হয়)
+- Responsive design (mobile-friendly)
+- Error handling (পেজ না পেলে friendly error)
+
+---
+
+## Landing Page ব্যবহারের নির্দেশনা
+
+1. Admin panel-এ **"ল্যান্ডিং পেজ"** ট্যাবে যান
+2. **"নতুন পেজ তৈরি করুন"** ক্লিক করুন
+3. Slug দিন (যেমন: `product-jy2570`) — এটি URL-এ ব্যবহার হবে
+4. Hero, features, specs ইত্যাদি পূরণ করুন → সেভ করুন
+5. **Products** ট্যাবে গিয়ে সংশ্লিষ্ট পণ্য edit করুন
+6. "বিস্তারিত পেজ" field-এ লিখুন: `landing.html?slug=product-jy2570`
+7. "বিস্তারিত পেজ আছে" checkbox চেক করুন → সেভ করুন
+
+এখন পণ্য কার্ডে click করলে `landing.html?slug=product-jy2570` পেজে যাবে।

@@ -839,6 +839,86 @@ function renderOrderHistory(orders){
   }).join('');
 }
 
+
+/* ===== Override forgot/reset to also try backend API ===== */
+var _origDoForgot = doForgot;
+doForgot = async function(e){
+  e.preventDefault();
+  var f = e.target;
+  var id = (f.id ? f.id.value : '').trim();
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+  // Try backend for email-based accounts
+  if(id && id.includes('@')){
+    try{
+      var res = await fetch(API_BASE + '/customer/forgot', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email: id})
+      });
+      var data = await res.json();
+      if(res.ok){
+        sessionStorage.setItem('bs_reset_email', id);
+        sessionStorage.setItem('bs_reset_via', 'backend');
+        var rt = document.getElementById('resetTarget');
+        if(rt) rt.textContent = id;
+        var banner = document.getElementById('demoOtpBanner');
+        if(banner) banner.innerHTML = '<i class="fas fa-envelope" style="color:#FCA311"></i> আপনার <b>' + id + '</b> ইমেইলে OTP পাঠানো হয়েছে। ইনবক্স (ও Spam) চেক করুন।';
+        if(window.bsToast) bsToast(data.msg || 'OTP পাঠানো হয়েছে', 'ok');
+        showAuthStep('reset');
+        return false;
+      } else {
+        if(window.bsToast) bsToast(data.error || 'এই ইমেইলে কোনো অ্যাকাউন্ট নেই', 'err');
+        return false;
+      }
+    } catch(ex){ console.warn('Backend forgot failed:', ex); }
+  }
+  // For phone numbers, fall back to local flow
+  return _origDoForgot(e);
+};
+
+var _origDoReset = doReset;
+doReset = async function(e){
+  e.preventDefault();
+  var f = e.target;
+  var code = (f.code ? f.code.value : '').trim();
+  var pw = f.pw ? f.pw.value : '';
+  var via = sessionStorage.getItem('bs_reset_via');
+  var email = sessionStorage.getItem('bs_reset_email');
+  if(pw.length < 6){ if(window.bsToast) bsToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষর', 'err'); return false; }
+  var API_BASE = (function(){
+    var local = 'http://localhost:5000/api';
+    var prod  = 'https://bscollectionbd.onrender.com/api';
+    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
+  })();
+  if(via === 'backend' && email){
+    try{
+      var res = await fetch(API_BASE + '/customer/reset', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email: email, code: code, newPassword: pw})
+      });
+      var data = await res.json();
+      if(res.ok){
+        if(window.bsToast) bsToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!', 'ok');
+        sessionStorage.removeItem('bs_reset_email');
+        sessionStorage.removeItem('bs_reset_via');
+        pendingReset = {};
+        f.reset();
+        showAuthStep('login');
+        return false;
+      } else {
+        if(window.bsToast) bsToast(data.error || 'OTP ভুল বা মেয়াদোত্তীর্ণ। আবার চেষ্টা করুন।', 'err');
+        return false;
+      }
+    } catch(ex){ console.warn('Backend reset failed:', ex); }
+  }
+  return _origDoReset(e);
+};
+
 /* ===== Override login to also try backend ===== */
 var _origDoLogin = doLogin;
 doLogin = async function(e){
