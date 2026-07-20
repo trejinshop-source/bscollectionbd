@@ -1075,6 +1075,7 @@ navLinks.forEach(link => {
     if(target === 'customers') loadCustomers();
     if(target === 'reports') loadStats();
     if(target === 'advanced' && window.bsExtInit) window.bsExtInit();
+    if(target === 'landingpages') loadLandingPages();
   });
 });
 // Restore page from URL hash on refresh
@@ -2910,6 +2911,170 @@ window.bsRemovePromo = function(idx){
 })();
 
 </script>
+
+
+/* ============================================================
+   LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা
+   ============================================================ */
+function loadLandingPages(){
+  const tbody=document.getElementById('landingPagesTableBody');
+  if(!tbody) return;
+  tbody.innerHTML='<tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>';
+  apiJSON('/landing-pages').then(pages=>{
+    if(!pages||!pages.length){
+      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8">কোনো ল্যান্ডিং পেজ নেই। উপরের বাটন দিয়ে তৈরি করুন।</td></tr>';
+      return;
+    }
+    tbody.innerHTML=pages.map(p=>`
+      <tr>
+        <td><strong>${esc(p.title||'')}</strong><br><code style="font-size:11px;color:#64748b">${esc(p.slug)}</code></td>
+        <td>${esc(p.hero&&p.hero.headline||'—')}</td>
+        <td><a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">landing.html?slug=${esc(p.slug)}</a></td>
+        <td><span style="background:${p.active?'#dcfce7':'#fee2e2'};color:${p.active?'#166534':'#991b1b'};padding:2px 10px;font-size:12px;font-weight:600">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
+        <td style="font-size:12px;color:#64748b">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
+        <td>
+          <button class="icon-btn" title="সম্পাদনা" onclick="editLandingPage('${esc(p.slug)}')"><i class="fas fa-pen"></i></button>
+          <button class="icon-btn danger" title="মুছুন" onclick="deleteLandingPage('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('');
+  }).catch(err=>{
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#ef4444">লোড করতে সমস্যা: '+esc(err.message)+'</td></tr>';
+  });
+}
+
+function openLandingPageModal(slug){
+  const modal=document.getElementById('landingPageModal');
+  const titleEl=document.getElementById('lpModalTitle');
+  ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpHeroHeadline','lpHeroSub','lpHeroPriceNow','lpHeroPriceOld','lpHeroCtaLabel','lpHeroCtaLink','lpHeroImage']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const activeChk=document.getElementById('lpActive');if(activeChk)activeChk.checked=true;
+  document.getElementById('lpFeaturesContainer').innerHTML='';
+  document.getElementById('lpSpecsContainer').innerHTML='';
+  document.getElementById('lpReviewsContainer').innerHTML='';
+  document.getElementById('lpFaqContainer').innerHTML='';
+  const galleryEl=document.getElementById('lpGallery');if(galleryEl)galleryEl.value='';
+  const imgPrev=document.getElementById('lpHeroImgPreview');if(imgPrev)imgPrev.style.display='none';
+  const previewLink=document.getElementById('lpPreviewLink');
+  if(!slug){
+    titleEl.textContent='নতুন ল্যান্ডিং পেজ তৈরি করুন';
+    if(previewLink)previewLink.style.display='none';
+    modal.classList.remove('hidden');
+    return;
+  }
+  titleEl.textContent='ল্যান্ডিং পেজ সম্পাদনা';
+  apiJSON('/landing-pages/'+encodeURIComponent(slug)).then(p=>{
+    document.getElementById('lpEditSlug').value=p.slug||'';
+    document.getElementById('lpTitle').value=p.title||'';
+    document.getElementById('lpSlug').value=p.slug||'';
+    document.getElementById('lpMetaDesc').value=p.metaDescription||'';
+    document.getElementById('lpHeroHeadline').value=(p.hero&&p.hero.headline)||'';
+    document.getElementById('lpHeroSub').value=(p.hero&&p.hero.subheadline)||'';
+    document.getElementById('lpHeroPriceNow').value=(p.hero&&p.hero.priceNow)||'';
+    document.getElementById('lpHeroPriceOld').value=(p.hero&&p.hero.priceOld)||'';
+    document.getElementById('lpHeroCtaLabel').value=(p.hero&&p.hero.ctaLabel)||'';
+    document.getElementById('lpHeroCtaLink').value=(p.hero&&p.hero.ctaLink)||'';
+    document.getElementById('lpHeroImage').value=(p.hero&&p.hero.image)||'';
+    if(activeChk)activeChk.checked=p.active!==false;
+    if(p.hero&&p.hero.image&&imgPrev){imgPrev.src=p.hero.image;imgPrev.style.display='block';}
+    (p.features||[]).forEach(f=>lpAddFeature(f));
+    (p.specs||[]).forEach(s=>lpAddSpec(s.label,s.value));
+    if(galleryEl)galleryEl.value=(p.gallery||[]).join('\n');
+    (p.reviews||[]).forEach(r=>lpAddReview(r.name,r.rating,r.text));
+    (p.faq||[]).forEach(q=>lpAddFaq(q.q,q.a));
+    if(previewLink){previewLink.href='../frontend/landing.html?slug='+encodeURIComponent(p.slug);previewLink.style.display='';}
+    modal.classList.remove('hidden');
+  }).catch(err=>{ const fn=window.toast||function(m){alert(m);}; fn('ডেটা লোড সমস্যা: '+err.message,'err'); });
+}
+
+function editLandingPage(slug){ openLandingPageModal(slug); }
+
+async function saveLandingPage(){
+  const editSlug=(document.getElementById('lpEditSlug').value||'').trim();
+  const slug=(document.getElementById('lpSlug').value||'').trim();
+  const title=(document.getElementById('lpTitle').value||'').trim();
+  const notifyFn=window.toast||function(m,k){alert(m);};
+  if(!slug)return notifyFn('Slug (ইউনিক আইডি) দিন','err');
+  if(!title)return notifyFn('পেজের নাম দিন','err');
+  const body={
+    slug,title,
+    metaDescription:document.getElementById('lpMetaDesc').value.trim(),
+    active:document.getElementById('lpActive').checked,
+    hero:{
+      headline:document.getElementById('lpHeroHeadline').value.trim(),
+      subheadline:document.getElementById('lpHeroSub').value.trim(),
+      priceNow:Number(document.getElementById('lpHeroPriceNow').value)||undefined,
+      priceOld:Number(document.getElementById('lpHeroPriceOld').value)||undefined,
+      ctaLabel:document.getElementById('lpHeroCtaLabel').value.trim()||'এখনই অর্ডার করুন',
+      ctaLink:document.getElementById('lpHeroCtaLink').value.trim(),
+      image:document.getElementById('lpHeroImage').value.trim(),
+    },
+    features:Array.from(document.querySelectorAll('#lpFeaturesContainer .lp-feature-input')).map(i=>i.value.trim()).filter(Boolean),
+    specs:Array.from(document.querySelectorAll('#lpSpecsContainer .lp-spec-row')).map(row=>({label:row.querySelector('.lp-spec-label').value.trim(),value:row.querySelector('.lp-spec-value').value.trim()})).filter(s=>s.label||s.value),
+    gallery:(document.getElementById('lpGallery').value||'').split('\n').map(s=>s.trim()).filter(Boolean),
+    reviews:Array.from(document.querySelectorAll('#lpReviewsContainer .lp-review-row')).map(row=>({name:row.querySelector('.lp-rv-name').value.trim(),rating:Number(row.querySelector('.lp-rv-rating').value)||5,text:row.querySelector('.lp-rv-text').value.trim()})).filter(r=>r.name||r.text),
+    faq:Array.from(document.querySelectorAll('#lpFaqContainer .lp-faq-row')).map(row=>({q:row.querySelector('.lp-faq-q').value.trim(),a:row.querySelector('.lp-faq-a').value.trim()})).filter(f=>f.q||f.a),
+  };
+  const btn=document.getElementById('lpSaveBtn');
+  btn.disabled=true;btn.textContent='সেভ হচ্ছে...';
+  try{
+    const API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
+    const tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
+    const isEdit=!!editSlug;
+    const url=API+'/landing-pages'+(isEdit?'/'+encodeURIComponent(editSlug):'');
+    const res=await fetch(url,{method:isEdit?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify(body)});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||'সেভ হয়নি');
+    notifyFn(isEdit?'পেজ আপডেট হয়েছে!':'নতুন পেজ তৈরি হয়েছে!','ok');
+    document.getElementById('landingPageModal').classList.add('hidden');
+    loadLandingPages();
+  }catch(e){notifyFn('সমস্যা: '+e.message,'err');}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> সেভ করুন';}
+}
+
+function deleteLandingPage(slug,title){
+  if(!confirm('"'+title+'" পেজটি মুছে ফেলবেন? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।'))return;
+  const API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
+  const tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
+  const notifyFn=window.toast||function(m,k){alert(m);};
+  fetch(API+'/landing-pages/'+encodeURIComponent(slug),{method:'DELETE',headers:{'Authorization':'Bearer '+tk}})
+    .then(r=>r.json()).then(d=>{if(d.ok){notifyFn('পেজ মুছে ফেলা হয়েছে','ok');loadLandingPages();}else notifyFn(d.error||'মুছতে সমস্যা','err');})
+    .catch(()=>notifyFn('নেটওয়ার্ক সমস্যা','err'));
+}
+
+function lpAddFeature(val){
+  const c=document.getElementById('lpFeaturesContainer');
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
+  row.innerHTML='<input type="text" class="lp-feature-input" placeholder="যেমন: ১২ ঘন্টা ব্যাটারি ব্যাকআপ" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(val||'')+'"><button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer;font-size:14px">✕</button>';
+  c.appendChild(row);
+}
+
+function lpAddSpec(label,value){
+  const c=document.getElementById('lpSpecsContainer');
+  const row=document.createElement('div');
+  row.className='lp-spec-row';
+  row.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
+  row.innerHTML='<input type="text" class="lp-spec-label" placeholder="বৈশিষ্ট্য (যেমন: ব্যাটারি)" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(label||'')+'"><input type="text" class="lp-spec-value" placeholder="মান (যেমন: ৬০০০ mAh)" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(value||'')+'"><button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer;font-size:14px">✕</button>';
+  c.appendChild(row);
+}
+
+function lpAddReview(name,rating,text){
+  const c=document.getElementById('lpReviewsContainer');
+  const row=document.createElement('div');
+  row.className='lp-review-row';
+  row.style.cssText='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:10px';
+  row.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="lp-rv-name" placeholder="নাম" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(name||'')+'"><input type="number" class="lp-rv-rating" placeholder="রেটিং (১-৫)" min="1" max="5" style="width:80px;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(rating||5)+'"><button type="button" onclick="this.closest(\'.lp-review-row\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer">✕</button></div><textarea class="lp-rv-text" placeholder="রিভিউ টেক্সট" rows="2" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;box-sizing:border-box">'+(text||'')+'</textarea>';
+  c.appendChild(row);
+}
+
+function lpAddFaq(q,a){
+  const c=document.getElementById('lpFaqContainer');
+  const row=document.createElement('div');
+  row.className='lp-faq-row';
+  row.style.cssText='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:10px';
+  row.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="lp-faq-q" placeholder="প্রশ্ন" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(q||'')+'"><button type="button" onclick="this.closest(\'.lp-faq-row\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer">✕</button></div><textarea class="lp-faq-a" placeholder="উত্তর" rows="2" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;box-sizing:border-box">'+(a||'')+'</textarea>';
+  c.appendChild(row);
+}
 
 <!-- ==================== LANDING PAGE MODAL ==================== -->
 <div class="modal-overlay hidden" id="landingPageModal">

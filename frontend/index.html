@@ -1288,7 +1288,29 @@ function productHTML(p){
 }
 function renderProducts(arr,target){document.getElementById(target).innerHTML = arr.map(productHTML).join('');}
 renderProducts(featured,'featuredGrid');
-renderProducts(bestSellers,'bestGrid');
+/* ================ BEST SELLERS — অ্যাডমিন নিয়ন্ত্রিত ================
+   এখানে শুধু সেই পণ্যগুলো দেখাবে যেগুলো অ্যাডমিন প্যানেলে
+   "Best Seller" হিসেবে চিহ্নিত করা হয়েছে।
+   Products → পণ্য এডিট → Placements → "Best Seller (Home)" চেক করুন।
+   ================================================================ */
+function loadBestSellers(){
+  const api=(window.BSAdmin&&BSAdmin.API_BASE)||'https://bscollectionbd.onrender.com/api';
+  fetch(api+'/products?limit=100')
+    .then(function(r){return r.ok?r.json():Promise.reject();})
+    .then(function(data){
+      const list=Array.isArray(data)?data:(data.products||data.data||[]);
+      const filtered=list.filter(function(p){return p.placements&&p.placements.homeBestseller;}).map(toCardProduct);
+      if(filtered.length>0){
+        renderProducts(filtered,'bestGrid');
+        observeFadeIns&&observeFadeIns();
+      } else {
+        // Fallback: hardcoded demo data
+        renderProducts(bestSellers,'bestGrid');
+      }
+    })
+    .catch(function(){renderProducts(bestSellers,'bestGrid');});
+}
+loadBestSellers();
 
 /* ================= FILTER TABS =================
    অ্যাডমিনের "এডভান্সড অপশন → Filter Tabs" থেকে সেভ করা কনফিগ এখন সরাসরি

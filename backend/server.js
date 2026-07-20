@@ -270,11 +270,20 @@ app.post("/api/auth/login", (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 app.post("/api/customer/signup", async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body || {};
-    if (!name || !email || !password) return res.status(400).json({ error: "সব ঘর পূরণ করুন" });
+    const { name, password } = req.body || {};
+    let email = String(req.body.email || "").trim().toLowerCase();
+    let phone = String(req.body.phone || "").trim();
+    if (!name || (!email && !phone) || !password) return res.status(400).json({ error: "নাম, ইমেইল বা মোবাইল নম্বর এবং পাসওয়ার্ড দিন" });
     if (String(password).length < 6) return res.status(400).json({ error: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর" });
-    const exists = await User.findOne({ email: String(email).toLowerCase() });
-    if (exists) return res.status(400).json({ error: "এই ইমেইলে অ্যাকাউন্ট আছে" });
+    const query = [];
+    if (email) query.push({ email });
+    if (phone) query.push({ phone });
+    const exists = query.length ? await User.findOne({ $or: query }) : null;
+    if (exists) {
+      if (email && exists.email === email) return res.status(400).json({ error: "এই ইমেইলে অ্যাকাউন্ট আছে" });
+      if (phone && exists.phone === phone) return res.status(400).json({ error: "এই মোবাইল নম্বরে অ্যাকাউন্ট আছে" });
+    }
+    if (!email && phone) email = phone + "@phone.bscbd.local";
     const user = await User.create({ name, email, phone, passwordHash: sha256(password) });
     const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
@@ -284,13 +293,18 @@ app.post("/api/customer/signup", async (req, res) => {
 app.post("/api/customer/login", async (req, res) => {
   try {
     const { email, phone, password } = req.body || {};
-    const identifier = String(email || phone || "").trim();
-    const isPhone = !email && phone;
-    const user = isPhone
-      ? await User.findOne({ phone: identifier })
-      : await User.findOne({ email: identifier.toLowerCase() });
+    const raw = String(email || phone || "").trim();
+    // Auto-detect: phone numbers start with digits or +
+    const looksLikePhone = /^[+]?[0-9]{10,15}$/.test(raw) || /^01[3-9][0-9]{8}$/.test(raw);
+    let user;
+    if (looksLikePhone) {
+      user = await User.findOne({ phone: raw });
+      if (!user) user = await User.findOne({ email: raw + "@phone.bscbd.local" });
+    } else {
+      user = await User.findOne({ email: raw.toLowerCase() });
+    }
     if (!user || user.passwordHash !== sha256(password || ""))
-      return res.status(401).json({ error: "ইমেইল বা পাসওয়ার্ড ভুল" });
+      return res.status(401).json({ error: "ইমেইল/মোবাইল বা পাসওয়ার্ড ভুল" });
     const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -298,21 +312,43 @@ app.post("/api/customer/login", async (req, res) => {
 
 app.post("/api/customer/forgot", async (req, res) => {
   try {
-    const email = String(req.body?.email || "").toLowerCase();
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: "এই ইমেইলে অ্যাকাউন্ট নেই" });
+    const raw = String(req.body?.email || req.body?.identifier || "").trim();
+    if (!raw) return res.status(400).json({ error: "ইমেইল বা মোবাইল নম্বর দিন" });
+    const looksLikePhone = /^[+]?[0-9]{10,15}$/.test(raw) || /^01[3-9][0-9]{8}$/.test(raw);
+    let user;
+    if (looksLikePhone) {
+      user = await User.findOne({ phone: raw });
+      if (!user) user = await User.findOne({ email: raw + "@phone.bscbd.local" });
+    } else {
+      user = await User.findOne({ email: raw.toLowerCase() });
+    }
+    if (!user) return res.status(404).json({ error: "এই ইমেইল/মোবাইলে কোনো অ্যাকাউন্ট নেই" });
     const code = String(Math.floor(100000 + Math.random() * 900000));
     user.otp = { code, expires: new Date(Date.now() + 10 * 60 * 1000) };
     await user.save();
-    appsScriptPost({ action: "sendOtp", email, code });
-    res.json({ msg: "OTP পাঠানো হয়েছে। ১০ মিনিটের মধ্যে ব্যবহার করুন।" });
+    const emailForOtp = looksLikePhone ? null : raw.toLowerCase();
+    if (emailForOtp) {
+      appsScriptPost({ action: "sendOtp", email: emailForOtp, code, name: user.name });
+    }
+    const msg = emailForOtp
+      ? "OTP আপনার ইমেইলে পাঠানো হয়েছে। ১০ মিনিটের মধ্যে ব্যবহার করুন।"
+      : "OTP তৈরি হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করুন।";
+    res.json({ msg });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post("/api/customer/reset", async (req, res) => {
   try {
-    const { email, code, newPassword } = req.body || {};
-    const user = await User.findOne({ email: String(email || "").toLowerCase() });
+    const { email, phone, code, newPassword } = req.body || {};
+    const raw = String(email || phone || "").trim();
+    const looksLikePhone = /^[+]?[0-9]{10,15}$/.test(raw) || /^01[3-9][0-9]{8}$/.test(raw);
+    let user;
+    if (looksLikePhone) {
+      user = await User.findOne({ phone: raw });
+      if (!user) user = await User.findOne({ email: raw + "@phone.bscbd.local" });
+    } else {
+      user = await User.findOne({ email: raw.toLowerCase() });
+    }
     if (!user) return res.status(404).json({ error: "অ্যাকাউন্ট পাওয়া যায়নি" });
     if (!user.otp?.code || user.otp.code !== code || new Date() > user.otp.expires)
       return res.status(400).json({ error: "OTP অবৈধ বা মেয়াদোত্তীর্ণ" });

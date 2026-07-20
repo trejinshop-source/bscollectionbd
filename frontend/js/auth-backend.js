@@ -46,9 +46,13 @@
         saveSession(d.token, d.user); return { ok: true };
       } catch (e) { return { ok: false, msg: e.message }; }
     },
-    async login({ email, password }) {
+    async login({ email, phone, password }) {
       try {
-        const d = await post('/customer/login', { email, password });
+        // Auto-detect: phone number vs email
+        const id = email || phone || '';
+        const looksLikePhone = /^[+]?[0-9]{10,15}$/.test(id) || /^01[3-9][0-9]{8}$/.test(id);
+        const payload = looksLikePhone ? { phone: id, password } : { email: id, password };
+        const d = await post('/customer/login', payload);
         saveSession(d.token, d.user); return { ok: true };
       } catch (e) { return { ok: false, msg: e.message }; }
     },

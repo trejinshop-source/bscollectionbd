@@ -851,13 +851,15 @@ doForgot = async function(e){
     var prod  = 'https://bscollectionbd.onrender.com/api';
     return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
   })();
-  // Try backend for email-based accounts
-  if(id && id.includes('@')){
+  // Try backend for email or phone accounts
+  var isForgotPhone = /^[+]?[0-9]{10,15}$/.test(id) || /^01[3-9][0-9]{8}$/.test(id);
+  if(id){
     try{
+      var forgotPayload = isForgotPhone ? {identifier: id} : {email: id};
       var res = await fetch(API_BASE + '/customer/forgot', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({email: id})
+        body: JSON.stringify(forgotPayload)
       });
       var data = await res.json();
       if(res.ok){
@@ -876,8 +878,9 @@ doForgot = async function(e){
       }
     } catch(ex){ console.warn('Backend forgot failed:', ex); }
   }
-  // For phone numbers, fall back to local flow
-  return _origDoForgot(e);
+  // For phone numbers with no backend account, fall back to local demo flow
+  if(!isForgotPhone) return _origDoForgot(e);
+  return false;
 };
 
 var _origDoReset = doReset;
@@ -931,12 +934,14 @@ doLogin = async function(e){
     var prod  = 'https://bscollectionbd.onrender.com/api';
     return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
   })();
-  // Try backend first (email login)
+  // Try backend first — auto-detect email vs phone
   try{
+    var looksLikePhone = /^[+]?[0-9]{10,15}$/.test(id) || /^01[3-9][0-9]{8}$/.test(id);
+    var loginPayload = looksLikePhone ? {phone: id, password: pw} : {email: id, password: pw};
     var res = await fetch(API_BASE + '/customer/login', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email: id, password: pw})
+      body: JSON.stringify(loginPayload)
     });
     var data = await res.json();
     if(res.ok && data.token){
@@ -969,14 +974,12 @@ doRegister = async function(e){
     var prod  = 'https://bscollectionbd.onrender.com/api';
     return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
   })();
-  if(!email){
-    return _origDoRegister(e);
-  }
+  // Allow signup with email OR phone
   try{
     var res = await fetch(API_BASE + '/customer/signup', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, phone, password: pw})
+      body: JSON.stringify({name: name, email: email, phone: phone, password: pw})
     });
     var data = await res.json();
     if(res.ok && data.token){
