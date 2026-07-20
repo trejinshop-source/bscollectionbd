@@ -25,8 +25,10 @@ function doPost(e) {
     switch (data.action) {
       case 'sendOtp':  return sendOtp(data);
       case 'newOrder': return newOrder(data);
-      case 'contact':  return contactMsg(data);
-      default:         return _json({ ok: false, msg: 'unknown action' });
+      case 'contact':      return contactMsg(data);
+      case 'newContact':   return contactMsg(data);
+      case 'replyContact': return replyContact(data);
+      default:             return _json({ ok: false, msg: 'unknown action' });
     }
   } catch (err) {
     return _json({ ok: false, msg: String(err) });
@@ -142,6 +144,25 @@ function contactMsg(d) {
     <div style="background:#fff;padding:14px;border-radius:8px;border:1px solid #e2e8f0;white-space:pre-wrap">${_esc(d.message || '')}</div>
   </div>`;
   MailApp.sendEmail({ to: OWNER_EMAIL, subject: SHOP_NAME + ' — Contact ' + _esc(d.name || ''), htmlBody: html });
+  return _json({ ok: true });
+}
+
+
+// -- Admin Reply to Contact Message
+function replyContact(d) {
+  if (!d.to) return _json({ ok: false, msg: 'missing recipient email' });
+  const html = '<div style="font-family:Segoe UI,Arial,sans-serif;max-width:520px;margin:0 auto;background:' + BRAND.bg + ';border-radius:12px;overflow:hidden;border:1px solid #e2e8f0">'
+    + '<div style="background:' + BRAND.navy + ';padding:22px 24px;color:#fff"><div style="font-size:20px;font-weight:700">' + SHOP_NAME + '</div><div style="font-size:13px;opacity:.85;margin-top:2px">আপনার বার্তার উত্তর</div></div>'
+    + '<div style="padding:26px 28px;color:' + BRAND.text + '">'
+    + '<p style="margin:0 0 14px;font-size:15px">প্রিয় ' + _esc(d.name || 'গ্রাহক') + ',</p>'
+    + '<p style="margin:0 0 14px;font-size:14px;line-height:1.7">আপনার বার্তার উত্তরে আমরা জানাচ্ছি:</p>'
+    + '<div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid ' + BRAND.orange + ';padding:16px;border-radius:6px;margin-bottom:18px;font-size:14px;line-height:1.8;white-space:pre-wrap">' + _esc(d.replyText || '') + '</div>'
+    + (d.originalMessage ? '<div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:6px;font-size:12.5px;color:' + BRAND.muted + '"><b>আপনার মূল বার্তা:</b><br><div style="margin-top:6px;white-space:pre-wrap">' + _esc(d.originalMessage) + '</div></div>' : '')
+    + '<p style="margin:18px 0 0;font-size:13px;color:' + BRAND.muted + '">আরো সহায়তার জন্য যোগাযোগ করুন।</p>'
+    + '</div>'
+    + '<div style="background:#0f172a;color:#94a3b8;padding:14px 24px;font-size:12px;text-align:center">© ' + new Date().getFullYear() + ' ' + SHOP_NAME + '</div></div>';
+  const subj = d.subject ? (SHOP_NAME + ' — ' + d.subject + ' (উত্তর)') : (SHOP_NAME + ' — আপনার বার্তার উত্তর');
+  MailApp.sendEmail({ to: d.to, subject: subj, htmlBody: html });
   return _json({ ok: true });
 }
 

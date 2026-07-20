@@ -61,15 +61,15 @@ const ProductSchema = new mongoose.Schema({
   hasDetailPage: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
   tags: [String],
-  colors: [String],
-  sizes: [String],
-  weight: String,
   // SEO
   seoTitle: String,
   seoDescription: String,
   seoKeywords: String,
   specs: [{ label: String, value: String }],
   features: [String],
+  colors: [String],
+  sizes: [String],
+  weight: String,
   placements: {
     shop: { type: Boolean, default: true },
     homePopular: { type: Boolean, default: false },
@@ -282,20 +282,14 @@ app.post("/api/customer/signup", async (req, res) => {
 
 app.post("/api/customer/login", async (req, res) => {
   try {
-    const { email, phone, password, identifier } = req.body || {};
-    // Accept: email field, phone field, or generic identifier (email or phone)
-    const id = identifier || email || phone || "";
-    const idLower = String(id).toLowerCase().trim();
-    // Try email match first, then phone match
-    const user = await User.findOne({
-      $or: [
-        { email: idLower },
-        { phone: idLower },
-        { phone: id.trim() },
-      ]
-    });
+    const { email, phone, password } = req.body || {};
+    const identifier = String(email || phone || "").trim();
+    const isPhone = !email && phone;
+    const user = isPhone
+      ? await User.findOne({ phone: identifier })
+      : await User.findOne({ email: identifier.toLowerCase() });
     if (!user || user.passwordHash !== sha256(password || ""))
-      return res.status(401).json({ error: "ইমেইল/ফোন বা পাসওয়ার্ড ভুল" });
+      return res.status(401).json({ error: "ইমেইল বা পাসওয়ার্ড ভুল" });
     const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -406,17 +400,14 @@ app.patch("/api/contacts/:id", authAdmin, async (req, res) => {
     if (read !== undefined) update.read = read;
     if (replied !== undefined) update.replied = replied;
     const msg = await ContactMessage.findByIdAndUpdate(req.params.id, update, { new: true });
-    // Send email reply to the client if replyText provided and email exists
     if (replyText && msg && msg.email) {
       appsScriptPost({
-        action: "contactReply",
+        action: "replyContact",
         to: msg.email,
-        toName: msg.name,
-        subject: "Re: " + (msg.subject || "Your Inquiry") + " — BS Collection BD",
+        name: msg.name || "",
+        subject: msg.subject || "আপনার বার্তার উত্তর",
+        originalMessage: msg.message || "",
         replyText,
-        originalMessage: msg.message,
-        siteName: "BS Collection BD",
-        siteUrl: "https://bscollectionbd.com",
       });
     }
     res.json(msg);
@@ -459,15 +450,6 @@ app.post("/api/products", authAdmin, async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
-// Get product by SKU
-app.get("/api/products/sku/:sku", async (req, res) => {
-  try {
-    const p = await Product.findOne({ sku: req.params.sku });
-    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
-    res.json(p);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
 app.get("/api/products/id/:id", async (req, res) => {
   try {
     const p = await Product.findById(req.params.id);
@@ -493,22 +475,10 @@ app.delete("/api/products/id/:id", authAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Image upload (single)
-app.post("/api/products/upload", authAdmin, async (req, res) => {
-  upload.single("image")(req, res, (err) => {
-    if (err) return res.status(400).json({ error: err.message || "আপলোড ব্যর্থ" });
-    if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
-    res.json({ url: req.file.path, urls: [req.file.path] });
-  });
-});
-
-// Image upload (multiple)
-app.post("/api/products/upload-multiple", authAdmin, async (req, res) => {
-  upload.array("images", 10)(req, res, (err) => {
-    if (err) return res.status(400).json({ error: err.message || "আপলোড ব্যর্থ" });
-    if (!req.files || !req.files.length) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
-    res.json({ urls: req.files.map(f => f.path) });
-  });
+// Image upload
+app.post("/api/products/upload", authAdmin, upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+  res.json({ url: req.file.path });
 });
 
 // About page image upload (public but with basic check)
@@ -550,6 +520,13 @@ app.delete("/api/categories/:id", authAdmin, async (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+
+// Category image upload
+app.post("/api/categories/upload", authAdmin, upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+  res.json({ url: req.file.path });
+});
+
 // ORDERS
 // ═════════════════════════════════════════════════════════════════════════════
 app.post("/api/orders", async (req, res) => {
@@ -617,10 +594,21 @@ app.post("/api/orders", async (req, res) => {
     // Notify
     appsScriptPost({
       action: "newOrder",
-      orderId: order.orderId,
-      customer: order.customer,
-      items: order.items,
-      total: order.total,
+      order: {
+        id: order.orderId,
+        customer: order.customer,
+        items: order.items.map(i => ({
+          name: i.name,
+          sku: i.sku,
+          qty: i.qty,
+          price: i.price,
+          total: i.price * i.qty,
+        })),
+        subtotal: order.subtotal,
+        shipping: order.deliveryCharge || order.deliveryFee,
+        total: order.total,
+        status: order.status,
+      },
     });
 
     res.status(201).json({ ok: true, orderId: order.orderId, _id: order._id });
@@ -803,7 +791,15 @@ const DEFAULT_PAGES = [
     title: "Contact Us — BS Collection BD",
     metaDescription: "Get in touch with BS Collection BD. We are here to help with your orders and queries.",
     metaKeywords: "contact bscollectionbd, fan store contact, electrical appliances support",
-    content: {},
+    content: {
+      heading: "যোগাযোগ করুন",
+      subheading: "Contact BS Collection BD",
+      intro: "আমাদের সাথে যোগাযোগ করুন। আমরা আপনার যেকোনো প্রশ্ন ও সমস্যার সমাধান করতে সর্বদা প্রস্তুত।",
+      address: "Mirpur 10, Dhaka 1216, Bangladesh",
+      phone: "+880 1344-367630",
+      email: "support@bscollectionbd.com",
+      hours: "শনি – বৃহস্পতি: সকাল ৯টা – রাত ৯টা",
+    },
   },
 ];
 

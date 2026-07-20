@@ -89,7 +89,12 @@
       const m = document.createElement('div');
       m.className = 'order-modal-overlay';
       m.id = 'orderModalOverlay';
-      // NOTE: Do NOT close order form when clicking outside — intentional UX decision
+      m.addEventListener('click', function (e) {
+        if (e.target === m) {
+          m.classList.remove('show');
+          if (typeof window.bsCloseCheckout === 'function') window.bsCloseCheckout();
+        }
+      });
       document.body.appendChild(m);
     }
   }

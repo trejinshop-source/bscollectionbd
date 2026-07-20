@@ -299,7 +299,7 @@
     const m = document.createElement('div');
     m.id = 'bs-modal-root';
     m.innerHTML = `
-      <div class="bs-modal-backdrop" onclick="bsCloseCheckout()"></div>
+      <div class="bs-modal-backdrop"></div>
       <div id="bs-checkout" class="bs-modal" role="dialog">
         <header class="bs-modal-head">
           <h3><i class="fas fa-truck"></i> অর্ডার সম্পূর্ণ করুন</h3>

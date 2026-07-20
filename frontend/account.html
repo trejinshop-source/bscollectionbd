@@ -856,7 +856,7 @@ doLogin = async function(e){
     var res = await fetch(API_BASE + '/customer/login', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({identifier: id, email: id, phone: id, password: pw})
+      body: JSON.stringify({email: id, password: pw})
     });
     var data = await res.json();
     if(res.ok && data.token){
