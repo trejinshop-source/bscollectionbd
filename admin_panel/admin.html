@@ -2910,7 +2910,8 @@ window.bsRemovePromo = function(idx){
   else boot();
 })();
 
-</script>
+
+
 
 
 /* ============================================================
@@ -3075,6 +3076,10 @@ function lpAddFaq(q,a){
   row.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="lp-faq-q" placeholder="প্রশ্ন" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(q||'')+'"><button type="button" onclick="this.closest(\'.lp-faq-row\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer">✕</button></div><textarea class="lp-faq-a" placeholder="উত্তর" rows="2" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;box-sizing:border-box">'+(a||'')+'</textarea>';
   c.appendChild(row);
 }
+
+</script>
+
+
 
 <!-- ==================== LANDING PAGE MODAL ==================== -->
 <div class="modal-overlay hidden" id="landingPageModal">
