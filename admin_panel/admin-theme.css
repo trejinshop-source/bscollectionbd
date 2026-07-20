@@ -65,3 +65,32 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
 .bs-ext-placements{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
 .bs-ext-placements label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f1f5f9;border-radius:20px;font-size:13px;cursor:pointer;font-weight:500;color:#334155}
 .bs-ext-placements input{margin:0}
+
+/* ============================================================
+   User update: font family from product-jy2218 + no border-radius
+   + strict sidebar tab isolation
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap');
+
+html, body, button, input, select, textarea, .sidebar, .topbar,
+.card, .stat-card, .data-card, .bs-ext-tabs button, .bs-ext-btn,
+.bs-ext-form input, .bs-ext-form textarea, .bs-ext-form select,
+h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
+  font-family: 'Poppins','Hind Siliguri','Noto Sans Bengali',sans-serif !important;
+}
+
+/* Kill border-radius everywhere in admin */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+/* Sidebar tab isolation: only the active panel is visible, others hidden.
+   Works with common patterns: .panel, .tab-panel, [data-panel], section[id^="panel-"] */
+.page:not(.active),
+.panel:not(.active),
+.tab-panel:not(.active),
+[data-panel]:not(.active),
+.admin-section:not(.active),
+.view:not(.active) {
+  display: none !important;
+}
