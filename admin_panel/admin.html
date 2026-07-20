@@ -475,7 +475,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     <li><a data-page="categories" data-title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Categories</a></li>
     <li><a data-page="customers" data-title="Customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Customers</a></li>
     <li><a data-page="reports" data-title="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>Reports</a></li>
-    <li><a data-page="advanced" data-title="এডভান্সড অপশন"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>এডভান্সড অপশন</a></li>
+    <li><a data-page="advanced" data-title="Advanced Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Advanced Options</a></li>
     <li class="nav-section-gap"></li>
     <li><a id="sidebarLogoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</a></li>
   </ul>
@@ -1063,7 +1063,7 @@ async function loadStats(){
     const d = await apiJSON('/stats');
     if(!d) return;
     // Dashboard
-    document.getElementById('dashRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString('bn-BD');
+    document.getElementById('dashRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString('en-US');
     document.getElementById('dashOrders').textContent = (d.totalOrders||0).toLocaleString();
     document.getElementById('dashProducts').textContent = (d.totalProducts||0).toLocaleString();
     const pPct = d.totalOrders ? Math.round((d.pendingOrders/d.totalOrders)*100) : 0;
@@ -1090,7 +1090,7 @@ async function loadStats(){
     document.getElementById('prodLowStockVal').textContent = d.lowStock||0;
     document.getElementById('prodOutStockVal').textContent = d.outOfStock||0;
     // Reports page
-    document.getElementById('rptRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString();
+    document.getElementById('rptRevenue').textContent = '৳' + (d.totalRevenue||0).toLocaleString('en-US');
     document.getElementById('rptOrders').textContent = d.totalOrders||0;
     document.getElementById('rptProducts').textContent = d.totalProducts||0;
     document.getElementById('rptCategories').textContent = d.totalCategories||0;
@@ -2238,12 +2238,165 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       <label>Why Us <textarea name="cnt_whyUs" rows="2">${esc(cnt.whyUs||'')}</textarea></label>
       <div class="row"><label>ঠিকানা <input name="cnt_address" value="${esc(cnt.address||'')}"/></label><label>ফোন <input name="cnt_phone" value="${esc(cnt.phone||'')}"/></label></div>
       <div class="row"><label>ইমেইল <input name="cnt_email" value="${esc(cnt.email||'')}"/></label><label>সময় <input name="cnt_hours" value="${esc(cnt.hours||'')}"/></label></div>` : '';
+
+    // ── Home page: structured, editable & savable sections that mirror
+    // index.html exactly (Promo Banners, Deal of Month, Why Choose Us, Reviews, Newsletter).
+    // Saving PUTs to /page-settings/home; index.html fetches this and renders live.
+    const homeFields = pageKey === 'home' ? (() => {
+      const banners = cnt.promoBanners || [];
+      const deal = cnt.dealOfMonth || {};
+      const why = cnt.whyChooseUs || [];
+      const revs = cnt.reviews || [];
+      const news = cnt.newsletter || {};
+
+      const bannerRows = banners.map((b,i) => `
+        <div class="bs-ext-panel" style="margin-bottom:10px" data-banner-row="${i}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <b style="color:#14213D;font-size:13px">Banner ${i+1}</b>
+            <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-banner-row]').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+          <div class="row">
+            <label>স্টাইল <select data-b-style><option value="amber" ${b.style==='amber'?'selected':''}>Amber</option><option value="dark" ${b.style==='dark'?'selected':''}>Dark</option></select></label>
+            <label>Tag/লেবেল <input data-b-tag value="${esc(b.tag||'')}"/></label>
+          </div>
+          <label>টাইটেল <input data-b-title value="${esc(b.title||'')}"/></label>
+          <label>বিবরণ <input data-b-text value="${esc(b.text||'')}"/></label>
+          <div class="row">
+            <label>বাটন টেক্সট <input data-b-btntext value="${esc(b.btnText||'Shop Now')}"/></label>
+            <label>বাটন লিংক <input data-b-btnlink value="${esc(b.btnLink||'shop.html')}"/></label>
+          </div>
+          <label>ছবি URL <input data-b-img value="${esc(b.img||'')}"/></label>
+        </div>`).join('');
+
+      const whyRows = why.map((w,i) => `
+        <div class="row-3" style="margin-bottom:8px;align-items:end" data-why-row="${i}">
+          <label>Icon (Font Awesome ক্লাস) <input data-w-icon value="${esc(w.icon||'')}" placeholder="fa-award"/></label>
+          <label>টাইটেল <input data-w-title value="${esc(w.title||'')}"/></label>
+          <label style="display:flex;gap:8px">
+            <span style="flex:1"><input data-w-text value="${esc(w.text||'')}" placeholder="বিবরণ"/></span>
+            <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-why-row]').remove()"><i class="fas fa-trash"></i></button>
+          </label>
+        </div>`).join('');
+
+      const revRows = revs.map((r,i) => `
+        <div class="row-3" style="margin-bottom:8px;align-items:end" data-rev-row="${i}">
+          <label>নাম <input data-r-name value="${esc(r.name||'')}"/></label>
+          <label>রেটিং (১-৫) <input type="number" min="1" max="5" data-r-rating value="${r.rating||5}"/></label>
+          <label style="display:flex;gap:8px">
+            <span style="flex:1"><input data-r-text value="${esc(r.text||'')}" placeholder="মতামত"/></span>
+            <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-rev-row]').remove()"><i class="fas fa-trash"></i></button>
+          </label>
+        </div>`).join('');
+
+      return `
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> Promo Banners</h4>
+          <div id="bsHomeBanners">${bannerRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddPromoBanner()"><i class="fas fa-plus"></i> নতুন Banner যোগ</button>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-tag" style="color:#FCA311"></i> Deal of the Month</h4>
+          <div class="row">
+            <label>Tag/লেবেল <input id="bsDealTag" value="${esc(deal.tag||'')}"/></label>
+            <label>হাইলাইট (যেমন: 45% OFF) <input id="bsDealHighlight" value="${esc(deal.highlight||'')}"/></label>
+          </div>
+          <label>টাইটেল <input id="bsDealTitle" value="${esc(deal.title||'')}"/></label>
+          <label>বিবরণ <textarea id="bsDealText" rows="2">${esc(deal.text||'')}</textarea></label>
+          <div class="row">
+            <label>বাটন টেক্সট <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
+            <label>বাটন লিংক <input id="bsDealBtnLink" value="${esc(deal.btnLink||'shop.html')}"/></label>
+          </div>
+          <div class="row">
+            <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/></label>
+            <label>কতদিনের কাউন্টডাউন <input type="number" id="bsDealDays" value="${deal.days||8}"/></label>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-thumbs-up" style="color:#FCA311"></i> Why Choose Us</h4>
+          <div id="bsHomeWhy">${whyRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddWhyCard()"><i class="fas fa-plus"></i> নতুন Card যোগ</button>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> Reviews (হোমপেজ)</h4>
+          <div id="bsHomeReviews">${revRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddReviewRow()"><i class="fas fa-plus"></i> নতুন Review যোগ</button>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-envelope-open-text" style="color:#FCA311"></i> Newsletter</h4>
+          <div class="row">
+            <label>টাইটেল <input id="bsNewsTitle" value="${esc(news.title||'')}"/></label>
+            <label>হাইলাইট (যেমন: 10% OFF) <input id="bsNewsHighlight" value="${esc(news.highlight||'')}"/></label>
+          </div>
+          <label>বিবরণ <input id="bsNewsText" value="${esc(news.text||'')}"/></label>
+          <div class="row">
+            <label>ইনপুট প্লেসহোল্ডার <input id="bsNewsPlaceholder" value="${esc(news.placeholder||'Enter your email address')}"/></label>
+            <label>বাটন টেক্সট <input id="bsNewsBtnText" value="${esc(news.btnText||'Subscribe')}"/></label>
+          </div>
+        </div>
+      `;
+    })() : '';
+
+    window.bsAddPromoBanner = () => {
+      const wrap = document.getElementById('bsHomeBanners'); if(!wrap) return;
+      const i = wrap.querySelectorAll('[data-banner-row]').length;
+      const div = document.createElement('div');
+      div.className = 'bs-ext-panel'; div.style.marginBottom = '10px'; div.dataset.bannerRow = i;
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b style="color:#14213D;font-size:13px">Banner ${i+1}</b>
+          <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-banner-row]').remove()"><i class="fas fa-trash"></i></button>
+        </div>
+        <div class="row">
+          <label>স্টাইল <select data-b-style><option value="amber">Amber</option><option value="dark">Dark</option></select></label>
+          <label>Tag/লেবেল <input data-b-tag/></label>
+        </div>
+        <label>টাইটেল <input data-b-title/></label>
+        <label>বিবরণ <input data-b-text/></label>
+        <div class="row">
+          <label>বাটন টেক্সট <input data-b-btntext value="Shop Now"/></label>
+          <label>বাটন লিংক <input data-b-btnlink value="shop.html"/></label>
+        </div>
+        <label>ছবি URL <input data-b-img/></label>`;
+      wrap.appendChild(div);
+    };
+    window.bsAddWhyCard = () => {
+      const wrap = document.getElementById('bsHomeWhy'); if(!wrap) return;
+      const i = wrap.querySelectorAll('[data-why-row]').length;
+      const div = document.createElement('div');
+      div.className = 'row-3'; div.style.marginBottom = '8px'; div.style.alignItems = 'end'; div.dataset.whyRow = i;
+      div.innerHTML = `
+        <label>Icon (Font Awesome ক্লাস) <input data-w-icon placeholder="fa-award"/></label>
+        <label>টাইটেল <input data-w-title/></label>
+        <label style="display:flex;gap:8px">
+          <span style="flex:1"><input data-w-text placeholder="বিবরণ"/></span>
+          <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-why-row]').remove()"><i class="fas fa-trash"></i></button>
+        </label>`;
+      wrap.appendChild(div);
+    };
+    window.bsAddReviewRow = () => {
+      const wrap = document.getElementById('bsHomeReviews'); if(!wrap) return;
+      const i = wrap.querySelectorAll('[data-rev-row]').length;
+      const div = document.createElement('div');
+      div.className = 'row-3'; div.style.marginBottom = '8px'; div.style.alignItems = 'end'; div.dataset.revRow = i;
+      div.innerHTML = `
+        <label>নাম <input data-r-name/></label>
+        <label>রেটিং (১-৫) <input type="number" min="1" max="5" data-r-rating value="5"/></label>
+        <label style="display:flex;gap:8px">
+          <span style="flex:1"><input data-r-text placeholder="মতামত"/></span>
+          <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-rev-row]').remove()"><i class="fas fa-trash"></i></button>
+        </label>`;
+      wrap.appendChild(div);
+    };
     document.getElementById('bsExtPageEditor').innerHTML = `
       <form class="bs-ext-form" id="bsExtPageForm">
         <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-file-alt"></i> ${esc(c.label || pageKey)} — পেজ সেটিংস</h3>
         <label>Page Title <input name="title" value="${esc(c.title || '')}"/></label>
         <label>Meta Description <textarea name="metaDescription" rows="2">${esc(c.metaDescription || '')}</textarea></label>
-        ${contactFields}${aboutFields}
+        ${contactFields}${aboutFields}${homeFields}
         <h4 style="color:#14213D;margin:16px 0 10px;font-size:14px">Hero Section</h4>
         <label>Hero Headline <input name="hero_headline" value="${esc(hero.headline || '')}"/></label>
         <label>Hero Subheadline <input name="hero_subheadline" value="${esc(hero.subheadline || '')}"/></label>
@@ -2269,6 +2422,47 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       if(fd.get('cnt_intro')) content.intro=fd.get('cnt_intro');
       if(fd.get('cnt_mission')) content.mission=fd.get('cnt_mission');
       if(fd.get('cnt_whyUs')) content.whyUs=fd.get('cnt_whyUs');
+
+      if (pageKey === 'home') {
+        content.promoBanners = Array.from(document.querySelectorAll('#bsHomeBanners [data-banner-row]')).map(row => ({
+          style: row.querySelector('[data-b-style]')?.value || 'amber',
+          tag: row.querySelector('[data-b-tag]')?.value || '',
+          title: row.querySelector('[data-b-title]')?.value || '',
+          text: row.querySelector('[data-b-text]')?.value || '',
+          btnText: row.querySelector('[data-b-btntext]')?.value || 'Shop Now',
+          btnLink: row.querySelector('[data-b-btnlink]')?.value || 'shop.html',
+          img: row.querySelector('[data-b-img]')?.value || '',
+        }));
+        content.dealOfMonth = {
+          tag: document.getElementById('bsDealTag')?.value || '',
+          title: document.getElementById('bsDealTitle')?.value || '',
+          highlight: document.getElementById('bsDealHighlight')?.value || '',
+          text: document.getElementById('bsDealText')?.value || '',
+          btnText: document.getElementById('bsDealBtnText')?.value || 'Buy Now',
+          btnLink: document.getElementById('bsDealBtnLink')?.value || 'shop.html',
+          img: document.getElementById('bsDealImg')?.value || '',
+          days: parseInt(document.getElementById('bsDealDays')?.value || 8),
+        };
+        content.whyChooseUs = Array.from(document.querySelectorAll('#bsHomeWhy [data-why-row]')).map(row => ({
+          icon: row.querySelector('[data-w-icon]')?.value || 'fa-star',
+          title: row.querySelector('[data-w-title]')?.value || '',
+          text: row.querySelector('[data-w-text]')?.value || '',
+        }));
+        content.reviews = Array.from(document.querySelectorAll('#bsHomeReviews [data-rev-row]')).map(row => ({
+          name: row.querySelector('[data-r-name]')?.value || '',
+          initial: (row.querySelector('[data-r-name]')?.value || '?').trim().charAt(0).toUpperCase(),
+          rating: parseInt(row.querySelector('[data-r-rating]')?.value || 5),
+          text: row.querySelector('[data-r-text]')?.value || '',
+        }));
+        content.newsletter = {
+          title: document.getElementById('bsNewsTitle')?.value || '',
+          highlight: document.getElementById('bsNewsHighlight')?.value || '',
+          text: document.getElementById('bsNewsText')?.value || '',
+          placeholder: document.getElementById('bsNewsPlaceholder')?.value || 'Enter your email address',
+          btnText: document.getElementById('bsNewsBtnText')?.value || 'Subscribe',
+        };
+      }
+
       const body = {
         title: fd.get('title'), metaDescription: fd.get('metaDescription'),
         hero: {

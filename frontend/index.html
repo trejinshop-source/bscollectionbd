@@ -1228,6 +1228,13 @@ document.addEventListener('bsdata:ready', function(){
     if(live.old && live.now) item.sale = '-' + Math.round((live.old-live.now)/live.old*100) + '%';
   });
   if(typeof renderProducts === 'function') renderProducts(featured,'featuredGrid');
+
+  // Categories/Featured Products এর নতুন এলিমেন্টগুলো fade-in ক্লাস নিয়ে যোগ হয়,
+  // কিন্তু IntersectionObserver শুধু পেজ লোডের সময় যা DOM-এ ছিল তা-ই observe করে।
+  // তাই আগের observer disconnect করে নতুন এলিমেন্টগুলো (re)-observe করতে হবে,
+  // নাহলে সেগুলো opacity:0 তেই আটকে থেকে সাদা দেখায়।
+  if (typeof observeFadeIns === 'function') observeFadeIns();
+  if (typeof renderHomeSections === 'function') renderHomeSections();
 });
 
 function toggleCategories(){
@@ -1283,21 +1290,69 @@ function renderProducts(arr,target){document.getElementById(target).innerHTML = 
 renderProducts(featured,'featuredGrid');
 renderProducts(bestSellers,'bestGrid');
 
-/* ================= FILTER TABS ================= */
-const cats = ["All", ...new Set(featured.map(p=>p.cat))];
-document.getElementById('filterTabs').innerHTML = cats.map((c,i)=>`<button class="${i===0?'active':''}" data-filter="${c}">${c}</button>`).join('');
-document.querySelectorAll('#filterTabs button').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('#filterTabs button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    const f = b.dataset.filter;
-    const filtered = f==='All' ? featured : featured.filter(p=>p.cat===f);
-    document.getElementById('featuredGrid').innerHTML = filtered.map(productHTML).join('');
-    observeFadeIns();
-  });
-});
+/* ================= FILTER TABS =================
+   অ্যাডমিনের "এডভান্সড অপশন → Filter Tabs" থেকে সেভ করা কনফিগ এখন সরাসরি
+   এখানে fetch করে ব্যবহার হয় (আগে এটি কেবল hardcoded ক্যাটাগরি নাম থেকে বাটন
+   বানাতো এবং শুধু 'featured' ডেমো অ্যারে ফিল্টার করতো — অ্যাডমিনে কিছু
+   পরিবর্তন/যোগ করলে এখানে তার কোনো প্রভাব পড়তো না)। */
+let _catalogPool = [];       // BSAdmin এর আসল পণ্য ক্যাটালগ (id, placements, categorySlug সহ)
+let _activeFilterTab = 'all';
 
-/* ================= REVIEWS ================= */
+function toCardProduct(p){
+  const now = p.now, old = p.old;
+  let sale = '';
+  if (old && now && old > now) sale = '-' + Math.round((old - now) / old * 100) + '%';
+  else if (p.featured) sale = 'NEW';
+  return {
+    id: p._id || p.id || p.sku,
+    sale, cat: p.cat || '', categorySlug: p.categorySlug || '',
+    name: p.name, rating: p.rating || 5, now: p.now, old: p.old,
+    img: p.img, url: p.detailPage || p.url || ('product-detail.html?id=' + (p.sku || p.id || '')),
+    placements: p.placements || {},
+  };
+}
+function buildCatalogPool(){
+  const list = (window.BSAdmin ? BSAdmin.getProducts() : null) || [];
+  _catalogPool = list.map(toCardProduct);
+}
+function filterCatalogPool(filterValue){
+  if (!filterValue || filterValue === 'all') return _catalogPool;
+  if (filterValue.startsWith('cat:')) {
+    const slug = filterValue.slice(4);
+    return _catalogPool.filter(p => p.categorySlug === slug);
+  }
+  return _catalogPool.filter(p => p.placements && p.placements[filterValue]);
+}
+function applyFilterTab(filterValue){
+  _activeFilterTab = filterValue;
+  const filtered = filterCatalogPool(filterValue);
+  document.getElementById('featuredGrid').innerHTML = (filtered.length ? filtered : _catalogPool).map(productHTML).join('');
+  observeFadeIns();
+}
+function renderFilterTabs(tabs){
+  const visible = (tabs || []).filter(t => t.visible !== false).sort((a,b) => (a.order||0) - (b.order||0));
+  const list = visible.length ? visible : [{ id:'all', label:'সকল পন্য', filter:'all' }];
+  document.getElementById('filterTabs').innerHTML = list.map((t,i) =>
+    `<button class="${i===0?'active':''}" data-filter="${t.filter||'all'}">${t.label||t.filter}</button>`
+  ).join('');
+  document.querySelectorAll('#filterTabs button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#filterTabs button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      applyFilterTab(b.dataset.filter);
+    });
+  });
+  if (list.length) applyFilterTab(list[0].filter || 'all');
+}
+
+buildCatalogPool();
+fetch(API_BASE + '/filter-tabs').then(r => r.ok ? r.json() : Promise.reject())
+  .then(tabs => renderFilterTabs(tabs))
+  .catch(() => renderFilterTabs([{ id:'all', label:'সকল পন্য', filter:'all', order:0, visible:true }]));
+
+/* ================= REVIEWS =================
+   ডিফল্ট রিভিউ, তবে অ্যাডমিনের Page Settings → Home থেকে সেভ করা থাকলে
+   সেটাই দেখানো হবে (renderHomeSections() দেখুন)। */
 const reviews = [
   {n:"Rahim Uddin",initial:"R",r:5,t:"BLDC ceiling fan-টি অসাধারণ শান্ত এবং স্টাইলিশ। আমার বিদ্যুৎ বিল অনেক কমেছে। হাইলি রেকমেন্ডেড!"},
   {n:"Farhana Akter",initial:"F",r:5,t:"দ্রুত ডেলিভারি এবং প্রিমিয়াম কোয়ালিটির প্রোডাক্ট। ইন্ডাস্ট্রিয়াল ফ্যানটি আমার গোডাউনে দারুণ কাজ করছে।"},
@@ -1311,6 +1366,97 @@ document.getElementById('reviewsGrid').innerHTML = reviews.map(r=>`
     </div>
     <p>"${r.t}"</p>
   </div>`).join('');
+
+/* ================= HOME PAGE SETTINGS (Promo Banners / Deal of Month /
+   Why Choose Us / Reviews / Newsletter) — অ্যাডমিন প্যানেলের "পেজ সেটিংস →
+   Home" থেকে সেভ করা কন্টেন্ট দিয়ে এই সেকশনগুলো লাইভ আপডেট হয়। ================= */
+function renderHomeSections(){
+  fetch(API_BASE + '/page-settings/home').then(r => r.ok ? r.json() : Promise.reject())
+    .then(setting => {
+      const c = (setting && setting.content) || {};
+
+      if (Array.isArray(c.promoBanners) && c.promoBanners.length) {
+        const grid = document.querySelector('.promo-grid');
+        if (grid) {
+          grid.innerHTML = c.promoBanners.map(b => `
+            <div class="promo-banner ${b.style==='dark'?'dark':'amber'} fade-in">
+              <span>${b.tag||''}</span>
+              <h3>${b.title||''}</h3>
+              <p style="font-size:13px;opacity:.9;margin-bottom:14px">${b.text||''}</p>
+              <a href="${b.btnLink||'shop.html'}" class="btn">${b.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></a>
+              <img class="promo-img" loading="lazy" src="${b.img||''}" alt="${b.title||''}"/>
+            </div>`).join('');
+        }
+      }
+
+      if (c.dealOfMonth && Object.keys(c.dealOfMonth).length) {
+        const d = c.dealOfMonth;
+        const dealSection = document.querySelector('#deal .deal');
+        if (dealSection) {
+          dealSection.innerHTML = `
+            <div class="deal-content">
+              <span class="tag">${d.tag||''}</span>
+              <h2>${d.title||''} — <span>${d.highlight||''}</span></h2>
+              <p>${d.text||''}</p>
+              <div class="countdown">
+                <div><b id="d">00</b><small>দিন</small></div>
+                <div><b id="h">00</b><small>ঘণ্টা</small></div>
+                <div><b id="m">00</b><small>মিনিট</small></div>
+                <div><b id="s">00</b><small>সেকেন্ড</small></div>
+              </div>
+              <a href="${d.btnLink||'shop.html'}" class="btn btn-accent">${d.btnText||'Buy Now'} <i class="fas fa-shopping-cart"></i></a>
+            </div>
+            <div class="deal-img"><img loading="lazy" src="${d.img||''}" alt="Deal Product"/></div>`;
+          if (d.days) {
+            window._dealDeadline = new Date().getTime() + Number(d.days) * 24*60*60*1000;
+            if (typeof updateCountdown === 'function') updateCountdown();
+          }
+        }
+      }
+
+      if (Array.isArray(c.whyChooseUs) && c.whyChooseUs.length) {
+        const grid = document.querySelector('.why-grid');
+        if (grid) {
+          grid.innerHTML = c.whyChooseUs.map(w => `
+            <div class="why-card fade-in"><div class="why-icon"><i class="fas ${w.icon||'fa-star'}"></i></div><h4>${w.title||''}</h4><p>${w.text||''}</p></div>`).join('');
+        }
+      }
+
+      if (Array.isArray(c.reviews) && c.reviews.length) {
+        document.getElementById('reviewsGrid').innerHTML = c.reviews.map(r => `
+          <div class="review-card fade-in">
+            <div class="review-header">
+              <div class="review-avatar">${r.initial || (r.name||'?').charAt(0).toUpperCase()}</div>
+              <div><h4>${r.name||''}</h4><div class="rating">${star(r.rating||5)}</div></div>
+            </div>
+            <p>"${r.text||''}"</p>
+          </div>`).join('');
+      }
+
+      if (c.newsletter && Object.keys(c.newsletter).length) {
+        const n = c.newsletter;
+        const box = document.querySelector('.newsletter');
+        if (box) {
+          box.innerHTML = `
+            <h2>${n.title||''} <span>${n.highlight||''}</span></h2>
+            <p>${n.text||''}</p>
+            <form id="newsForm">
+              <input type="email" placeholder="${n.placeholder||'Enter your email address'}" required aria-label="Email"/>
+              <button type="submit">${n.btnText||'Subscribe'}</button>
+            </form>`;
+          document.getElementById('newsForm').addEventListener('submit', e => {
+            e.preventDefault();
+            toast('Thanks for subscribing!');
+            e.target.reset();
+          });
+        }
+      }
+
+      observeFadeIns();
+    })
+    .catch(() => { /* backend unreachable — keep existing static/fallback content */ });
+}
+renderHomeSections();
 
 /* ================= CART / WISHLIST (unified bs_wish_v1) ================= */
 var WL_KEY = 'bs_wish_v1';
@@ -1425,8 +1571,9 @@ document.getElementById('newsForm').addEventListener('submit',e=>{
 });
 
 /* ================= COUNTDOWN ================= */
-const deadline = new Date().getTime() + 8*24*60*60*1000;
+let deadline = new Date().getTime() + 8*24*60*60*1000;
 function updateCountdown(){
+  if (window._dealDeadline) { deadline = window._dealDeadline; window._dealDeadline = null; }
   const t = deadline - Date.now();
   if(t<0)return;
   const d = Math.floor(t/(1000*60*60*24));

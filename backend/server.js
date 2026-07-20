@@ -750,6 +750,39 @@ const DEFAULT_PAGES = [
     content: {
       heroHeadline: "বাংলাদেশের সেরা ফ্যান কালেকশন",
       heroSubheadline: "প্রিমিয়াম মানের ফ্যান ও ইলেকট্রিক্যাল পণ্য",
+      promoBanners: [
+        { style: "amber", tag: "Home Collection — ঘরের জন্য সেরা", title: "প্রিমিয়াম সিলিং ফ্যানে আধুনিক ঘর কুলিং", text: "সেরা মানের সিলিং ফ্যান এখন সাশ্রয়ী মূল্যে পাচ্ছেন।", btnText: "Shop Now", btnLink: "shop.html", img: "assets/photo_2026-07-15_18-28-56.png" },
+        { style: "dark", tag: "Industrial — শিল্প পণ্য", title: "ভারী শিল্পের জন্য টেকসই কুলিং সমাধান", text: "গোডাউন ও কারখানার জন্য টেকসই ইন্ডাস্ট্রিয়াল ফ্যান।", btnText: "Shop Now", btnLink: "shop.html", img: "assets/photo_2026-07-15_18-29-17.png" },
+      ],
+      dealOfMonth: {
+        tag: "মাসের সেরা অফার",
+        title: "Premium Smart BLDC Fan",
+        highlight: "45% OFF",
+        text: "অ্যাপ কন্ট্রোল, স্লিপ টাইমার এবং আল্ট্রা-সাইলেন্ট মোটরসহ আমাদের টপ-রেটেড স্মার্ট সিলিং ফ্যানটি সংগ্রহ করুন। সীমিত স্টক — এখনই অর্ডার করুন!",
+        btnText: "Buy Now", btnLink: "shop.html",
+        img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg",
+        days: 8,
+      },
+      whyChooseUs: [
+        { icon: "fa-award", title: "Quality Products", text: "যাচাই করা পণ্যই আপনার হাতে পৌঁছে দেওয়ার চেষ্টা করি।" },
+        { icon: "fa-truck-fast", title: "Nationwide Delivery", text: "সারা বাংলাদেশে দ্রুত ও নিরাপদে আপনার ঠিকানায় পৌঁছে দেওয়া হয়।" },
+        { icon: "fa-money-bill-wave", title: "Cash on Delivery", text: "আগে পণ্য হাতে নিন, তারপর মূল্য পরিশোধ করুন।" },
+        { icon: "fa-lock", title: "No Advance Payment", text: "কোনো অগ্রিম প্রয়োজন নেই, নিশ্চিন্তে অর্ডার করুন।" },
+        { icon: "fa-headset", title: "Customer Support", text: "অর্ডারের আগে ও পরে প্রয়োজনীয় সহায়তা পেতে আমাদের সাথে যোগাযোগ করতে পারবেন।" },
+        { icon: "fa-heart", title: "Customer Satisfaction", text: "আপনার আস্থা ও সন্তুষ্টি অর্জনই আমাদের লক্ষ্য।" },
+      ],
+      reviews: [
+        { name: "Rahim Uddin", initial: "R", rating: 5, text: "BLDC ceiling fan-টি অসাধারণ শান্ত এবং স্টাইলিশ। আমার বিদ্যুৎ বিল অনেক কমেছে। হাইলি রেকমেন্ডেড!" },
+        { name: "Farhana Akter", initial: "F", rating: 5, text: "দ্রুত ডেলিভারি এবং প্রিমিয়াম কোয়ালিটির প্রোডাক্ট। ইন্ডাস্ট্রিয়াল ফ্যানটি আমার গোডাউনে দারুণ কাজ করছে।" },
+        { name: "Tanvir Hasan", initial: "T", rating: 4, text: "চমৎকার কাস্টমার সাপোর্ট। তারা আমাকে অফিসের জন্য সঠিক টেবিল ফ্যান বেছে নিতে সাহায্য করেছে।" },
+      ],
+      newsletter: {
+        title: "আপনার প্রথম অর্ডারে পান",
+        highlight: "10% OFF",
+        text: "এক্সক্লুসিভ অফার, নতুন পণ্য ও প্রোডাক্ট টিপস পেতে আমাদের নিউজলেটার সাবস্ক্রাইব করুন।",
+        placeholder: "Enter your email address",
+        btnText: "Subscribe",
+      },
     },
   },
   {
