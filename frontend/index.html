@@ -1346,7 +1346,7 @@ function renderFilterTabs(tabs){
 }
 
 buildCatalogPool();
-fetch(API_BASE + '/filter-tabs').then(r => r.ok ? r.json() : Promise.reject())
+fetch(BSAdmin.API_BASE + '/filter-tabs').then(r => r.ok ? r.json() : Promise.reject())
   .then(tabs => renderFilterTabs(tabs))
   .catch(() => renderFilterTabs([{ id:'all', label:'সকল পন্য', filter:'all', order:0, visible:true }]));
 
@@ -1371,7 +1371,7 @@ document.getElementById('reviewsGrid').innerHTML = reviews.map(r=>`
    Why Choose Us / Reviews / Newsletter) — অ্যাডমিন প্যানেলের "পেজ সেটিংস →
    Home" থেকে সেভ করা কন্টেন্ট দিয়ে এই সেকশনগুলো লাইভ আপডেট হয়। ================= */
 function renderHomeSections(){
-  fetch(API_BASE + '/page-settings/home').then(r => r.ok ? r.json() : Promise.reject())
+  fetch(BSAdmin.API_BASE + '/page-settings/home').then(r => r.ok ? r.json() : Promise.reject())
     .then(setting => {
       const c = (setting && setting.content) || {};
 
