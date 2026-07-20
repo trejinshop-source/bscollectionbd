@@ -938,103 +938,6 @@ body.route-services .hero,body.route-services .section:not(.page-view),body.rout
 .pv-stats span{font-size:12px;color:var(--muted)}
 @media(max-width:700px){ .pv-stats{grid-template-columns:repeat(2,1fr)} }
 
-/* =========================================================
-   NEW PURPLE "SOLVE FOR (X)" STYLE ABOUT PAGE (idm- namespace)
-   ========================================================= */
-:root{
-  --idm-purple:#6d2ed6;
-  --idm-purple-dark:#4c1c9c;
-  --idm-purple-darker:#3a1478;
-  --idm-purple-light:#f3ecfd;
-  --idm-ink:#221a33;
-  --idm-muted2:#7a7189;
-}
-.idm-about{background:#fff}
-.idm-about .container{max-width:1200px}
-.idm-eyebrow{display:inline-block;color:var(--idm-purple);font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-.idm-eyebrow-light{display:inline-block;color:#d9c3ff;font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-
-/* ---- Hero / About intro ---- */
-.idm-hero-about{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:center;padding:56px 16px 20px}
-.idm-hero-img{position:relative}
-.idm-hero-img .idm-img-frame{position:relative;border-radius:6px;overflow:hidden;box-shadow:0 24px 50px rgba(76,28,156,.18)}
-.idm-hero-img .idm-img-frame img,.idm-hero-img .idm-img-frame svg{width:100%;display:block}
-.idm-hero-img::before{content:'';position:absolute;left:-18px;bottom:-18px;width:70%;height:70%;background:var(--idm-purple);z-index:-1;clip-path:polygon(0 30%,100% 0,100% 100%,0% 100%);border-radius:4px}
-.idm-hero-img::after{content:'';position:absolute;top:-14px;right:-14px;width:80px;height:80px;border:6px solid var(--idm-purple-light);border-radius:50%;z-index:2}
-.idm-hero-text h1{font-size:40px;line-height:1.15;font-weight:800;color:var(--idm-ink);margin-bottom:18px;font-family:var(--font-display)}
-.idm-hero-text h1 .idm-accent{color:var(--idm-purple)}
-.idm-hero-text p{color:var(--idm-muted2);font-size:15px;line-height:1.85;margin-bottom:14px}
-.idm-hero-btns{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap}
-.idm-btn-filled{background:var(--idm-purple);color:#fff;padding:13px 26px;border-radius:2px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:2px solid var(--idm-purple);transition:.2s}
-.idm-btn-filled:hover{background:var(--idm-purple-dark);border-color:var(--idm-purple-dark)}
-.idm-btn-outline{background:transparent;color:var(--idm-ink);padding:13px 26px;border-radius:2px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:2px solid #e3dcf0;transition:.2s}
-.idm-btn-outline:hover{border-color:var(--idm-purple);color:var(--idm-purple)}
-.idm-hero-stats{display:flex;gap:30px;margin-top:28px;flex-wrap:wrap}
-.idm-hero-stats div{min-width:90px}
-.idm-hero-stats b{display:block;font-size:24px;color:var(--idm-purple-dark);font-family:var(--font-display)}
-.idm-hero-stats span{font-size:12px;color:var(--idm-muted2)}
-
-/* ---- Services ---- */
-.idm-services-section{padding:70px 16px 20px;text-align:center}
-.idm-services-head h2{font-size:30px;font-weight:800;color:var(--idm-ink);margin:0 auto 46px;max-width:640px;font-family:var(--font-display);letter-spacing:.2px}
-.idm-services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;text-align:left}
-.idm-service-card{background:#fff;border:1px solid #ece6f7;border-radius:4px;padding:34px 26px;transition:.25s}
-.idm-service-card:hover{box-shadow:0 14px 34px rgba(109,46,214,.1);transform:translateY(-3px)}
-.idm-service-icon{width:56px;height:56px;border-radius:50%;background:var(--idm-purple-light);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
-.idm-service-icon i{color:var(--idm-purple);font-size:22px}
-.idm-service-card h3{font-size:16px;font-weight:700;color:var(--idm-ink);margin-bottom:10px;line-height:1.4}
-.idm-service-card p{font-size:13.5px;color:var(--idm-muted2);line-height:1.75;margin-bottom:16px}
-.idm-service-link{font-size:13px;font-weight:700;color:var(--idm-purple);cursor:pointer;border:2px solid #e3dcf0;padding:8px 18px;display:inline-block;border-radius:2px;transition:.2s}
-.idm-service-link:hover{border-color:var(--idm-purple);background:var(--idm-purple-light)}
-.idm-service-card.idm-featured{background:var(--idm-purple);border-color:var(--idm-purple)}
-.idm-service-card.idm-featured .idm-service-icon{background:rgba(255,255,255,.16)}
-.idm-service-card.idm-featured .idm-service-icon i{color:#fff}
-.idm-service-card.idm-featured h3,.idm-service-card.idm-featured p{color:#fff}
-.idm-service-card.idm-featured p{opacity:.88}
-.idm-service-card.idm-featured .idm-service-link{color:#fff;border-color:rgba(255,255,255,.5)}
-.idm-service-card.idm-featured .idm-service-link:hover{background:rgba(255,255,255,.14)}
-
-/* ---- Testimonials ---- */
-.idm-testimonials-section{margin-top:80px;position:relative;background:var(--idm-purple);overflow:hidden;padding:64px 16px}
-.idm-testimonials-section::before{content:'';position:absolute;inset:0;background:var(--idm-purple-darker);clip-path:polygon(0 0,42% 0,20% 100%,0 100%)}
-.idm-testimonials-wrap{position:relative;display:grid;grid-template-columns:.7fr 1.3fr;gap:40px;align-items:center}
-.idm-testimonials-label h2{color:#fff;font-size:28px;font-weight:800;font-family:var(--font-display)}
-.idm-testimonial-cards{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.idm-tcard{background:#fff;border-radius:6px;padding:26px 24px;box-shadow:0 20px 40px rgba(0,0,0,.18)}
-.idm-tcard p{font-size:14px;color:#4a4458;line-height:1.8;margin-bottom:18px}
-.idm-tcard-user{display:flex;align-items:center;gap:12px}
-.idm-tcard-avatar{width:44px;height:44px;border-radius:50%;background:var(--idm-purple-light);display:flex;align-items:center;justify-content:center;color:var(--idm-purple);font-size:18px;flex-shrink:0}
-.idm-tcard-user b{display:block;font-size:14px;color:var(--idm-ink)}
-.idm-tcard-user span{font-size:12px;color:var(--idm-muted2)}
-.idm-t-nav{position:absolute;top:32px;right:32px;display:flex;gap:10px;z-index:2}
-.idm-t-nav button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;cursor:pointer;font-size:14px}
-.idm-t-nav button:hover{background:rgba(255,255,255,.12)}
-
-/* ---- Newsletter ---- */
-.idm-newsletter-section{padding:60px 16px;text-align:center}
-.idm-newsletter-wrap{max-width:760px;margin:0 auto}
-.idm-newsletter-wrap h2{font-size:26px;font-weight:800;color:var(--idm-ink);margin-bottom:22px;font-family:var(--font-display)}
-.idm-newsletter-form{display:flex;gap:0;max-width:560px;margin:0 auto;border:2px solid #ece6f7;border-radius:4px;overflow:hidden}
-.idm-newsletter-form input{flex:1;border:none;padding:15px 18px;font-size:14px;font-family:inherit;outline:none;color:var(--idm-ink)}
-.idm-newsletter-form button{background:var(--idm-purple);color:#fff;border:none;padding:15px 26px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
-.idm-newsletter-form button:hover{background:var(--idm-purple-dark)}
-
-@media(max-width:900px){
-  .idm-hero-about{grid-template-columns:1fr;padding-top:36px}
-  .idm-hero-img{max-width:420px;margin:0 auto 30px}
-  .idm-services-grid{grid-template-columns:1fr 1fr}
-  .idm-testimonials-wrap{grid-template-columns:1fr}
-  .idm-testimonial-cards{grid-template-columns:1fr}
-  .idm-t-nav{position:static;margin-top:24px}
-}
-@media(max-width:560px){
-  .idm-services-grid{grid-template-columns:1fr}
-  .idm-hero-text h1{font-size:30px}
-  .idm-newsletter-form{flex-direction:column;border:none;gap:10px}
-  .idm-newsletter-form input{border:2px solid #ece6f7;border-radius:4px}
-  .idm-newsletter-form button{border-radius:4px}
-}
-
 /* --- Services gallery page --- */
 .svc-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .svc-gallery-card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 22px;cursor:pointer;transition:.25s;position:relative;overflow:hidden;display:flex;flex-direction:column}
@@ -1294,8 +1197,8 @@ a{color:inherit}
   <div class="nav-items">
     <a href="index.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="services.html" class="nav-item"><i class="fas fa-concierge-bell"></i><span>Service</span></a>
-    <a href="about.html" class="nav-item active"><i class="fas fa-info-circle"></i><span>About Us</span></a>
-    <a href="cart.html" class="nav-item" onclick="renderCart();openCartPopup();return false;"><i class="fas fa-shopping-cart"></i><span>Cart</span></a>
+    <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i><span>About Us</span></a>
+    <a href="cart.html" class="nav-item active" onclick="renderCart();openCartPopup();return false;"><i class="fas fa-shopping-cart"></i><span>Cart</span></a>
     <a href="account.html" class="nav-item"><i class="far fa-user"></i><span>Login</span></a>
   </div>
 </nav>
@@ -1357,162 +1260,73 @@ a{color:inherit}
 
 
 <!-- ===== In-page About view ===== -->
-<section class="section page-view idm-about" id="pageAbout">
-  <style>
-    #pageAbout .cnw-hero{position:relative;max-width:1180px;margin:0 auto;height:340px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#12100e;border:none;outline:none;box-shadow:none}
-    #pageAbout .cnw-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:.75;border:none;outline:none}
-    #pageAbout .cnw-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.55) 0%,rgba(10,10,10,.35) 45%,rgba(10,10,10,.65) 100%)}
-    #pageAbout .cnw-hero-inner{position:relative;z-index:2;color:#fff}
-    #pageAbout .cnw-hero-inner h1{font-size:56px;font-weight:700;letter-spacing:.5px;margin-bottom:14px;font-family:var(--font-display)}
-    #pageAbout .cnw-crumb{font-size:15px;color:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;gap:8px}
-    #pageAbout .cnw-crumb a{color:#fff;cursor:pointer}
-    #pageAbout .cnw-crumb a:hover{text-decoration:underline}
-    #pageAbout .cnw-crumb i{font-size:11px;opacity:.7}
-    @media (max-width:900px){ #pageAbout .cnw-hero-inner h1{font-size:38px} }
-  </style>
-
-  <div class="cnw-hero">
-    <img src="assets/servises.png" alt="About us hero" />
-    <div class="cnw-hero-inner">
-      <h1>About Us</h1>
-      <div class="cnw-crumb"><a onclick="navTo('home')">Home</a> <i class="fas fa-chevron-right"></i> <span>About Us</span></div>
-    </div>
-  </div>
-
-  <!-- ===== About hero: image + intro text ===== -->
-  <div class="idm-hero-about container">
-    <div class="idm-hero-img">
-      <div class="idm-img-frame">
-        <svg viewBox="0 0 480 400" xmlns="http://www.w3.org/2000/svg">
-          <rect width="480" height="400" fill="#efe7fb"/>
-          <circle cx="360" cy="70" r="60" fill="#e2d3fb"/>
-          <rect x="60" y="230" width="140" height="90" rx="6" fill="#6d2ed6"/>
-          <rect x="70" y="150" width="230" height="110" rx="8" fill="#ffffff" stroke="#d9c8f5" stroke-width="2"/>
-          <circle cx="120" cy="120" r="34" fill="#4c1c9c"/>
-          <rect x="98" y="150" width="44" height="60" rx="10" fill="#6d2ed6"/>
-          <circle cx="220" cy="112" r="30" fill="#c9a8f7"/>
-          <rect x="200" y="140" width="40" height="56" rx="10" fill="#8a4de8"/>
-          <rect x="150" y="260" width="200" height="14" rx="7" fill="#e2d3fb"/>
-          <rect x="150" y="284" width="150" height="14" rx="7" fill="#e2d3fb"/>
-          <path d="M0,400 L0,340 L120,300 L260,360 L480,320 L480,400 Z" fill="#4c1c9c" opacity=".12"/>
-        </svg>
-      </div>
-    </div>
-    <div class="idm-hero-text">
-      <span class="idm-eyebrow">ABOUT</span>
-      <h1>আমরাই <span class="idm-accent">ধোপা মামা </span></h1>
-      <p><strong>ধোপা মামা</strong> ফরিদপুর সদর, ফরিদপুরের একটি প্রিমিয়াম হোম-বেজড অনলাইন লন্ড্রি সার্ভিস। আমরা আপনার প্রিয় কাপড়গুলোর কাপড় ধোয়া, শুকানো, আয়রন করা এবং সঠিক সময়ে ফেরত পৌঁছে দেওয়ার প্রতিশ্রুতি রাখি।</p>
-      <p>ব্যস্ত জীবনে লন্ড্রি নিয়ে দুশ্চিন্তা করতে হবে না — <strong>dhopamama.com</strong> এ একটি ক্লিকেই আমরা আপনার দরজায় হাজির। ফরিদপুর সদরের যেকোনো এলাকায় ফ্রি হোম পিকআপ ও ডেলিভারিসহ নরমাল ওয়াশ, ড্রাই ওয়াশ ও আয়রন সার্ভিস — মিলিয়ে ধোপা মামা আজকের সবচেয়ে সহজ কাপড় ধোয়ার সমাধান।</p>
-      <div class="idm-hero-btns">
-        <a class="idm-btn-filled"><i class="fas fa-shopping-cart"></i> Order Now</a>
-        <a class="idm-btn-outline">Contact Us</a>
-      </div>
-      <div class="idm-hero-stats">
-        <div><b>৫০০০+</b><span>সন্তুষ্ট গ্রাহক</span></div>
-        <div><b>১০+</b><span>বছরের অভিজ্ঞতা</span></div>
-        <div><b>১০০%</b><span>ফ্রি হোম পিকআপ</span></div>
-        <div><b>৪.৮/৫</b><span>গ্রাহক রেটিং</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== Services: for every step of the journey ===== -->
-  <div class="idm-services-section">
+<section class="section page-view" id="pageAbout">
+  <div class="pv-hero">
+    <svg class="pv-hero-waves" viewBox="0 0 1480 420" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="pvWaveA1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#CA9100" stop-opacity=".28"/>
+          <stop offset="100%" stop-color="#CA9100" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="pvWaveB1" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#CA9100" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#CA9100" stop-opacity=".2"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,260 C220,140 320,340 520,220 C700,110 780,300 980,190 C1150,100 1280,260 1480,150" fill="none" stroke="url(#pvWaveA1)" stroke-width="1.5"/>
+      <path d="M0,300 C220,190 340,370 540,260 C720,160 800,330 1010,230 C1170,150 1300,290 1480,190" fill="none" stroke="url(#pvWaveA1)" stroke-width="1"/>
+      <path d="M600,0 C760,90 820,220 980,160 C1120,110 1220,220 1480,90" fill="none" stroke="url(#pvWaveB1)" stroke-width="1.5"/>
+      <path d="M0,120 C120,60 180,150 320,90 C440,40 500,130 620,80" fill="none" stroke="url(#pvWaveA1)" stroke-width="1"/>
+    </svg>
+    <span class="pv-float-badge b1"><i class="fas fa-truck"></i></span>
+    <span class="pv-float-badge b2"><i class="fas fa-shield-alt"></i></span>
+    <span class="pv-float-badge b3"><i class="far fa-clock"></i></span>
+    <span class="pv-float-badge b4"><i class="fas fa-star"></i></span>
     <div class="container">
-      <div class="idm-services-head">
-        <span class="idm-eyebrow">SERVICES</span>
-        <h2>প্রতিটি ধাপে আমরা পাশে আছি</h2>
-      </div>
-      <div class="idm-services-grid">
-
-        <div class="idm-service-card">
-          <div class="idm-service-icon"><i class="fas fa-tags"></i></div>
-          <h3>সাশ্রয়ী মূল্য</h3>
-          <p>প্রতিটি সার্ভিসের জন্য স্বচ্ছ ও সাশ্রয়ী প্রাইস লিস্ট, কোনো লুকানো চার্জ নেই।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
-        <div class="idm-service-card idm-featured">
-          <div class="idm-service-icon"><i class="fas fa-truck"></i></div>
-          <h3>ফ্রি পিকআপ ও ডেলিভারি</h3>
-          <p>ফরিদপুর সদরের যেকোনো এলাকায় ঘরে বসে সম্পূর্ণ ফ্রি হোম পিকআপ ও ডেলিভারি সুবিধা।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
-        <div class="idm-service-card">
-          <div class="idm-service-icon"><i class="fas fa-shield-alt"></i></div>
-          <h3>গ্যারান্টিড কোয়ালিটি</h3>
-          <p>ফেব্রিক অনুযায়ী যত্নসহ ১০০% সন্তুষ্টির নিশ্চয়তায় কাপড় পরিষ্কার করা হয়।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
-        <div class="idm-service-card">
-          <div class="idm-service-icon"><i class="fas fa-star"></i></div>
-          <h3>প্রিমিয়াম কেয়ার</h3>
-          <p>শাড়ি, স্যুট, ব্লেজারসহ স্পর্শকাতর পোশাকের জন্য বিশেষ প্রিমিয়াম কেয়ার সার্ভিস।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
-        <div class="idm-service-card">
-          <div class="idm-service-icon"><i class="far fa-clock"></i></div>
-          <h3>সময়মতো ডেলিভারি</h3>
-          <p>৪৮/৭২ ঘন্টার মধ্যে নির্ধারিত সময়ে আপনার কাপড় ফেরত পৌঁছে দেওয়া হয়।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
-        <div class="idm-service-card">
-          <div class="idm-service-icon"><i class="fas fa-leaf"></i></div>
-          <h3>ইকো-ফ্রেন্ডলি</h3>
-          <p>নিরাপদ ও পরিবেশবান্ধব ডিটারজেন্ট ব্যবহার করে কাপড় ও ত্বক দুটোরই যত্ন নেওয়া হয়।</p>
-          <span class="idm-service-link">Learn More</span>
-        </div>
-
+      <div class="pv-crumb"><a onclick="navTo('home')">Home</a> <span class="pv-crumb-sep"><i class="fas fa-chevron-right"></i></span> <span class="pv-crumb-current">About Us</span></div>
+      <p>ঘরে বসে সহজে অর্ডার করুন — নরমাল ওয়াশ, ড্রাই ওয়াশ ও আয়রন সার্ভিস, সম্পূর্ণ ফ্রি পিকআপ ও ডেলিভারিসহ।</p>
+      <div class="pv-badge-row">
+        <span><i class="fas fa-truck"></i> ফ্রি পিকআপ ও ডেলিভারি</span>
+        <span><i class="fas fa-shield-alt"></i> কোয়ালিটি গ্যারান্টি</span>
+        <span><i class="far fa-clock"></i> ৪৮/৭২ ঘন্টায় ডেলিভারি</span>
       </div>
     </div>
   </div>
-
-  <!-- ===== Testimonials ===== -->
-  <div class="idm-testimonials-section">
-    <div class="container idm-testimonials-wrap">
-      <div class="idm-testimonials-label">
-        <span class="idm-eyebrow-light">OUR CLIENTS</span>
-        <h2>Testimonials</h2>
-      </div>
-      <div class="idm-testimonial-cards">
-        <div class="idm-tcard">
-          <p>ফরিদপুরে থেকে অনলাইনে লন্ড্রি অর্ডার করা এত সহজ হবে ভাবিনি। ফ্রি পিকআপ আর সময়মতো ডেলিভারি — সত্যিই দারুণ অভিজ্ঞতা।</p>
-          <div class="idm-tcard-user">
-            <div class="idm-tcard-avatar"><i class="fas fa-user"></i></div>
-            <div><b>রহিম উদ্দিন</b><span>নিয়মিত গ্রাহক</span></div>
-          </div>
-        </div>
-        <div class="idm-tcard">
-          <p>শাড়ি ও স্যুটের ড্রাই ক্লিনিং কোয়ালিটি অসাধারণ। প্রতিবার সময়মতো কাপড় হাতে পাই, দামও সাশ্রয়ী।</p>
-          <div class="idm-tcard-user">
-            <div class="idm-tcard-avatar"><i class="fas fa-user"></i></div>
-            <div><b>ফারহানা আক্তার</b><span>নিয়মিত গ্রাহক</span></div>
-          </div>
+  <div class="pv-body">
+    <div class="container">
+      <div class="pv-card">
+        <h2>আমাদের গল্প — ধোপা মামা (Dhopa Mama)</h2>
+        <p><strong>ধোপা মামা (Dhopa Mama)</strong>, যা <strong>Dhopa Mama</strong> ব্র্যান্ডে পরিচালিত, ফরিদপুর সদর, ফরিদপুরের একটি প্রিমিয়াম হোম-বেজড অনলাইন লন্ড্রি সার্ভিস। আমরা আপনার প্রিয় কাপড়গুলোর কাপড় ধোয়া, শুকানো, আয়রন করা এবং সঠিক সময়ে ফেরত পৌঁছে দেওয়ার প্রতিশ্রুতি রাখি।</p>
+        <p>ব্যস্ত জীবনে লন্ড্রি নিয়ে দুশ্চিন্তা করতে হবে না — <strong>dhopamama.com</strong> এ একটি ক্লিকেই আমরা আপনার দরজায় হাজির। ফরিদপুর সদরের যেকোনো এলাকায় ফ্রি হোম পিকআপ ও ডেলিভারিসহ নরমাল ওয়াশ, ড্রাই ওয়াশ ও আয়রন সার্ভিস — এই তিনটিই মিলিয়ে ধোপা মামা আজকের সবচেয়ে সহজ কাপড় ধোয়ার সমাধান।</p>
+        <div class="pv-stats">
+          <div><b>৫০০০+</b><span>সন্তুষ্ট গ্রাহক</span></div>
+          <div><b>১০+</b><span>বছরের অভিজ্ঞতা</span></div>
+          <div><b>১০০%</b><span>ফ্রি হোম পিকআপ</span></div>
+          <div><b>৪.৮/৫</b><span>গ্রাহক রেটিং</span></div>
         </div>
       </div>
-      <div class="idm-t-nav">
-        <button aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <button aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+      <div class="pv-card">
+        <h2>কেন Dhopa Mama?</h2>
+        <div class="pv-feat">
+          <div><i class="fas fa-truck"></i><div><b>ফ্রি পিকআপ ও ডেলিভারি</b><span>ঘরে বসে সম্পূর্ণ ফ্রি</span></div></div>
+          <div><i class="fas fa-star"></i><div><b>প্রিমিয়াম কেয়ার</b><span>ফেব্রিক অনুযায়ী যত্ন</span></div></div>
+          <div><i class="fas fa-clock"></i><div><b>সময়মতো ডেলিভারি</b><span>৪৮/৭২ ঘন্টার মধ্যে</span></div></div>
+          <div><i class="fas fa-tags"></i><div><b>সাশ্রয়ী মূল্য</b><span>স্বচ্ছ প্রাইস লিস্ট</span></div></div>
+          <div><i class="fas fa-leaf"></i><div><b>ইকো-ফ্রেন্ডলি</b><span>নিরাপদ ডিটারজেন্ট</span></div></div>
+          <div><i class="fas fa-shield-alt"></i><div><b>গ্যারান্টিড কোয়ালিটি</b><span>সন্তুষ্টির নিশ্চয়তা</span></div></div>
+        </div>
+      </div>
+      <div class="pv-card">
+        <h2>সার্ভিস আওয়ার</h2>
+        <p><i class="far fa-clock" style="color:var(--green)"></i> প্রতিদিন সকাল ৮টা থেকে রাত ১০টা পর্যন্ত। WhatsApp এ যেকোনো সময় বার্তা দিতে পারবেন।</p>
+      </div>
+      <div class="pv-cta">
+        <h3>আজই অর্ডার করুন</h3>
+        <p style="color:#55451E">ঘরে বসে ফ্রি পিকআপ পেতে এখনই অর্ডার প্লেস করুন।</p>
+        <a onclick="navTo('home')"><i class="fas fa-shopping-cart"></i> অর্ডার করুন</a>
       </div>
     </div>
   </div>
-
-  <!-- ===== Newsletter ===== -->
-  <div class="idm-newsletter-section">
-    <div class="container idm-newsletter-wrap">
-      <span class="idm-eyebrow">SUBSCRIBE OUR</span>
-      <h2>নিউজলেটার সাবস্ক্রাইব করুন</h2>
-      <form class="idm-newsletter-form" onsubmit="event.preventDefault();alert('ধন্যবাদ! আপনি সফলভাবে সাবস্ক্রাইব করেছেন।');this.reset();">
-        <input type="email" placeholder="আপনার ইমেইল দিন" required />
-        <button type="submit">Subscribe Now</button>
-      </form>
-    </div>
-  </div>
-
 </section>
 
 <!-- ===== In-page Contact view ===== -->
@@ -1539,7 +1353,7 @@ a{color:inherit}
     <span class="pv-float-badge b3"><i class="fas fa-envelope"></i></span>
     <span class="pv-float-badge b4"><i class="fas fa-map-marker-alt"></i></span>
     <div class="container">
-      <div class="pv-crumb"><a >Home</a> <span class="pv-crumb-sep"><i class="fas fa-chevron-right"></i></span> <span class="pv-crumb-current">Contact</span></div>
+      <div class="pv-crumb"><a onclick="navTo('home')">Home</a> <span class="pv-crumb-sep"><i class="fas fa-chevron-right"></i></span> <span class="pv-crumb-current">Contact</span></div>
       <p>যেকোনো প্রশ্ন, অর্ডার সহায়তা বা ফিডব্যাকের জন্য নিচের যেকোনো মাধ্যমে যোগাযোগ করুন।</p>
       <div class="pv-badge-row">
         <span><i class="far fa-clock"></i> প্রতিদিন সকাল ৮টা – রাত ১০টা</span>
@@ -3204,7 +3018,7 @@ document.querySelectorAll('.modal-overlay').forEach(function(ov){
       <div class="svc-price-box" id="svcModalPriceBox"></div>
       <h4>কীভাবে কাজ করে</h4>
       <ul class="svc-steps" id="svcModalSteps"></ul>
-      <a class="svc-cta" ><i class="fas fa-shopping-cart"></i>&nbsp; এখনই অর্ডার করুন</a>
+      <a class="svc-cta"><i class="fas fa-shopping-cart"></i>&nbsp; এখনই অর্ডার করুন</a>
     </div>
   </div>
 </div>
@@ -3375,7 +3189,7 @@ var SERVICES_LIST = window.__pickApi("services", [
     price:'ফ্রি', unit:'সকল অর্ডারে',
     desc:'যেকোনো পরিমাণ অর্ডারে আমরা আপনার ঠিকানা থেকে কাপড় সংগ্রহ করি এবং কাজ শেষে আবার পৌঁছে দিই — কোনো অতিরিক্ত চার্জ ছাড়াই।',
     priceRows:[['পিকআপ চার্জ','ফ্রি'],['ডেলিভারি চার্জ','ফ্রি'],['সার্ভিস এলাকা','ফরিদপুর সদর']],
-    steps:['অ্যাপ/ওয়েবসাইট থেকে অর্ডার করুন','পছন্দমতো সময় বেছে নিন','আমাদের রাইডার ঘরে এসে সংগ্রহ করবে','কাজ শেষে ঘরে পৌঁছে দেওয়া হবে']
+    steps:['অ্যাপ/ওয়েবসাইট থেকে অর্ডার করুন','পছন্দমতো সময় বেছে নিন','আমাদের রাইt��ার ঘরে এসে সংগ্রহ করবে','কাজ শেষে ঘরে পৌঁছে দেওয়া হবে']
   },
   {
     id:'premium-care', icon:'fa-user-tie', title:'প্রিমিয়াম কেয়ার (স্যুট ও ব্লেজার)', popular:false,
@@ -4134,7 +3948,58 @@ html, body { overflow-x: hidden; }
 </script>
 
 
-<script>window.addEventListener('load',function(){ try{location.hash='#/about';if(typeof applyRoute==='function')applyRoute();}catch(e){} });</script>
+<script>window.addEventListener('load',function(){ try{var el=document.getElementById('categories');if(el)el.scrollIntoView({behavior:'smooth'});}catch(e){} });</script>
+
+<script id="dm-cart-hook">
+(function(){
+  function toOrdersShape(o){
+    var iso = (o.createdAt || new Date().toISOString()).slice(0,10);
+    var d = new Date(iso);
+    var display = d.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+    return {
+      id: String(o.id).replace(/[^0-9]/g,'').slice(-8) || String(Date.now()).slice(-8),
+      paymentDateISO: iso,
+      paymentDateDisplay: display,
+      status: 'processing',
+      customer: { name:o.customerName, mobile:o.customerMobile, address:o.customerAddress },
+      pickup: (o.date||'') + (o.time?' '+o.time:''),
+      method: o.method,
+      total: o.total,
+      userContact: (function(){ try{var u=JSON.parse(localStorage.getItem('dmUser')||'null'); return u&&u.contact;}catch(e){return null;} })(),
+      items: (o.items||[]).map(function(it){
+        return {
+          title: it.name||it.title||'Service',
+          by: it.category||'Dhopa Mama',
+          size: it.size||'-',
+          qty: it.qty||1,
+          price: Number(it.price||0),
+          status: 'Delivered',
+          deliveryDate: display,
+          icon: '<svg viewBox="0 0 48 48" fill="none" stroke="#997D36" stroke-width="1.6"><rect x="10" y="12" width="28" height="26"/><path d="M16 12v-2a4 4 0 0 1 8 0v2"/></svg>'
+        };
+      })
+    };
+  }
+  function saveOrder(o){
+    try{
+      var list = JSON.parse(localStorage.getItem('dmOrders')||'[]');
+      list.unshift(toOrdersShape(o));
+      localStorage.setItem('dmOrders', JSON.stringify(list));
+    }catch(e){ console.warn(e); }
+  }
+  // Patch after DOMContentLoaded so original functions are defined
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.openOrderSuccessModal === 'function'){
+      var orig = window.openOrderSuccessModal;
+      window.openOrderSuccessModal = function(order){
+        try{ saveOrder(order); }catch(e){}
+        return orig.apply(this, arguments);
+      };
+    }
+  });
+})();
+</script>
+
 
 <style id="page-transition-css">
 /* ===== Page Transition ===== */
