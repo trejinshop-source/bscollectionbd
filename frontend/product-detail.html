@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title id="pageTitle">পণ্যের বিবরণ — BS Collection BD</title>
+<meta name="description" id="pageDesc" content="BS Collection BD-তে বিস্তারিত পণ্য তথ্য।"/>
+<meta name="theme-color" content="#14213D"/>
+<meta property="og:type" content="product"/>
+<meta property="og:title" id="ogTitle" content="BS Collection BD"/>
+<meta property="og:image" id="ogImage" content=""/>
+<link rel="icon" href="assets/logo.png.jpeg"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Bengali','Hind Siliguri','Poppins',sans-serif;background:#F5F7FA;color:#14213D}
+:root{--primary:#14213D;--accent:#FCA311;--muted:#64748b;--border:#e2e8f0;--shadow:0 8px 24px rgba(20,33,61,.08)}
+/* Header */
+.site-header{background:#14213D;padding:14px 0;position:sticky;top:0;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800;font-size:18px}
+.logo i{color:#FCA311;font-size:20px}
+.logo span{color:#FCA311}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:14px;font-weight:500;transition:.2s}
+.nav-links a:hover,.nav-links a.active{color:#FCA311}
+.header-icons{display:flex;gap:12px;align-items:center}
+.icon-btn{background:rgba(255,255,255,.1);border:0;color:#fff;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:15px;transition:.2s;text-decoration:none}
+.icon-btn:hover{background:rgba(255,255,255,.2);color:#FCA311}
+.badge{position:absolute;top:-6px;right:-6px;background:#DC2626;color:#fff;border-radius:999px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;padding:0 4px}
+/* Breadcrumb */
+.breadcrumb{background:#fff;border-bottom:1px solid var(--border);padding:12px 0}
+.breadcrumb-inner{max-width:1200px;margin:0 auto;padding:0 12px 0 20px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:var(--accent)}
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200%;animation:shimmer 1.5s infinite;height:20px;border-radius:4px}
+@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
+/* Layout */
+main{max-width:1200px;margin:32px auto;padding:0 20px}
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-bottom:48px}
+/* Gallery */
+.gallery-main{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f8fafc;cursor:zoom-in}
+.gallery-thumbs{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.gallery-thumb{width:72px;height:72px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:.2s;opacity:.7}
+.gallery-thumb.active,.gallery-thumb:hover{border-color:var(--accent);opacity:1}
+/* Product info */
+.product-cat{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.product-title{font-size:26px;font-weight:800;color:var(--primary);line-height:1.3;margin-bottom:12px}
+.rating-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.stars{color:#FCA311;font-size:15px;letter-spacing:2px}
+.price-row{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.price-now{font-size:32px;font-weight:800;color:var(--accent)}
+.price-old{font-size:18px;color:#94a3b8;text-decoration:line-through}
+.discount-badge{background:#ef4444;color:#fff;padding:4px 10px;font-size:12px;font-weight:700}
+.stock-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:13px;font-weight:600;margin-bottom:20px}
+.in-stock{background:#dcfce7;color:#166534}
+.out-stock{background:#fee2e2;color:#991b1b}
+.product-desc{font-size:14px;line-height:1.8;color:var(--muted);margin-bottom:24px}
+/* Variant selectors */
+.variant-section{margin-bottom:18px}
+.variant-label{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;display:block}
+.color-options{display:flex;gap:10px;flex-wrap:wrap}
+.color-opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s;position:relative;font-size:0}
+.color-opt.active,.color-opt:hover{border-color:var(--accent);transform:scale(1.1)}
+.text-options{display:flex;gap:8px;flex-wrap:wrap}
+.text-opt{padding:7px 16px;border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:600;color:var(--primary);transition:.2s;background:#fff}
+.text-opt.active,.text-opt:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* Qty + add to cart */
+.qty-section{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.qty-btn{width:36px;height:36px;background:var(--primary);color:#fff;border:0;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:.2s;flex-shrink:0}
+.qty-btn:hover{background:var(--accent);color:#0b1526}
+.qty-val{font-size:18px;font-weight:700;min-width:36px;text-align:center}
+.add-to-cart-btn{flex:1;padding:14px;background:var(--primary);color:#fff;border:0;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;transition:.2s}
+.add-to-cart-btn:hover{background:var(--accent);color:#0b1526}
+.buy-now-btn{width:100%;padding:14px;background:var(--accent);color:#0b1526;border:0;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;transition:.2s;margin-bottom:12px}
+.buy-now-btn:hover{background:#e8940a}
+.wish-btn{width:100%;padding:12px;background:#fff;color:var(--primary);border:1.5px solid var(--border);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:.2s}
+.wish-btn:hover,.wish-btn.active{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+/* Specs */
+.section-title{font-size:20px;font-weight:800;color:var(--primary);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--accent)}
+.specs-table{width:100%;border-collapse:collapse;background:#fff;box-shadow:var(--shadow)}
+.specs-table tr:nth-child(even){background:#f8fafc}
+.specs-table td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border)}
+.specs-table td:first-child{font-weight:700;color:var(--primary);width:40%;background:#f8fafc}
+/* Reviews */
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.review-card{background:#fff;padding:18px;box-shadow:var(--shadow)}
+.review-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.review-avatar{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.review-name{font-weight:700;font-size:14px;color:var(--primary)}
+.review-date{font-size:11px;color:var(--muted)}
+.review-stars{color:#FCA311;font-size:13px}
+.review-text{font-size:13px;color:var(--muted);line-height:1.7}
+/* Related */
+.related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.product-card{background:#fff;box-shadow:var(--shadow);position:relative}
+.product-card img{width:100%;height:200px;object-fit:cover;display:block}
+.product-card-body{padding:16px}
+.product-card-name{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:8px;line-height:1.3}
+.product-card-price{font-size:18px;font-weight:800;color:var(--accent)}
+.product-card-old{font-size:13px;color:#94a3b8;text-decoration:line-through;margin-left:6px}
+.product-card-btn{display:flex;gap:8px;margin-top:12px}
+.pc-btn{flex:1;padding:10px;border:0;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.pc-btn.primary{background:var(--primary);color:#fff}.pc-btn.primary:hover{background:var(--accent);color:#0b1526}
+.pc-btn.ghost{background:#f1f5f9;color:var(--primary)}.pc-btn.ghost:hover{background:var(--primary);color:#fff}
+/* Toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--primary);color:#fff;padding:12px 24px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.3s;white-space:nowrap;pointer-events:none}
+/* Error */
+.error-state{text-align:center;padding:80px 20px}
+.error-state i{font-size:64px;color:#e2e8f0;display:block;margin-bottom:20px}
+.error-state h2{font-size:22px;font-weight:800;color:var(--primary);margin-bottom:8px}
+.error-state p{color:var(--muted);font-size:14px;margin-bottom:28px}
+@media(max-width:768px){.product-grid{grid-template-columns:1fr}.nav-links{display:none}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo"><i class="fas fa-bolt"></i> BS <span>Collection BD</span></a>
+    <nav><ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="wishlist.html">Wishlist</a></li>
+      <li><a href="account.html">Account</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul></nav>
+    <div class="header-icons">
+      <a href="wishlist.html" class="icon-btn" title="Wishlist"><i class="far fa-heart"></i><span class="badge" id="wishBadge" style="display:none">0</span></a>
+      <a href="cart.html" class="icon-btn" title="Cart"><i class="fas fa-shopping-cart"></i><span class="badge" id="cartBadge" style="display:none">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="breadcrumb">
+  <div class="breadcrumb-inner">
+    <a href="index.html">Home</a>
+    <i class="fas fa-chevron-right" style="font-size:10px"></i>
+    <a href="shop.html">Shop</a>
+    <i class="fas fa-chevron-right" style="font-size:10px"></i>
+    <span id="breadProduct" style="color:var(--primary);font-weight:600">পণ্য</span>
+  </div>
+</div>
+
+<main id="mainContent">
+  <div style="text-align:center;padding:80px 20px">
+    <i class="fas fa-spinner fa-spin" style="font-size:40px;color:var(--accent)"></i>
+    <p style="margin-top:16px;color:var(--muted)">পণ্যের তথ্য লোড হচ্ছে...</p>
+  </div>
+</main>
+
+<script src="js/bs-shared.js" defer></script>
+<script>
+(function(){
+  var CART_KEY = 'bs_cart_v1';
+  var WISH_KEY = 'bs_wish_v1';
+  var API_BASE = ['localhost','127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:5000/api' : 'https://bscollectionbd.onrender.com/api';
+
+  // Get SKU from URL
+  var sku = new URLSearchParams(location.search).get('sku');
+  var id  = new URLSearchParams(location.search).get('id');
+  var selectedQty = 1;
+  var selectedColor = '';
+  var selectedSize  = '';
+
+  function fmt(n) { return '৳ ' + (n||0).toLocaleString('en-IN'); }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function readCart() { try { return JSON.parse(localStorage.getItem(CART_KEY))||[]; } catch(_){ return []; } }
+  function saveCart(c) { localStorage.setItem(CART_KEY, JSON.stringify(c)); syncBadges(); }
+  function readWL()   { try { return JSON.parse(localStorage.getItem(WISH_KEY))||[]; }   catch(_){ return []; } }
+  function saveWL(w)  { localStorage.setItem(WISH_KEY, JSON.stringify(w)); syncBadges(); }
+
+  function syncBadges() {
+    var cnt = readCart().reduce(function(s,i){ return s+(+i.qty||0); }, 0);
+    var cb = document.getElementById('cartBadge');
+    if(cb){ cb.textContent=cnt; cb.style.display=cnt?'flex':'none'; }
+    var wl = readWL();
+    var wb = document.getElementById('wishBadge');
+    if(wb){ wb.textContent=wl.length; wb.style.display=wl.length?'flex':'none'; }
+  }
+
+  function showToast(msg) {
+    var t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){ t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+    setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },300); },2000);
+  }
+
+  function addToCart(p, qty, color, size) {
+    var cart = readCart();
+    var ex = cart.find(function(x){ return x.id===p.id&&x.color===color&&x.size===size; });
+    if(ex){ ex.qty=(+ex.qty||0)+qty; }
+    else { cart.push({ id:p.id||p._id||p.sku, sku:p.sku, name:p.name+(color?' ('+color+')':'')+(size?' - '+size:''), price:p.now||p.price||0, img:p.img, qty:qty, color:color, size:size }); }
+    saveCart(cart);
+    showToast('কার্টে যোগ হয়েছে ✔');
+  }
+
+  function toggleWishlist(p) {
+    var wl = readWL();
+    var idx = wl.findIndex(function(x){ return x.id===p.id; });
+    if(idx>=0){ wl.splice(idx,1); saveWL(wl); showToast('Wishlist থেকে সরানো হয়েছে'); }
+    else { wl.push(p); saveWL(wl); showToast('Wishlist-এ যোগ হয়েছে ❤'); }
+    var btn = document.getElementById('wishBtn');
+    if(btn) btn.classList.toggle('active', readWL().some(function(x){ return x.id===p.id; }));
+  }
+
+  function setMainImg(url) {
+    var main = document.getElementById('mainImg');
+    if(main) main.src = url;
+    document.querySelectorAll('.gallery-thumb').forEach(function(t){ t.classList.toggle('active', t.dataset.src===url); });
+  }
+
+  function renderProduct(p) {
+    if(!p){ renderError(); return; }
+    var id = p._id || p.id || p.sku;
+    p.id = id;
+    var discount = p.old&&p.old>p.now ? Math.round((p.old-p.now)/p.old*100) : 0;
+    var gallery = p.gallery&&p.gallery.length ? p.gallery : (p.img ? [p.img] : []);
+    var isWished = readWL().some(function(x){ return x.id===id; });
+
+    // SEO
+    if(p.seoTitle||p.name) document.getElementById('pageTitle').textContent = (p.seoTitle||p.name+' — BS Collection BD');
+    if(p.seoDescription||p.description) document.getElementById('pageDesc').setAttribute('content', p.seoDescription||p.description.substring(0,155));
+    if(p.img) document.getElementById('ogImage').setAttribute('content', p.img);
+    document.getElementById('ogTitle').setAttribute('content', p.seoTitle||p.name||'BS Collection BD');
+    document.getElementById('breadProduct').textContent = p.name||'পণ্য';
+
+    // Colors / Sizes
+    var colorsHTML = '';
+    if(p.colors&&p.colors.length){
+      var colorList = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FFA07A','#98D8C8','#14213D','#F5F5F5','#808080'];
+      colorsHTML = '<div class="variant-section"><span class="variant-label">রং নির্বাচন করুন: <b id="selectedColorLabel" style="color:var(--accent)">' + esc(p.colors[0]) + '</b></span><div class="color-options">';
+      p.colors.forEach(function(c,i){
+        var bg = colorList[i%colorList.length];
+        colorsHTML += '<div class="color-opt' + (i===0?' active':'') + '" data-color="'+esc(c)+'" title="'+esc(c)+'" style="background:'+bg+'" onclick="selectColor(this,\''+esc(c)+'\')"></div>';
+      });
+      colorsHTML += '</div></div>';
+      selectedColor = p.colors[0];
+    }
+    var sizesHTML = '';
+    if(p.sizes&&p.sizes.length){
+      sizesHTML = '<div class="variant-section"><span class="variant-label">সাইজ নির্বাচন করুন: <b id="selectedSizeLabel" style="color:var(--accent)">' + esc(p.sizes[0]) + '</b></span><div class="text-options">';
+      p.sizes.forEach(function(s,i){
+        sizesHTML += '<div class="text-opt' + (i===0?' active':'') + '" data-size="'+esc(s)+'" onclick="selectSize(this,\''+esc(s)+'\')">' + esc(s) + '</div>';
+      });
+      sizesHTML += '</div></div>';
+      selectedSize = p.sizes[0];
+    }
+
+    // Specs
+    var specsHTML = '';
+    if(p.specs&&p.specs.length){
+      specsHTML = '<section style="margin-bottom:40px"><h2 class="section-title"><i class="fas fa-list-ul" style="color:var(--accent);margin-right:8px"></i> স্পেসিফিকেশন</h2>';
+      specsHTML += '<table class="specs-table"><tbody>';
+      p.specs.forEach(function(s){ specsHTML += '<tr><td>'+esc(s.label)+'</td><td>'+esc(s.value)+'</td></tr>'; });
+      if(p.weight) specsHTML += '<tr><td>ওজন</td><td>'+esc(p.weight)+'</td></tr>';
+      specsHTML += '</tbody></table></section>';
+    }
+
+    // Gallery thumbs
+    var thumbsHTML = '';
+    if(gallery.length>1){
+      thumbsHTML = '<div class="gallery-thumbs">';
+      gallery.forEach(function(u,i){
+        thumbsHTML += '<img class="gallery-thumb'+(i===0?' active':'')+'" src="'+esc(u)+'" data-src="'+esc(u)+'" alt="" onclick="setMainImg(this.dataset.src)"/>';
+      });
+      thumbsHTML += '</div>';
+    }
+
+    var mainHTML = `
+      <div class="product-grid">
+        <div>
+          <img id="mainImg" class="gallery-main" src="${esc(gallery[0]||'')}" alt="${esc(p.name||'')}"/>
+          ${thumbsHTML}
+        </div>
+        <div>
+          <div class="product-cat">${esc(p.cat||'')}</div>
+          <h1 class="product-title">${esc(p.name||'')}</h1>
+          <div class="rating-row">
+            <span class="stars">${'★'.repeat(Math.round(p.rating||5))}${'☆'.repeat(5-Math.round(p.rating||5))}</span>
+            <span style="font-size:13px;color:var(--muted)">${p.ratingCount||0} রিভিউ</span>
+            ${p.brand?'<span style="font-size:12px;background:#f1f5f9;padding:3px 10px;color:var(--muted);font-weight:600">'+esc(p.brand)+'</span>':''}
+          </div>
+          <div class="price-row">
+            <span class="price-now">${fmt(p.now)}</span>
+            ${p.old&&p.old>p.now?'<span class="price-old">'+fmt(p.old)+'</span><span class="discount-badge">-'+discount+'%</span>':''}
+          </div>
+          <div class="stock-badge ${p.stock>0?'in-stock':'out-stock'}">
+            <i class="fas ${p.stock>0?'fa-circle-check':'fa-circle-xmark'}"></i>
+            ${p.stock>5?'স্টকে আছে':p.stock>0?'মাত্র '+p.stock+' টি বাকি':'স্টক শেষ'}
+          </div>
+          ${p.shortDescription?'<p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px">'+esc(p.shortDescription)+'</p>':''}
+          ${p.description?'<p class="product-desc">'+esc(p.description)+'</p>':''}
+          ${colorsHTML}
+          ${sizesHTML}
+          <div class="qty-section">
+            <button class="qty-btn" onclick="changeQty(-1)"><i class="fas fa-minus" style="font-size:11px"></i></button>
+            <span class="qty-val" id="qtyDisplay">1</span>
+            <button class="qty-btn" onclick="changeQty(1)"><i class="fas fa-plus" style="font-size:11px"></i></button>
+            <button class="add-to-cart-btn" onclick="doAddToCart()" ${p.stock<=0?'disabled style="opacity:.5;cursor:not-allowed"':''}>
+              <i class="fas fa-shopping-cart"></i> কার্টে যোগ করুন
+            </button>
+          </div>
+          <a href="cart.html" id="buyNowBtn" class="buy-now-btn" style="text-decoration:none">
+            <i class="fas fa-bolt"></i> এখনই কিনুন
+          </a>
+          <button class="wish-btn ${isWished?'active':''}" id="wishBtn" onclick="doWish()">
+            <i class="fa${isWished?'s':'r'} fa-heart"></i> ${isWished?'Wishlist-এ আছে':'Wishlist-এ যোগ করুন'}
+          </button>
+        </div>
+      </div>
+      ${specsHTML}`;
+
+    document.getElementById('mainContent').innerHTML = mainHTML;
+    syncBadges();
+
+    window.setMainImg = function(url) {
+      var main = document.getElementById('mainImg');
+      if(main) main.src = url;
+      document.querySelectorAll('.gallery-thumb').forEach(function(t){ t.classList.toggle('active', t.dataset.src===url); });
+    };
+    window.changeQty = function(d) {
+      selectedQty = Math.max(1, selectedQty+d);
+      var el = document.getElementById('qtyDisplay');
+      if(el) el.textContent = selectedQty;
+    };
+    window.selectColor = function(el, color) {
+      selectedColor = color;
+      document.querySelectorAll('.color-opt').forEach(function(e){ e.classList.remove('active'); });
+      el.classList.add('active');
+      var label = document.getElementById('selectedColorLabel');
+      if(label) label.textContent = color;
+    };
+    window.selectSize = function(el, size) {
+      selectedSize = size;
+      document.querySelectorAll('.text-opt').forEach(function(e){ e.classList.remove('active'); });
+      el.classList.add('active');
+      var label = document.getElementById('selectedSizeLabel');
+      if(label) label.textContent = size;
+    };
+    window.doAddToCart = function() { addToCart(p, selectedQty, selectedColor, selectedSize); };
+    window.doWish = function() { toggleWishlist({id:p.id||p._id, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat, detailPage:'product-detail.html?sku='+encodeURIComponent(p.sku||'')}); };
+
+    // Buy Now: add to cart then go to cart
+    var buyNowBtn = document.getElementById('buyNowBtn');
+    if(buyNowBtn) {
+      buyNowBtn.addEventListener('click', function(e) {
+        if(p.stock<=0) { e.preventDefault(); return; }
+        addToCart(p, selectedQty, selectedColor, selectedSize);
+        // href="cart.html" will navigate
+      });
+    }
+
+    // Load reviews
+    loadReviews(p._id||p.id);
+    // Load related products
+    loadRelated(p.cat||'', p._id||p.id);
+  }
+
+  function renderError() {
+    document.getElementById('mainContent').innerHTML = '<div class="error-state"><i class="fas fa-box-open"></i><h2>পণ্য পাওয়া যায়নি</h2><p>এই পণ্যটি বর্তমানে উপলব্ধ নেই বা সরিয়ে ফেলা হয়েছে।</p><a href="shop.html" class="btn-primary" style="display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:var(--primary);color:#fff;font-weight:700;text-decoration:none"><i class="fas fa-shop"></i> Shop পেজে ফিরুন</a></div>';
+    function btn(t,h,bg){ var a=document.createElement('a');a.href=h;a.textContent=t;Object.assign(a.style,{display:'inline-flex',alignItems:'center',padding:'14px 28px',background:bg||'#14213D',color:'#fff',fontWeight:'700',textDecoration:'none',gap:'8px',marginTop:'8px'});return a; }
+  }
+
+  async function loadReviews(productId) {
+    if(!productId) return;
+    try {
+      var res = await fetch(API_BASE + '/reviews?productId=' + productId + '&limit=6');
+      if(!res.ok) return;
+      var reviews = await res.json();
+      if(!reviews||!reviews.length) return;
+      var html = '<section style="margin-bottom:40px"><h2 class="section-title"><i class="fas fa-star" style="color:var(--accent);margin-right:8px"></i> ক্রেতাদের মতামত</h2><div class="reviews-grid">';
+      reviews.forEach(function(r){
+        html += '<div class="review-card"><div class="review-header"><div class="review-avatar">'+esc((r.name||'A')[0].toUpperCase())+'</div><div><div class="review-name">'+esc(r.name||'Anonymous')+'</div><div class="review-date">'+new Date(r.createdAt).toLocaleDateString('en-GB')+'</div></div></div>';
+        html += '<div class="review-stars">'+'★'.repeat(r.rating||5)+'</div><p class="review-text">'+esc(r.text||r.comment||'')+'</p></div>';
+      });
+      html += '</div></section>';
+      document.getElementById('mainContent').insertAdjacentHTML('beforeend', html);
+    } catch(_){}
+  }
+
+  async function loadRelated(cat, currentId) {
+    try {
+      var url = API_BASE + '/products?limit=8';
+      if(cat) url += '&cat=' + encodeURIComponent(cat);
+      var res = await fetch(url);
+      if(!res.ok) return;
+      var all = await res.json();
+      var related = all.filter(function(p){ return (p._id||p.id)!==currentId; }).slice(0,4);
+      if(!related.length) return;
+      var html = '<section style="margin-bottom:40px"><h2 class="section-title"><i class="fas fa-boxes-stacked" style="color:var(--accent);margin-right:8px"></i> সম্পর্কিত পণ্য</h2><div class="related-grid">';
+      related.forEach(function(p){
+        var link = p.detailPage || ('product-detail.html?sku=' + encodeURIComponent(p.sku||''));
+        html += '<div class="product-card">';
+        if(p.img){ html += '<a href="'+link+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name||'')+'" onerror="this.style.display=\'none\'"/></a>'; }
+        html += '<div class="product-card-body"><a href="'+link+'" style="text-decoration:none;color:inherit"><div class="product-card-name">'+esc(p.name||'')+'</div></a>';
+        html += '<div><span class="product-card-price">'+fmt(p.now)+'</span>'+(p.old&&p.old>p.now?'<span class="product-card-old">'+fmt(p.old)+'</span>':'')+'</div>';
+        html += '<div class="product-card-btn"><a href="'+link+'" class="pc-btn ghost"><i class="fas fa-eye"></i> দেখুন</a></div></div></div>';
+      });
+      html += '</div></section>';
+      document.getElementById('mainContent').insertAdjacentHTML('beforeend', html);
+    } catch(_){}
+  }
+
+  async function loadProduct() {
+    try {
+      var url;
+      if (sku) url = API_BASE + '/products/sku/' + encodeURIComponent(sku);
+      else if (id) url = API_BASE + '/products/id/' + encodeURIComponent(id);
+      else { renderError(); return; }
+      var res = await fetch(url);
+      if(!res.ok) { renderError(); return; }
+      var p = await res.json();
+      renderProduct(p);
+    } catch(e) { renderError(); }
+  }
+
+  syncBadges();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', loadProduct);
+  else loadProduct();
+})();
+</script>
+</body>
+</html>

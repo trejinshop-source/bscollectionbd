@@ -858,6 +858,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     </div>
     <div class="modal-footer">
       <button class="cancel-btn" id="catModalCancel">বাতিল</button>
+      <button class="save-btn" type="button" onclick="catAutoSEO()" style="background:var(--orange);margin-right:auto"><i class="fas fa-magic"></i> Auto SEO</button>
       <button class="save-btn" id="catModalSave">সংরক্ষণ করুন</button>
     </div>
   </div>
@@ -1004,23 +1005,41 @@ const navLinks = document.querySelectorAll('.nav a[data-page]');
 const pages = document.querySelectorAll('.page');
 const pageTitle = document.getElementById('pageTitle');
 
+function navigateTo(target) {
+  if(!target) return;
+  navLinks.forEach(l => l.classList.remove('active'));
+  const link = document.querySelector(`.nav a[data-page="${target}"]`);
+  if(link) link.classList.add('active');
+  pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
+  if(pageTitle) pageTitle.textContent = link ? link.getAttribute('data-title') : target;
+  closeMenu();
+  window.scrollTo({top:0,behavior:'instant'});
+  // Save current page in URL hash for refresh persistence
+  if(location.hash !== '#' + target) history.replaceState(null, '', '#' + target);
+  if(target === 'orders') loadOrders();
+  if(target === 'products') loadProducts();
+  if(target === 'categories') loadCategories();
+  if(target === 'customers') loadCustomers();
+  if(target === 'reports') loadStats();
+  if(target === 'advanced' && window.bsExtInit) window.bsExtInit();
+}
+
 navLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    const target = link.getAttribute('data-page');
-    navLinks.forEach(l => l.classList.remove('active'));
-    link.classList.add('active');
-    pages.forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
-    pageTitle.textContent = link.getAttribute('data-title');
-    closeMenu();
-    window.scrollTo({top:0,behavior:'instant'});
-    if(target === 'orders') loadOrders();
-    if(target === 'products') loadProducts();
-    if(target === 'categories') loadCategories();
-    if(target === 'customers') loadCustomers();
-    if(target === 'reports') loadStats();
-    if(target === 'advanced' && window.bsExtInit) window.bsExtInit();
-  });
+  link.addEventListener('click', () => navigateTo(link.getAttribute('data-page')));
 });
+
+// Restore page on refresh via hash
+window.addEventListener('hashchange', () => {
+  const page = location.hash.replace('#','');
+  if(page && document.getElementById('page-' + page)) navigateTo(page);
+});
+// Initial load
+(function(){
+  const hashPage = location.hash.replace('#','');
+  if(hashPage && document.getElementById('page-' + hashPage) && isLoggedIn()) {
+    setTimeout(() => navigateTo(hashPage), 100);
+  }
+})();
 
 /* ============================================================
    INIT
@@ -1492,6 +1511,64 @@ document.getElementById('catModalCancel').addEventListener('click',()=>document.
 document.getElementById('catName').addEventListener('input',function(){
   if(!document.getElementById('catEditId').value) document.getElementById('catSlug').value=this.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
 });
+
+// ── Category image upload via dropzone ──────────────────────────
+const catDropzone = document.getElementById('catImgDropzone');
+const catFileInput = document.getElementById('catImgFile');
+const catImgPreview = document.getElementById('catImgPreview');
+const catImgField = document.getElementById('catImg');
+const catUploadBar = document.getElementById('catUploadBar');
+const catUploadProgress = document.getElementById('catUploadProgress');
+
+if (catDropzone && catFileInput) {
+  catDropzone.addEventListener('click', () => catFileInput.click());
+  catDropzone.addEventListener('dragover', e => { e.preventDefault(); catDropzone.classList.add('dragover'); });
+  catDropzone.addEventListener('dragleave', () => catDropzone.classList.remove('dragover'));
+  catDropzone.addEventListener('drop', e => { e.preventDefault(); catDropzone.classList.remove('dragover'); if(e.dataTransfer.files[0]) uploadCatImg(e.dataTransfer.files[0]); });
+  catFileInput.addEventListener('change', () => { if(catFileInput.files[0]) uploadCatImg(catFileInput.files[0]); });
+}
+
+if (catImgField) {
+  catImgField.addEventListener('input', () => {
+    const url = catImgField.value.trim();
+    if(catImgPreview) { catImgPreview.src = url; catImgPreview.style.display = url ? 'block' : 'none'; }
+  });
+}
+
+async function uploadCatImg(file) {
+  if(!catUploadProgress) return;
+  catUploadProgress.style.display = 'block';
+  if(catUploadBar) catUploadBar.style.width = '30%';
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await apiFetch('/products/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + adminToken() }, body: fd });
+    if(catUploadBar) catUploadBar.style.width = '100%';
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'আপলোড ব্যর্থ');
+    const url = d.url || (d.urls && d.urls[0]);
+    if (catImgField) catImgField.value = url;
+    if (catImgPreview) { catImgPreview.src = url; catImgPreview.style.display = 'block'; }
+    showToast('ছবি আপলোড হয়েছে', 'success');
+  } catch(e) { showToast('ছবি আপলোড ব্যর্থ: ' + e.message, 'error'); }
+  finally { setTimeout(() => { if(catUploadProgress) catUploadProgress.style.display = 'none'; if(catUploadBar) catUploadBar.style.width = '0'; }, 800); }
+}
+
+function adminToken() { return localStorage.getItem('bs_admin_token') || ''; }
+
+// ── Category auto-SEO ──────────────────────────────────────────
+function catAutoSEO() {
+  const name = document.getElementById('catName')?.value?.trim() || '';
+  const slug = document.getElementById('catSlug')?.value?.trim() || '';
+  if (!name) return showToast('প্রথমে ক্যাটাগরির নাম দিন', 'error');
+  const seoTitle = name + ' — BS Collection BD | Bangladesh Fan Shop';
+  const seoDesc = name + ' পণ্যসমূহ কিনুন সেরা দামে। ' + name + ' এর বিশাল কালেকশন BS Collection BD-তে পাবেন।';
+  const seoKeywords = slug + ', ' + name.toLowerCase() + ', bscollectionbd, fan bangladesh, electrical appliances bd';
+  // Show in a small popup/toast
+  showToast('SEO: "' + seoTitle.substring(0,40) + '..."', 'success');
+  // Copy to clipboard
+  navigator.clipboard?.writeText(JSON.stringify({ seoTitle, seoDescription: seoDesc, seoKeywords }, null, 2)).catch(() => {});
+}
+
 document.getElementById('catModalSave').addEventListener('click', async ()=>{
   const name=document.getElementById('catName').value.trim();
   const slug=document.getElementById('catSlug').value.trim();
@@ -1687,7 +1764,65 @@ function setupDropdown(btnId,menuId){
 setupDropdown('notifBtn','notifMenu');
 setupDropdown('profileBtn','profileMenu');
 document.addEventListener('click',()=>document.querySelectorAll('.dropdown-menu.open').forEach(m=>m.classList.remove('open')));
-document.getElementById('markAllRead').addEventListener('click',e=>{e.preventDefault();document.querySelector('#notifBtn .dot')?.remove();document.getElementById('notifMenu').classList.remove('open');showToast('সব নোটিফিকেশন পড়া হয়েছে');});
+document.getElementById('markAllRead')?.addEventListener('click',e=>{e.preventDefault();document.querySelector('#notifBtn .dot')?.remove();document.getElementById('notifMenu').classList.remove('open');showToast('সব নোটিফিকেশন পড়া হয়েছে');});
+
+// Load real notifications
+async function loadNotifications() {
+  const menu = document.getElementById('notifMenu');
+  if (!menu) return;
+  try {
+    const [statsData, orderData] = await Promise.all([
+      apiJSON('/stats').catch(() => ({})),
+      apiJSON('/orders?limit=5').catch(() => ({ orders: [] })),
+    ]);
+    const orders = orderData.orders || [];
+    const unreadContacts = statsData.unreadContacts || 0;
+    const pendingOrders = statsData.pendingOrders || 0;
+    const lowStock = statsData.lowStock || 0;
+
+    let items = '';
+    // Recent orders
+    orders.slice(0,3).forEach(o => {
+      const ago = timeAgo(new Date(o.createdAt));
+      items += `<div class="dd-item notif-item"><div><div class="cell-main">নতুন অর্ডার: ${esc(o.orderId||'')} (${esc(o.customer?.name||'')})</div><div class="cell-sub">${ago}</div></div></div>`;
+    });
+    if (unreadContacts > 0) {
+      items += `<div class="dd-item notif-item" onclick="navigateTo('advanced')" style="cursor:pointer"><div><div class="cell-main" style="color:var(--orange)">${unreadContacts} টি নতুন যোগাযোগ বার্তা</div><div class="cell-sub">এডভান্সড অপশনে দেখুন</div></div></div>`;
+    }
+    if (lowStock > 0) {
+      items += `<div class="dd-item notif-item"><div><div class="cell-main" style="color:#dc2626">${lowStock} টি পণ্যের স্টক কম</div><div class="cell-sub">পণ্য ব্যবস্থাপনায় দেখুন</div></div></div>`;
+    }
+    if (!items) {
+      items = '<div class="dd-item notif-item"><div><div class="cell-main">কোনো নতুন নোটিফিকেশন নেই</div></div></div>';
+    }
+
+    const hasNew = unreadContacts > 0 || pendingOrders > 0;
+    const dot = document.querySelector('#notifBtn .dot');
+    if (hasNew && !dot) {
+      const d = document.createElement('span'); d.className = 'dot';
+      document.getElementById('notifBtn').appendChild(d);
+    } else if (!hasNew && dot) {
+      dot.remove();
+    }
+
+    const oldTitle = menu.querySelector('.dd-title');
+    menu.innerHTML = `<div class="dd-title">Notifications <a id="markAllRead" style="float:right;text-transform:none;font-weight:600;color:var(--orange);font-size:11px;cursor:pointer;">Mark all read</a></div>${items}`;
+    document.getElementById('markAllRead')?.addEventListener('click', e => { e.preventDefault(); document.querySelector('#notifBtn .dot')?.remove(); menu.classList.remove('open'); showToast('সব নোটিফিকেশন পড়া হয়েছে'); });
+  } catch (_) {}
+}
+
+function timeAgo(date) {
+  const diff = Math.floor((Date.now() - date) / 1000);
+  if (diff < 60) return 'এইমাত্র';
+  if (diff < 3600) return Math.floor(diff/60) + ' মিনিট আগে';
+  if (diff < 86400) return Math.floor(diff/3600) + ' ঘণ্টা আগে';
+  return Math.floor(diff/86400) + ' দিন আগে';
+}
+
+if (isLoggedIn()) {
+  loadNotifications();
+  setInterval(loadNotifications, 60000); // refresh every minute
+}
 
 /* ============================================================
    STICKY TOPBAR
@@ -1941,6 +2076,16 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <label>বর্ণনা <textarea name="description" rows="4">${esc(p.description || '')}</textarea></label>
         <label>সংক্ষিপ্ত বিবরণ <input name="shortDescription" value="${esc(p.shortDescription || '')}" placeholder="Brief product summary"/></label>
 
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;padding:14px;margin:14px 0">
+          <h4 style="margin:0 0 10px;color:#0369a1;font-size:13px"><i class="fas fa-palette"></i> ভেরিয়েন্ট অপশন (ঐচ্ছিক)</h4>
+          <div class="row-3">
+            <label>রং/কালার (কমা দিয়ে)<input name="colors" value="${esc((p.colors||[]).join(', '))}" placeholder="লাল, নীল, সাদা"/></label>
+            <label>সাইজ (কমা দিয়ে)<input name="sizes" value="${esc((p.sizes||[]).join(', '))}" placeholder="Small, Medium, Large"/></label>
+            <label>ওজন<input name="weight" value="${esc(p.weight||'')}" placeholder="যেমন: 1.2 kg"/></label>
+          </div>
+          <p style="color:#64748b;font-size:11px;margin:6px 0 0">খালি রাখলে এই অপশনগুলো পণ্য পেজে দেখাবে না।</p>
+        </div>
+
         <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:14px 0">
           <h4 style="margin:0 0 10px;color:#14213D;font-size:14px"><i class="fas fa-search" style="color:#FCA311"></i> SEO সেটিংস
             <button type="button" class="bs-ext-btn ghost" style="float:right;padding:4px 10px;font-size:12px" onclick="bsExtAutoSEO()"><i class="fas fa-magic"></i> Auto SEO</button>
@@ -1977,14 +2122,22 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <button type="button" class="bs-ext-btn ghost" onclick="bsExtAddSpec()"><i class="fas fa-plus"></i> নতুন স্পেক যোগ</button>
         </label>
 
-        <div class="row" style="margin-top:14px">
-          <label>বিস্তারিত পেজের ফাইলনেম <input name="detailPage" value="${esc(p.detailPage || '')}" placeholder="product-jy2218.html"/></label>
-          <label style="align-self:end">
-            <input type="checkbox" name="hasDetailPage" ${p.hasDetailPage ? 'checked' : ''} style="width:auto;margin-right:6px"/>
-            বিস্তারিত পেজ আছে
-          </label>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:14px 0">
+          <h4 style="margin:0 0 10px;color:#14213D;font-size:13px"><i class="fas fa-file-code" style="color:#FCA311"></i> বিস্তারিত পণ্য পেজ</h4>
+          <div class="row">
+            <label>পেজের URL / ফাইলনেম <input name="detailPage" value="${esc(p.detailPage || '')}" placeholder="product-detail.html?sku=jy2218" id="detailPageInput"/></label>
+            <label style="align-self:end;display:flex;flex-direction:column;gap:6px">
+              <span style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" name="hasDetailPage" ${p.hasDetailPage ? 'checked' : ''} id="hasDetailPageCb" style="width:auto"/>
+                বিস্তারিত পেজ চালু করুন
+              </span>
+              <button type="button" class="bs-ext-btn orange" onclick="bsAutoFillDetailPage()" style="font-size:11px">
+                <i class="fas fa-magic"></i> Auto-fill URL
+              </button>
+            </label>
+          </div>
+          <p style="color:#64748b;font-size:11px;margin:8px 0 0"><i class="fas fa-info-circle"></i> Auto-fill করলে <code>product-detail.html?sku=SKU</code> হবে — যেকোনো পণ্যের জন্য কাজ করবে।</p>
         </div>
-        <p style="color:#64748b;font-size:12px;margin:-10px 0 14px">খালি রাখলে SKU থেকে <code>product-&lt;sku&gt;.html</code> স্বয়ংক্রিয়ভাবে তৈরি হবে</p>
 
         <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end">
           <button type="button" class="bs-ext-btn ghost" onclick="bsExtCloseModal()">বাতিল</button>
@@ -2034,6 +2187,10 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       });
       const tagsRaw = fd.get('tags') || '';
       const tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+      const colorsRaw = fd.get('colors') || '';
+      const colors = colorsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+      const sizesRaw = fd.get('sizes') || '';
+      const sizes = sizesRaw.split(',').map(t=>t.trim()).filter(Boolean);
       const body = {
         sku: fd.get('sku'), name: fd.get('name'), cat: fd.get('cat'), brand: fd.get('brand'),
         categorySlug: fd.get('categorySlug'), now: +fd.get('now'), old: +fd.get('old') || undefined,
@@ -2042,7 +2199,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         detailPage: fd.get('detailPage') || undefined,
         hasDetailPage: fd.get('hasDetailPage') === 'on',
         featured: fd.get('featured') === 'on',
-        tags,
+        tags, colors, sizes,
+        weight: fd.get('weight') || undefined,
         seoTitle: fd.get('seoTitle') || undefined,
         seoDescription: fd.get('seoDescription') || undefined,
         seoKeywords: fd.get('seoKeywords') || undefined,
@@ -2061,6 +2219,17 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       } catch (err) { toast(err.message, 'err'); }
     };
   };
+  window.bsAutoFillDetailPage = () => {
+    const skuEl = document.querySelector('#bsExtProdForm [name=sku]');
+    const dpEl = document.getElementById('detailPageInput');
+    const cbEl = document.getElementById('hasDetailPageCb');
+    if (!dpEl) return;
+    const sku = skuEl?.value?.trim() || 'product';
+    dpEl.value = 'product-detail.html?sku=' + encodeURIComponent(sku);
+    if (cbEl) cbEl.checked = true;
+    toast('Detail page URL সেট হয়েছে', 'ok');
+  };
+
   window.bsExtAutoSEO = () => {
     const form = document.getElementById('bsExtProdForm');
     if(!form) return;

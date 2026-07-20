@@ -61,6 +61,9 @@ const ProductSchema = new mongoose.Schema({
   hasDetailPage: { type: Boolean, default: false },
   rating: { type: Number, default: 0 },
   tags: [String],
+  colors: [String],
+  sizes: [String],
+  weight: String,
   // SEO
   seoTitle: String,
   seoDescription: String,
@@ -279,10 +282,20 @@ app.post("/api/customer/signup", async (req, res) => {
 
 app.post("/api/customer/login", async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-    const user = await User.findOne({ email: String(email || "").toLowerCase() });
+    const { email, phone, password, identifier } = req.body || {};
+    // Accept: email field, phone field, or generic identifier (email or phone)
+    const id = identifier || email || phone || "";
+    const idLower = String(id).toLowerCase().trim();
+    // Try email match first, then phone match
+    const user = await User.findOne({
+      $or: [
+        { email: idLower },
+        { phone: idLower },
+        { phone: id.trim() },
+      ]
+    });
     if (!user || user.passwordHash !== sha256(password || ""))
-      return res.status(401).json({ error: "ইমেইল বা পাসওয়ার্ড ভুল" });
+      return res.status(401).json({ error: "ইমেইল/ফোন বা পাসওয়ার্ড ভুল" });
     const token = signToken({ userId: user._id, email: user.email, name: user.name, role: "customer" });
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -393,6 +406,19 @@ app.patch("/api/contacts/:id", authAdmin, async (req, res) => {
     if (read !== undefined) update.read = read;
     if (replied !== undefined) update.replied = replied;
     const msg = await ContactMessage.findByIdAndUpdate(req.params.id, update, { new: true });
+    // Send email reply to the client if replyText provided and email exists
+    if (replyText && msg && msg.email) {
+      appsScriptPost({
+        action: "contactReply",
+        to: msg.email,
+        toName: msg.name,
+        subject: "Re: " + (msg.subject || "Your Inquiry") + " — BS Collection BD",
+        replyText,
+        originalMessage: msg.message,
+        siteName: "BS Collection BD",
+        siteUrl: "https://bscollectionbd.com",
+      });
+    }
     res.json(msg);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -433,6 +459,15 @@ app.post("/api/products", authAdmin, async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+// Get product by SKU
+app.get("/api/products/sku/:sku", async (req, res) => {
+  try {
+    const p = await Product.findOne({ sku: req.params.sku });
+    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
+    res.json(p);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get("/api/products/id/:id", async (req, res) => {
   try {
     const p = await Product.findById(req.params.id);
@@ -458,10 +493,22 @@ app.delete("/api/products/id/:id", authAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Image upload
-app.post("/api/products/upload", authAdmin, upload.single("image"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
-  res.json({ url: req.file.path });
+// Image upload (single)
+app.post("/api/products/upload", authAdmin, async (req, res) => {
+  upload.single("image")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || "আপলোড ব্যর্থ" });
+    if (!req.file) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+    res.json({ url: req.file.path, urls: [req.file.path] });
+  });
+});
+
+// Image upload (multiple)
+app.post("/api/products/upload-multiple", authAdmin, async (req, res) => {
+  upload.array("images", 10)(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || "আপলোড ব্যর্থ" });
+    if (!req.files || !req.files.length) return res.status(400).json({ error: "ছবি পাওয়া যায়নি" });
+    res.json({ urls: req.files.map(f => f.path) });
+  });
 });
 
 // About page image upload (public but with basic check)
@@ -554,7 +601,7 @@ app.post("/api/orders", async (req, res) => {
     });
     let fakeScore = 0;
     const fakeReasons = [];
-    if (recentSamePhone > 3) { fakeScore += 40; fakeReasons.push("Same phone used 3+ times in 24h"); }
+    if (recentSamePhone > 1) { fakeScore += 60; fakeReasons.push("Same phone used more than once in 24h"); }
     if (customer.phone && !/^01[3-9]\d{8}$/.test(customer.phone)) { fakeScore += 30; fakeReasons.push("Invalid BD phone number"); }
     orderData.fakeScore = fakeScore;
     orderData.fakeReasons = fakeReasons;
@@ -948,7 +995,7 @@ app.get("/api/stats", authAdmin, async (req, res) => {
       ContactMessage.countDocuments({ read: false }),
     ]);
     const revenueAgg = await Order.aggregate([
-      { $match: { status: { $in: ["Completed", "Shipped"] } } },
+      { $match: { status: "Completed" } },
       { $group: { _id: null, total: { $sum: "$total" } } },
     ]);
     const inStock = await Product.countDocuments({ stock: { $gt: 5 } });

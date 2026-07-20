@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Login / Register — bscollectionbd</title>
-<meta name="description" content="Login or create a free bscollectionbd account to track orders, manage wishlist and shop faster."/>
-<link rel="icon" href="assets/logo.jpg"/>
+<title>Coming Soon — bscollectionbd</title>
+<meta name="description" content="This product will be available soon at bscollectionbd."/>
+<link rel="icon" href="assets/logo.png.jpeg"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -323,7 +323,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 .nav-menu>li>a{font-weight:500;padding:8px 0;transition:.25s;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--primary,#14213D);text-decoration:none}
 .nav-menu>li>a:hover,.nav-menu>li>a.active{color:var(--accent,#FCA311)}
 .nav-menu li{position:relative}
-.dropdown{position:absolute;top:calc(100% + 6px);left:0;background:#fff;min-width:210px;box-shadow:0 16px 40px rgba(20,33,61,.14);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s;z-index:50;list-style:none}
+.dropdown{position:absolute;top:calc(100%+6px);left:0;background:#fff;min-width:210px;box-shadow:0 16px 40px rgba(20,33,61,.14);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s;z-index:50;list-style:none}
 .nav-menu li:hover>.dropdown{opacity:1;visibility:visible;transform:translateY(0)}
 .dropdown li a{display:block;padding:10px 20px;transition:.2s;font-size:14px;text-decoration:none;color:inherit}
 .dropdown li a:hover{background:#F5F7FA;color:var(--accent,#FCA311);padding-left:26px}
@@ -356,6 +356,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 @media(max-width:1100px){.search-bar{max-width:340px}.nav-menu{gap:14px}}
 @media(max-width:900px){.logo-text small{display:none}.search-bar{max-width:260px}}
 @media(max-width:768px){
+  .logo{order:0}
   .nav-inner{gap:8px;flex-wrap:nowrap}
   .header-icons{display:none!important}
   .main-header{position:relative}
@@ -365,7 +366,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
   .search-toggle{display:inline-flex}
   .mobile-cart-icon{display:inline-flex}
   .hamburger{display:flex;order:3;margin-left:4px}
-  .nav-menu{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 18px;gap:4px;z-index:110;max-height:80vh;overflow-y:auto;border-radius:0 0 14px 14px;box-shadow:0 16px 40px rgba(20,33,61,.14);border:1px solid #eef1f5;border-top:none;order:6}
+  .nav-menu{display:none;position:absolute;top:calc(100%+10px);left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 18px;gap:4px;z-index:110;max-height:80vh;overflow-y:auto;border-radius:14px;box-shadow:0 16px 40px rgba(20,33,61,.14);border:1px solid #eef1f5;order:6}
   .nav-menu.open{display:flex}
   .nav-menu>li{width:100%;border-bottom:1px solid #f1f5f9}
   .nav-menu>li:last-child{border-bottom:none}
@@ -380,7 +381,6 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
   .nav-menu-icons a .badge{position:static;margin-left:2px}
   /* General responsive */
   .section{padding:40px 0!important}
-  .page-hero h1{font-size:clamp(22px,6vw,32px)!important}
   .footer-grid,.footer-grid-inner{grid-template-columns:1fr 1fr!important}
 }
 @media(max-width:560px){
@@ -397,62 +397,9 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 
 </style>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght;500;600;700&family=Noto+Sans+Bengali:wght;500;600;700&family=Poppins:wght;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/bs-app.css">
-  <script src="js/data.js" defer></script>
-  <script src="js/bs-app.js" defer></script>
-</head>
-<style>
-/* ── Login page specific ── */
-.auth-wrap{min-height:calc(100vh - 130px);display:grid;grid-template-columns:1fr 1fr;background:#F5F7FA}
-.auth-left{position:relative;overflow:hidden}
-.auth-left-img{width:100%;height:100%;object-fit:cover;display:block;min-height:100%}
-.auth-right{display:flex;align-items:center;justify-content:center;padding:60px 50px}
-.auth-form-box{width:100%;max-width:420px;background:#fff;box-shadow:0 16px 48px rgba(20,33,61,.1);padding:48px 44px}
-.auth-form-box h2{font-size:26px;font-weight:800;color:#14213D;margin-bottom:6px}
-.auth-form-box>p{color:#64748b;font-size:14px;margin-bottom:28px;line-height:1.55}
-.form-field{margin-bottom:18px}
-.form-field label{display:block;font-size:13px;font-weight:600;color:#14213D;margin-bottom:7px}
-.form-field input{width:100%;padding:13px 16px;border:1.5px solid #e2e8f0;font-family:inherit;font-size:14px;outline:none;transition:.2s;background:#F8FAFC;box-sizing:border-box}
-.form-field input:focus{border-color:#14213D;background:#fff;box-shadow:0 0 0 3px rgba(20,33,61,.06)}
-.btn-login{display:flex;width:100%;align-items:center;justify-content:center;gap:10px;background:#14213D;color:#fff;padding:14px 24px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.25s;letter-spacing:.3px;font-family:inherit;margin-top:4px;box-sizing:border-box}
-.btn-login:hover{background:#FCA311}
-.form-divider{text-align:center;margin:22px 0;color:#94a3b8;font-size:13px;position:relative}
-.form-divider::before,.form-divider::after{content:"";position:absolute;top:50%;width:42%;height:1px;background:#e2e8f0}
-.form-divider::before{left:0}.form-divider::after{right:0}
-.auth-link{color:#FCA311;font-weight:700;text-decoration:none}
-.auth-link:hover{text-decoration:underline}
-.auth-perks{text-align:left;margin:0 auto;list-style:none;padding:0}
-.auth-perks li{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:14px;color:#cbd5e1;line-height:1.4}
-.auth-perks li i{color:#FCA311;font-size:16px;flex-shrink:0;width:20px}
-.auth-tabs{display:flex;margin-bottom:26px;border-bottom:2px solid #eef1f5}
-.auth-tab-btn{flex:1;padding:10px 4px;background:transparent;border:none;font-weight:700;font-size:14px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:inherit;transition:.2s}
-.auth-tab-btn.active{color:#14213D;border-color:#FCA311}
-.auth-tab-btn:hover{color:#14213D}
-.auth-step{display:none}
-.auth-step.active{display:block}
-.back-link{display:inline-flex;align-items:center;gap:6px;color:#94a3b8;font-size:13px;text-decoration:none;margin-bottom:14px;cursor:pointer;font-weight:600}
-.back-link:hover{color:#14213D}
-.back-link i{font-size:11px}
-.profile-avatar{width:76px;height:76px;background:linear-gradient(135deg,#14213D,#2A3B5E);color:#FCA311;font-size:30px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 26px rgba(20,33,61,.25)}
-.profile-detail{display:flex;align-items:center;gap:12px;padding:13px 16px;background:#F8FAFC;border:1px solid #eef1f5;font-size:14px;color:#374151;margin-bottom:12px}
-@media(max-width:800px){
-  .auth-wrap{grid-template-columns:1fr}
-  .auth-left{display:none}
-  .auth-right{padding:40px 20px}
-  .auth-form-box{padding:36px 28px;box-shadow:none;border:1px solid #e2e8f0;max-width:100%}
-}
-@media(max-width:480px){
-  .auth-right{padding:24px 14px}
-  .auth-form-box{padding:28px 18px}
-  .auth-form-box h2{font-size:22px}
-}
-</style>
 </head>
 <body>
-
+<!-- ============ HEADER ============ -->
 <header>
   <div class="main-header">
     <div class="container nav-inner">
@@ -501,423 +448,38 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 </header>
 <div class="overlay" id="overlay"></div>
 
-<main class="auth-wrap">
-  <div class="auth-left">
-    <img src="https://images.unsplash.com/photo-1713192707656-11e779929375?q=80&w=1200&auto=format&fit=crop" alt="bscollectionbd" class="auth-left-img"/>
+
+
+<section class="page-hero">
+  <div class="container">
+    <h1>Coming <span>Soon</span></h1>
+    <div class="crumbs"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / Coming Soon</div>
   </div>
-
-  <div class="auth-right">
-    <div class="auth-form-box">
-
-      <div class="auth-tabs" id="authTabs">
-        <button type="button" class="auth-tab-btn active" data-tab="login">Login</button>
-        <button type="button" class="auth-tab-btn" data-tab="signup">Sign Up</button>
-      </div>
-
-      <!-- LOGIN -->
-      <div class="auth-step active" data-step="login">
-        <h2>Welcome Back <i class="fas fa-fan" style="color:#FCA311;font-size:20px"></i></h2>
-        <p>Sign in to continue shopping at bscollectionbd.</p>
-
-        <form id="loginForm" onsubmit="return doLogin(event)">
-          <div class="form-field">
-            <label for="loginId"><i class="fas fa-user" style="color:#FCA311;margin-right:4px"></i> Phone or Email *</label>
-            <input id="loginId" name="id" required type="text" placeholder="01XXXXXXXXX or email@example.com" autocomplete="username"/>
-          </div>
-          <div class="form-field">
-            <label for="loginPw"><i class="fas fa-lock" style="color:#FCA311;margin-right:4px"></i> Password *</label>
-            <input id="loginPw" name="pw" type="password" required placeholder="Enter your password" autocomplete="current-password"/>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin:-4px 0 20px;font-size:13px">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#374151;font-weight:400;margin:0">
-              <input type="checkbox" name="remember" style="width:auto;accent-color:#14213D;margin:0"/> Remember me
-            </label>
-            <a href="#" class="auth-link" style="font-size:12px" data-tab="forgot">Forgot Password?</a>
-          </div>
-          <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login to My Account</button>
-        </form>
-
-        <div class="form-divider">or</div>
-        <p style="text-align:center;font-size:14px;color:#64748b;margin:0">
-          Don't have an account? <a href="#" class="auth-link" data-tab="signup">Create one free</a>
-        </p>
-      </div>
-
-      <!-- SIGNUP -->
-      <div class="auth-step" data-step="signup">
-        <h2>Create Your Account <i class="fas fa-sparkles" style="color:#FCA311;font-size:18px"></i></h2>
-        <p>Join bscollectionbd — Bangladesh's #1 fan store.</p>
-
-        <form id="registerForm" onsubmit="return doRegister(event)">
-          <div class="form-field">
-            <label><i class="fas fa-user" style="color:#FCA311;margin-right:4px"></i> Full Name *</label>
-            <input name="name" required type="text" placeholder="Your full name" autocomplete="name"/>
-          </div>
-          <div class="form-field">
-            <label><i class="fas fa-phone" style="color:#FCA311;margin-right:4px"></i> Phone Number *</label>
-            <input name="phone" required type="tel" placeholder="01XXXXXXXXX" autocomplete="tel"/>
-          </div>
-          <div class="form-field">
-            <label><i class="fas fa-envelope" style="color:#FCA311;margin-right:4px"></i> Email (optional)</label>
-            <input name="email" type="email" placeholder="email@example.com" autocomplete="email"/>
-          </div>
-          <div class="form-field">
-            <label><i class="fas fa-lock" style="color:#FCA311;margin-right:4px"></i> Password *</label>
-            <input name="pw" type="password" required placeholder="Minimum 6 characters" autocomplete="new-password"/>
-          </div>
-          <button type="submit" class="btn-reg btn-login"><i class="fas fa-user-plus"></i> Create My Account</button>
-        </form>
-
-        <p style="text-align:center;font-size:14px;color:#64748b;margin-top:22px">
-          Already have an account? <a href="#" class="auth-link" data-tab="login">Sign in</a>
-        </p>
-      </div>
-
-      <!-- FORGOT PASSWORD: request OTP -->
-      <div class="auth-step" data-step="forgot">
-        <a href="#" class="back-link" data-tab="login"><i class="fas fa-arrow-left"></i> Back to login</a>
-        <h2>Reset Password</h2>
-        <p>Enter your registered phone or email and we'll send a verification code.</p>
-
-        <form id="forgotForm" onsubmit="return doForgot(event)">
-          <div class="form-field">
-            <label><i class="fas fa-user" style="color:#FCA311;margin-right:4px"></i> Phone or Email *</label>
-            <input name="id" required type="text" placeholder="01XXXXXXXXX or email@example.com"/>
-          </div>
-          <button type="submit" class="btn-login"><i class="fas fa-paper-plane"></i> Send OTP</button>
-        </form>
-        <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:14px">Demo mode: no real SMS/email is sent — the code will be shown on screen.</p>
-      </div>
-
-      <!-- RESET: verify OTP + new password -->
-      <div class="auth-step" data-step="reset">
-        <a href="#" class="back-link" data-tab="forgot"><i class="fas fa-arrow-left"></i> Resend code</a>
-        <h2>Set New Password</h2>
-        <p>Enter the 6-digit code sent to <b id="resetTarget" style="color:#14213D"></b></p>
-        <div id="demoOtpBanner" style="background:#FFF7E8;border:1px dashed #FCA311;padding:10px 14px;font-size:13px;color:#14213D;margin-bottom:18px;font-weight:600"></div>
-
-        <form id="resetForm" onsubmit="return doReset(event)">
-          <div class="form-field">
-            <label><i class="fas fa-key" style="color:#FCA311;margin-right:4px"></i> OTP Code *</label>
-            <input name="code" required type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code"/>
-          </div>
-          <div class="form-field">
-            <label><i class="fas fa-lock" style="color:#FCA311;margin-right:4px"></i> New Password *</label>
-            <input name="pw" type="password" required minlength="6" placeholder="Minimum 6 characters" autocomplete="new-password"/>
-          </div>
-          <button type="submit" class="btn-login"><i class="fas fa-check"></i> Update Password</button>
-        </form>
-      </div>
-
-      <!-- PROFILE: shown when a user is logged in -->
-      <div class="auth-step" data-step="profile">
-        <div class="profile-avatar" id="profileAvatar">U</div>
-        <h2 style="text-align:center" id="profileName">Member</h2>
-        <p style="text-align:center;margin-bottom:20px;color:#64748b;font-size:14px">আপনার অ্যাকাউন্টে লগইন করা আছে</p>
-
-        <div class="profile-detail"><i class="fas fa-phone" style="color:#FCA311;width:18px"></i> <span id="profilePhone">—</span></div>
-        <div class="profile-detail"><i class="fas fa-envelope" style="color:#FCA311;width:18px"></i> <span id="profileEmail">—</span></div>
-
-        <div style="margin-top:24px;border-top:1px solid #f1f5f9;padding-top:18px">
-          <h4 style="color:#14213D;font-size:14px;font-weight:700;margin-bottom:12px"><i class="fas fa-box" style="color:#FCA311;margin-right:6px"></i> আমার অর্ডারসমূহ</h4>
-          <div id="orderHistoryBox" style="max-height:280px;overflow-y:auto">
-            <p style="color:#94a3b8;font-size:13px;text-align:center;padding:16px 0">লোড হচ্ছে...</p>
-          </div>
-        </div>
-
-        <a href="index.html" class="btn-login" style="text-decoration:none;justify-content:center;margin-top:18px"><i class="fas fa-bag-shopping"></i> Continue Shopping</a>
-        <button type="button" class="btn-login" style="background:#fff;color:#14213D;border:1.5px solid #14213D;margin-top:10px" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
-      </div>
-
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;padding-top:18px;border-top:1px solid #f1f5f9;justify-content:center">
-        <a href="privacy-policy.html" style="font-size:12px;color:#94a3b8;text-decoration:none">Privacy Policy</a>
-        <span style="color:#e2e8f0">|</span>
-        <a href="terms-of-service.html" style="font-size:12px;color:#94a3b8;text-decoration:none">Terms of Service</a>
-        <span style="color:#e2e8f0">|</span>
-        <a href="contact.html" style="font-size:12px;color:#94a3b8;text-decoration:none">Get Help</a>
+</section>
+<section class="section">
+  <div class="container" style="max-width:640px">
+    <div style="background:#fff;box-shadow:var(--shadow);padding:60px 30px;text-align:center">
+      <i class="fas fa-hourglass-half" style="font-size:64px;color:var(--accent);margin-bottom:20px;display:block"></i>
+      <h2 style="color:var(--primary);font-size:28px;margin-bottom:10px" id="csTitle">This Product is Coming Soon</h2>
+      <p style="color:var(--muted);margin-bottom:22px;font-size:15px" id="csProductName"></p>
+      <p style="color:var(--muted);margin-bottom:26px">We're working hard to bring this product to you. Please check back soon or explore our currently available products.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <a href="shop.html" class="btn btn-primary" style="background:var(--primary);color:#fff;padding:12px 24px;font-weight:700"><i class="fas fa-store"></i> Browse Shop</a>
+        <a href="contact.html" class="btn btn-outline" style="background:transparent;color:var(--primary);border:1px solid var(--primary);padding:12px 24px;font-weight:700"><i class="fas fa-envelope"></i> Notify Me</a>
       </div>
     </div>
   </div>
-</main>
-
+</section>
 <script>
-/* =====================================================================
-   Self-contained account system (works even without cart.js / BSCart).
-   Users are stored locally in this browser under localStorage key
-   'bs_users'. The logged-in user is stored under 'bs_current_user'.
-   If window.BSCart is present, we also mirror the login into it so
-   the rest of the site (cart badge, wishlist, etc.) stays in sync —
-   but it is never required for login/signup/profile to work.
-===================================================================== */
-var LS_USERS = 'bs_users';
-var LS_CURRENT = 'bs_current_user';
-
-function getUsers(){
-  try{ var raw = localStorage.getItem(LS_USERS); return raw ? JSON.parse(raw) : []; }
-  catch(e){ return []; }
-}
-function saveUsers(users){
-  try{ localStorage.setItem(LS_USERS, JSON.stringify(users)); }catch(e){}
-}
-function getCurrentUser(){
-  try{ var raw = localStorage.getItem(LS_CURRENT); return raw ? JSON.parse(raw) : null; }
-  catch(e){ return null; }
-}
-function setCurrentUser(u){
-  try{ localStorage.setItem(LS_CURRENT, JSON.stringify(u)); }catch(e){}
-  try{ if(window.BSCart && typeof BSCart.setUser==='function') BSCart.setUser(u); }catch(e){}
-}
-function clearCurrentUser(){
-  try{ localStorage.removeItem(LS_CURRENT); }catch(e){}
-  try{ if(window.BSCart && typeof BSCart.setUser==='function') BSCart.setUser(null); }catch(e){}
-}
-
-/* ===== Tab / step controller ===== */
-function showAuthStep(name){
-  document.querySelectorAll('.auth-step').forEach(function(s){s.classList.toggle('active', s.dataset.step===name);});
-  document.querySelectorAll('.auth-tab-btn').forEach(function(b){b.classList.toggle('active', b.dataset.tab===name);});
-  var tabs=document.getElementById('authTabs');
-  if(tabs) tabs.style.display = (name==='profile') ? 'none' : 'flex';
-}
-document.addEventListener('click', function(e){
-  var t = e.target.closest('[data-tab]');
-  if(t){ e.preventDefault(); showAuthStep(t.dataset.tab); }
-});
-
-/* ===== Profile rendering ===== */
-function renderProfile(u){
-  var nameEl=document.getElementById('profileName'), phoneEl=document.getElementById('profilePhone'),
-      emailEl=document.getElementById('profileEmail'), avatarEl=document.getElementById('profileAvatar');
-  if(nameEl) nameEl.textContent = u.name || 'Member';
-  if(phoneEl) phoneEl.textContent = u.phone || '—';
-  if(emailEl) emailEl.textContent = u.email || '—';
-  if(avatarEl) avatarEl.textContent = (u.name||'U').trim().charAt(0).toUpperCase();
-}
-function doLogout(){
-  clearCurrentUser();
-  if(window.bsToast) bsToast('Logged out successfully.','ok');
-  showAuthStep('login');
-}
-
-/* ===== Login ===== */
-function doLogin(e){
-  e.preventDefault();
-  var f=e.target;
-  var id=f.id.value.trim(), pw=f.pw.value;
-  var users=getUsers();
-  var u=users.find(function(x){return (x.phone===id||x.email===id)&&x.pw===pw;});
-  if(!u){ if(window.bsToast) bsToast('Invalid credentials. Please check and try again.','err'); return false; }
-  setCurrentUser(u);
-  if(window.bsToast) bsToast('Welcome back, '+u.name+'!','ok');
-  renderProfile(u);
-  showAuthStep('profile');
-  return false;
-}
-
-/* ===== Register ===== */
-function doRegister(e){
-  e.preventDefault();
-  var f=e.target;
-  var name=f.name.value.trim(),phone=f.phone.value.trim(),email=f.email.value.trim(),pw=f.pw.value;
-  if(!name||!phone||pw.length<6){ if(window.bsToast) bsToast('Please fill all required fields (password min 6 chars)','err'); return false; }
-  var users=getUsers();
-  if(users.find(function(u){return u.phone===phone;})){ if(window.bsToast) bsToast('Phone already registered. Please login.','err'); return false; }
-  var newUser={name:name,phone:phone,email:email,pw:pw};
-  users.push(newUser);
-  saveUsers(users);
-  setCurrentUser(newUser);
-  if(window.bsToast) bsToast('Account created! Welcome, '+name+'!','ok');
-  renderProfile(newUser);
-  showAuthStep('profile');
-  return false;
-}
-
-/* ===== Forgot / Reset password (client-side demo flow) ===== */
-var pendingReset = {};
-function doForgot(e){
-  e.preventDefault();
-  var f=e.target;
-  var id=f.id.value.trim();
-  var users=getUsers();
-  var u=users.find(function(x){return x.phone===id||x.email===id;});
-  if(!u){ if(window.bsToast) bsToast('No account found with that phone/email.','err'); return false; }
-  var code = String(Math.floor(100000+Math.random()*900000));
-  pendingReset = { id:id, code:code };
-  var rt=document.getElementById('resetTarget'); if(rt) rt.textContent = id;
-  var banner=document.getElementById('demoOtpBanner');
-  if(banner) banner.innerHTML = '<i class="fas fa-circle-info"></i> Demo OTP (no real SMS/email sent): <span style="color:#FCA311">'+code+'</span>';
-  if(window.bsToast) bsToast('OTP sent (demo): '+code,'ok');
-  showAuthStep('reset');
-  return false;
-}
-function doReset(e){
-  e.preventDefault();
-  var f=e.target;
-  var code=f.code.value.trim(), pw=f.pw.value;
-  if(!pendingReset.id){ if(window.bsToast) bsToast('Please request a new code first.','err'); showAuthStep('forgot'); return false; }
-  if(code!==pendingReset.code){ if(window.bsToast) bsToast('Incorrect code. Please try again.','err'); return false; }
-  if(pw.length<6){ if(window.bsToast) bsToast('Password must be at least 6 characters.','err'); return false; }
-  var users=getUsers();
-  var u=users.find(function(x){return x.phone===pendingReset.id||x.email===pendingReset.id;});
-  if(u){ u.pw = pw; saveUsers(users); }
-  if(window.bsToast) bsToast('Password updated! Please login with your new password.','ok');
-  pendingReset = {};
-  f.reset();
-  showAuthStep('login');
-  return false;
-}
-
-/* ===== On load: go straight to profile if already logged in ===== */
-document.addEventListener('DOMContentLoaded', function(){
-  var current = getCurrentUser();
-  if(current){ renderProfile(current); showAuthStep('profile'); }
-  else { showAuthStep('login'); }
-  // Also sync with auth-backend.js if available
-  setTimeout(syncWithBackendAuth, 300);
-});
-
-/* ===== Auth-backend.js bridge ===== */
-function syncWithBackendAuth(){
-  // If auth-backend.js is loaded, it manages bs_customer_token / bs_customer_user
-  var token = localStorage.getItem('bs_customer_token');
-  var userJson = localStorage.getItem('bs_customer_user');
-  if(token && userJson){
-    try{
-      var u = JSON.parse(userJson);
-      if(u && u.name){
-        // mirror into old-style current-user key so profile works
-        setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
-        renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
-        showAuthStep('profile');
-        // Load orders from backend
-        loadCustomerOrders(token);
-      }
-    } catch(ex){}
-  }
-}
-
-/* ===== Customer orders from backend ===== */
-async function loadCustomerOrders(token){
-  var API_BASE = (function(){
-    var local = 'http://localhost:5000/api';
-    var prod  = 'https://bscollectionbd.onrender.com/api';
-    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
-  })();
-  try{
-    var res = await fetch(API_BASE + '/customer/orders', {
-      headers: {'Authorization': 'Bearer ' + token}
-    });
-    if(!res.ok) return;
-    var orders = await res.json();
-    renderOrderHistory(orders);
-  } catch(ex){}
-}
-
-function renderOrderHistory(orders){
-  var container = document.getElementById('orderHistoryBox');
-  if(!container) return;
-  if(!orders || !orders.length){
-    container.innerHTML = '<p style="color:#94a3b8;text-align:center;padding:20px 0">কোনো অর্ডার পাওয়া যায়নি।</p>';
-    return;
-  }
-  var statusColors = {Pending:'#f59e0b',Verified:'#3b82f6',Processing:'#8b5cf6',Shipped:'#06b6d4',Completed:'#10b981',Cancelled:'#ef4444',Fake:'#6b7280'};
-  container.innerHTML = orders.map(function(o){
-    var color = statusColors[o.status] || '#94a3b8';
-    var date = new Date(o.createdAt).toLocaleDateString('en-GB');
-    var items = (o.items||[]).map(function(i){return i.name + ' ×' + i.qty;}).join(', ');
-    return '<div style="border:1px solid #e2e8f0;padding:14px;margin-bottom:10px;background:#f8fafc">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-      '<span style="font-weight:700;color:#14213D">' + (o.orderId||'#') + '</span>' +
-      '<span style="background:'+color+';color:#fff;padding:3px 10px;font-size:12px;font-weight:600">' + o.status + '</span>' +
-      '</div>' +
-      '<div style="font-size:13px;color:#374151;margin-bottom:4px">' + (items||'(no items)') + '</div>' +
-      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b">' +
-      '<span>' + date + '</span>' +
-      '<span style="font-weight:700;color:#FCA311">৳ ' + (o.total||0).toLocaleString() + '</span>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-/* ===== Override login to also try backend ===== */
-var _origDoLogin = doLogin;
-doLogin = async function(e){
-  e.preventDefault();
-  var f = e.target;
-  var id = f.id.value.trim();
-  var pw = f.pw.value;
-  var API_BASE = (function(){
-    var local = 'http://localhost:5000/api';
-    var prod  = 'https://bscollectionbd.onrender.com/api';
-    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
-  })();
-  // Try backend first (email login)
-  try{
-    var res = await fetch(API_BASE + '/customer/login', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({identifier: id, email: id, phone: id, password: pw})
-    });
-    var data = await res.json();
-    if(res.ok && data.token){
-      localStorage.setItem('bs_customer_token', data.token);
-      localStorage.setItem('bs_customer_user', JSON.stringify(data.user));
-      var u = data.user;
-      setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
-      if(window.bsToast) bsToast('স্বাগতম, ' + u.name + '!', 'ok');
-      renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
-      showAuthStep('profile');
-      loadCustomerOrders(data.token);
-      return false;
-    }
-  } catch(ex){}
-  // Fall back to local storage auth
-  return _origDoLogin(e);
-};
-
-/* ===== Override register to also try backend ===== */
-var _origDoRegister = doRegister;
-doRegister = async function(e){
-  e.preventDefault();
-  var f = e.target;
-  var name = f.name.value.trim();
-  var phone = f.phone.value.trim();
-  var email = (f.email ? f.email.value.trim() : '');
-  var pw = f.pw.value;
-  var API_BASE = (function(){
-    var local = 'http://localhost:5000/api';
-    var prod  = 'https://bscollectionbd.onrender.com/api';
-    return ['localhost','127.0.0.1'].includes(location.hostname) ? local : prod;
-  })();
-  if(!email){
-    return _origDoRegister(e);
-  }
-  try{
-    var res = await fetch(API_BASE + '/customer/signup', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, phone, password: pw})
-    });
-    var data = await res.json();
-    if(res.ok && data.token){
-      localStorage.setItem('bs_customer_token', data.token);
-      localStorage.setItem('bs_customer_user', JSON.stringify(data.user));
-      var u = data.user;
-      setCurrentUser({name:u.name, email:u.email||'', phone:u.phone||''});
-      if(window.bsToast) bsToast('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম, ' + u.name + '!', 'ok');
-      renderProfile({name:u.name, email:u.email||'', phone:u.phone||''});
-      showAuthStep('profile');
-      return false;
-    } else {
-      if(window.bsToast) bsToast(data.error || 'Registration failed', 'err');
-      return false;
-    }
-  } catch(ex){
-    return _origDoRegister(e);
-  }
-};
+(function(){
+  var params = new URLSearchParams(location.search);
+  var name = params.get('product');
+  if(name){ document.getElementById('csProductName').textContent = decodeURIComponent(name); }
+})();
 </script>
 
+
+<!-- ============ FOOTER ============ -->
 <footer style="background:#0B1526;color:#cbd5e1;padding:56px 0 0" id="siteFooter">
   <div class="container">
     <div class="footer-grid-inner" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1.2fr;gap:36px;padding-bottom:44px">
@@ -927,7 +489,7 @@ doRegister = async function(e){
           <img src="assets/logo.jpg" alt="bscollectionbd" style="height:48px;width:auto;object-fit:contain"/>
         </div>
         <p style="font-size:14px;line-height:1.75;margin-bottom:10px;color:#94a3b8">Bangladesh's trusted online store for premium fans &amp; electrical appliances. Quality products, fast delivery nationwide.</p>
-        <p style="font-size:13px;color:#64748b;margin-bottom:14px">Delivering our best products right to your door.</p>
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px">আমাদের সেরা পণ্য সরাসরি আপনার দরজায় পৌঁছে দিই।</p>
         <div style="display:flex;gap:10px">
           <a href="#" aria-label="Facebook" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-facebook-f"></i></a>
           <a href="#" aria-label="Instagram" style="width:36px;height:36px;background:rgba(255,255,255,.08);color:#94a3b8;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;text-decoration:none;border-radius:4px"><i class="fab fa-instagram"></i></a>
@@ -967,7 +529,7 @@ doRegister = async function(e){
           <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center;font-size:14px;color:#94a3b8"><i class="fas fa-envelope" style="color:#FCA311;flex-shrink:0"></i>support@bscollectionbd.com</li>
           <li style="margin-bottom:12px;display:flex;gap:10px;align-items:center;font-size:14px;color:#94a3b8"><i class="fas fa-clock" style="color:#FCA311;flex-shrink:0"></i>Sat &ndash; Thu: 9:00 AM &ndash; 9:00 PM</li>
         </ul>
-        <p style="font-size:12px;color:#64748b;margin-top:6px">Have an issue? Feel free to reach out to us anytime.</p>
+        <p style="font-size:12px;color:#64748b;margin-top:6px">যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন।</p>
       </div>
     </div>
     <div style="border-top:1px solid #1a2942;padding:20px 0;text-align:center;font-size:13px;color:#94a3b8">
@@ -976,25 +538,55 @@ doRegister = async function(e){
   </div>
 </footer>
 
-<a href="#" id="toTop" aria-label="Back to top" style="position:fixed;bottom:28px;right:28px;width:46px;height:46px;background:#14213D;color:#fff;display:none;align-items:center;justify-content:center;font-size:16px;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:80;text-decoration:none;border-radius:50%"><style>#toTop.show{display:flex!important}#toTop:hover{background:#FCA311}</style><i class="fas fa-arrow-up"></i></a>
+<a href="#" id="toTop" aria-label="Back to top" style="position:fixed;bottom:30px;right:30px;width:44px;height:44px;background:#14213D;color:#fff;display:none;align-items:center;justify-content:center;font-size:16px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:80;text-decoration:none;border-radius:50%">
+<style>#toTop.show{display:flex}</style>
+<i class="fas fa-arrow-up"></i></a>
+
 
 <script>
+/* mini init for standalone pages */
 (function(){
-  var y=document.getElementById('year');if(y)y.textContent=new Date().getFullYear();
-  var tt=document.getElementById('toTop');
-  if(tt){window.addEventListener('scroll',function(){tt.classList.toggle('show',window.scrollY>400);},{passive:true});tt.addEventListener('click',function(e){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});}
-  var ham=document.getElementById('hamburger');var nav=document.getElementById('navMenu');var ov=document.getElementById('overlay');
-  if(ham&&nav){ham.addEventListener('click',function(){ham.classList.toggle('open');nav.classList.toggle('open');if(ov)ov.classList.toggle('show');});}
-  if(ov)ov.addEventListener('click',function(){if(ham)ham.classList.remove('open');if(nav)nav.classList.remove('open');ov.classList.remove('show');});
-  var st=document.getElementById('searchToggle');var sb=document.getElementById('searchBar');
-  if(st&&sb)st.addEventListener('click',function(){sb.classList.toggle('open');});
+  var ham = document.getElementById('hamburger');
+  var nav = document.getElementById('navMenu');
+  var ov  = document.getElementById('overlay');
+  if(ham && nav && ov){
+    ham.addEventListener('click', function(){ nav.classList.toggle('open'); ov.classList.toggle('show'); });
+    ov.addEventListener('click', function(){ nav.classList.remove('open'); ov.classList.remove('show'); });
+  }
+  var y = document.getElementById('year'); if(y) y.textContent = new Date().getFullYear();
+  var tt = document.getElementById('toTop');
+  if(tt){
+    window.addEventListener('scroll', function(){ tt.classList.toggle('show', window.scrollY>500); });
+    tt.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+  }
+  var st = document.getElementById('searchToggle');
+  var sb = document.getElementById('searchBar');
+  if(st && sb){
+    st.addEventListener('click', function(e){
+      e.stopPropagation();
+      sb.classList.toggle('open');
+      if(sb.classList.contains('open')){
+        var inp = document.getElementById('searchInput');
+        if(inp) inp.focus();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(sb.classList.contains('open') && !sb.contains(e.target) && e.target !== st){
+        sb.classList.remove('open');
+      }
+    });
+  }
+  var nf = document.getElementById('newsForm');
+  if(nf) nf.addEventListener('submit', function(e){ e.preventDefault(); if(window.bsToast) bsToast('Thanks for subscribing!','ok'); e.target.reset(); });
 })();
 </script>
 <script src="cart.js"></script>
 
+<script>window.doSearch=function(e){if(e&&e.preventDefault)e.preventDefault();var q=(document.getElementById('searchInput')||{}).value||'';if(q.trim())window.location.href='search.html?q='+encodeURIComponent(q.trim());}</script>
+
 <!-- BS_INJECT_START -->
-<script src="js/bs-shared.js" defer></script>
-<script src="js/auth-backend.js" defer></script>
+
+
 <!-- BS_INJECT_END -->
 </body>
 </html>
