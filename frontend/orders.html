@@ -385,7 +385,7 @@
 <header class="header">
   <div class="container header-top">
     <a href="index.html" class="logo">
-      <img loading="lazy" decoding="async" src="assets/d5f720099214.png" alt="Dhopa Mama">
+      <img loading="lazy" src="assets/logo.jpg" alt="BS Collection BD" class="footer-logo" style="height:64px;object-fit:contain;border-radius:4px"/>
     </a>
     <nav class="main-nav" id="mainNav">
       <a href="index.html">Home</a>
@@ -588,12 +588,15 @@ function goBackFromCartPopup() {
 }
 
 /* ===================== Data ===================== */
-var ORDERS_KEY = 'dmOrders';
+var ORDERS_KEY = 'bs_orders_v1'; // BS Collection BD
 var DEFAULT_ITEM_ICON = '<svg viewBox="0 0 48 48" fill="none" stroke="#997D36" stroke-width="1.6"><rect x="10" y="12" width="28" height="26"/><path d="M16 12v-2a4 4 0 0 1 8 0v2"/></svg>';
 
 function currentUserContact(){
-  try{ var u = JSON.parse(localStorage.getItem('dmUser')||'null'); return u && (u.contact||u.email||u.mobile) || null; }catch(e){ return null; }
+  try{ var u = JSON.parse(localStorage.getItem('bs_customer_user')||'null'); return u && (u.email||u.phone||u.contact||u.mobile) || null; }catch(e){ return null; }
 }
+function getAuthToken(){ return localStorage.getItem('bs_customer_token') || ''; }
+var API_BASE_ORDERS = (location.hostname==='localhost'||location.hostname==='127.0.0.1')
+  ? 'http://localhost:5000/api' : 'https://bscollectionbd.onrender.com/api';
 function normalizeOrder(o){
   var iso = o.paymentDateISO || (o.createdAt ? String(o.createdAt).slice(0,10) : (o.date && /^\d{4}-\d{2}-\d{2}/.test(o.date) ? o.date.slice(0,10) : ''));
   var display = o.paymentDateDisplay;
@@ -607,7 +610,7 @@ function normalizeOrder(o){
   var items = (o.items||[]).map(function(it){
     return {
       title: it.title||it.name||'Item',
-      by: it.by||it.category||'Dhopa Mama',
+      by: it.by||it.category||'BS Collection BD',
       size: it.size||'-',
       qty: Number(it.qty||1),
       price: Number(it.price||0),
@@ -643,6 +646,50 @@ function loadOrders(){
 let ORDERS = loadOrders();
 let activeTab = 'all';
 let pendingCancelId = null;
+
+// ─── Fetch from backend for logged-in users ─────────────────────────
+function normalizeBackendOrder(o){
+  var iso = (o.createdAt||'').slice(0,10);
+  var display = iso ? new Date(o.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '—';
+  var st = (o.status||'Pending');
+  if(/complet/i.test(st)) st='completed';
+  else if(/cancel/i.test(st)) st='cancelled';
+  else st='processing';
+  var items = (o.items||[]).map(function(it){
+    return {
+      title: it.name||'পণ্য',
+      by: 'BS Collection BD',
+      size: '-', qty: Number(it.qty||1), price: Number(it.price||0),
+      status: st==='completed'?'Delivered':st==='cancelled'?'Cancelled':'Processing',
+      deliveryDate: display, icon: DEFAULT_ITEM_ICON
+    };
+  });
+  return {
+    id: o.orderId || String(o._id||'').slice(-8),
+    paymentDateISO: iso, paymentDateDisplay: display,
+    status: st, userContact: o.customer?.email||o.customer?.phone||null,
+    total: o.total||0, deliveryCharge: o.deliveryCharge||o.deliveryFee||70,
+    items: items, _fromBackend: true
+  };
+}
+(async function loadFromBackend(){
+  var tk = getAuthToken();
+  if(!tk) return;
+  try{
+    var res = await fetch(API_BASE_ORDERS + '/customer/orders', { headers:{'Authorization':'Bearer '+tk} });
+    if(!res.ok) return;
+    var data = await res.json();
+    if(!Array.isArray(data)||!data.length) return;
+    var backendNorm = data.map(normalizeBackendOrder);
+    var localIds = new Set(ORDERS.map(function(o){return o.id;}));
+    backendNorm.forEach(function(o){
+      if(!localIds.has(o.id)){ ORDERS.unshift(o); localIds.add(o.id); }
+      else { var idx=ORDERS.findIndex(function(x){return x.id===o.id;}); if(idx>=0) ORDERS[idx]=o; }
+    });
+    ORDERS.forEach(recomputeStatus);
+    render();
+  }catch(e){}
+})();
 
 /* ===================== Helpers ===================== */
 function money(n){ return '৳' + Number(n||0).toLocaleString('en-IN'); }
@@ -891,8 +938,8 @@ render();
   <div class="container">
     <div class="footer-grid">
       <div>
-        <img loading="lazy" decoding="async" src="assets/d5f720099214.png" alt="Dhopa Mama" class="footer-logo"/>
-        <p class="footer-about">ঘরে বসে সহজে অর্ডার করুন লন্ড্রি সার্ভিস — ফ্রি পিকআপ ও ডেলিভারিসহ, নরমাল ওয়াশ, ড্রাই ওয়াশ ও আয়রন।</p>
+        <img loading="lazy" src="assets/logo.jpg" alt="BS Collection BD" class="footer-logo" style="height:64px;object-fit:contain;border-radius:4px"/>
+        <p class="footer-about">বাংলাদেশের বিশ্বস্ত ফ্যান ও ইলেকট্রিক্যাল পণ্যের অনলাইন স্টোর। সারা বাংলাদেশে দ্রুত ডেলিভারি।</p>
         <div class="footer-social">
           <a href="#" class="fb" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
           <a href="#" class="ig" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
@@ -941,8 +988,8 @@ render();
     </svg>
   </div>
   <div class="footer-bottom">
-    ধোপা মামা (Dhopa Mama) — ফরিদপুর সদর, ফরিদপুরে ফ্রি হোম পিকআপ লন্ড্রি ও কাপড় ধোয়ার সার্ভিস, dhopamama.com<br>
-    Copyright © Dhopa Mama 2026 – All Rights Reserved |
+    BS Collection BD (BS Collection BD) — ফরিদপুর সদর, ফরিদপুরে ফ্রি হোম পিকআপ লন্ড্রি ও কাপড় ধোয়ার সার্ভিস, bscollectionbd.com<br>
+    Copyright © BS Collection BD 2026 – All Rights Reserved |
   </div>
 </footer>
 

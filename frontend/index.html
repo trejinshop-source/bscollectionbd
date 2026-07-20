@@ -980,7 +980,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
           <img loading="lazy" src="https://bn.smartdeal.com.bd/public/uploads/all/Rh6pC0FDQpSUWtDBB7ddd7zplYvfy0vlcJmGGLfQ.jpg" alt="Luxury BLDC Ceiling Fan"/>
         </div>
       </div>
-      <div class="hero-side">
+      <div class="hero-side" id="heroSideCards">
         <a class="hero-card amber fade-in" href="product-jy2570.html">
           <div class="hero-card-body">
             <span class="discount">25% OFF</span>
@@ -1407,10 +1407,33 @@ function renderHomeSections(){
               <a href="${d.btnLink||'shop.html'}" class="btn btn-accent">${d.btnText||'Buy Now'} <i class="fas fa-shopping-cart"></i></a>
             </div>
             <div class="deal-img"><img loading="lazy" src="${d.img||''}" alt="Deal Product"/></div>`;
-          if (d.days) {
+          // deadline ISO date takes priority over days count
+          if (d.deadline) {
+            window._dealDeadline = new Date(d.deadline).getTime();
+          } else if (d.days) {
             window._dealDeadline = new Date().getTime() + Number(d.days) * 24*60*60*1000;
-            if (typeof updateCountdown === 'function') updateCountdown();
           }
+          if (typeof updateCountdown === 'function') updateCountdown();
+        }
+      }
+
+      // Update hero-side promo cards from admin promoBanners
+      if (Array.isArray(c.promoBanners) && c.promoBanners.length) {
+        const heroSide = document.getElementById('heroSideCards');
+        if (heroSide) {
+          const styleMap = ['amber','dark'];
+          heroSide.innerHTML = c.promoBanners.slice(0,2).map((b, i) => {
+            const styleClass = b.style || styleMap[i % 2];
+            return `<a class="hero-card ${styleClass} fade-in" href="${b.btnLink||'shop.html'}">
+              <div class="hero-card-body">
+                ${b.discount||b.highlight ? `<span class="discount">${b.discount||b.highlight}</span>` : ''}
+                <h3>${b.title||''}</h3>
+                <span>${b.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></span>
+              </div>
+              ${b.img ? `<img class="hero-card-img" loading="lazy" src="${b.img}" alt="${b.title||''}"/>` : ''}
+            </a>`;
+          }).join('');
+          observeFadeIns();
         }
       }
 
@@ -1833,7 +1856,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
   var orderCloseBtn = document.getElementById('orderModalClose');
   if(orderCloseBtn) orderCloseBtn.addEventListener('click', closeOrderForm);
-  if(orderOverlay) orderOverlay.addEventListener('click', function(e){ if(e.target===this) closeOrderForm(); });
+  // Clicking the backdrop does NOT close the order form — prevents accidental order cancellation
 
   var orderForm = document.getElementById('orderForm');
   if(orderForm) orderForm.addEventListener('submit', function(e){

@@ -111,6 +111,31 @@ main{max-width:1200px;margin:32px auto;padding:0 20px}
 .error-state h2{font-size:22px;font-weight:800;color:var(--primary);margin-bottom:8px}
 .error-state p{color:var(--muted);font-size:14px;margin-bottom:28px}
 @media(max-width:768px){.product-grid{grid-template-columns:1fr}.nav-links{display:none}}
+
+/* ── Review / Question Submission Form ── */
+.rv-form-wrap{background:#fff;padding:28px 28px 32px;margin-bottom:40px;box-shadow:var(--shadow)}
+.rv-form-wrap h2{font-size:19px;font-weight:800;color:var(--primary);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.rv-tabs{display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:22px}
+.rv-tab{padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s;font-family:inherit}
+.rv-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.rv-form-group{margin-bottom:14px}
+.rv-form-group label{display:block;font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px}
+.rv-form-group input,.rv-form-group textarea{width:100%;border:1.5px solid #e2e8f0;padding:11px 13px;font-size:13.5px;font-family:inherit;outline:none;transition:.2s;background:#f8fafc;color:var(--text)}
+.rv-form-group input:focus,.rv-form-group textarea:focus{border-color:var(--accent);background:#fff}
+.rv-form-group textarea{resize:vertical;min-height:88px}
+.rv-stars-wrap{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px;margin-bottom:4px}
+.rv-stars-wrap input{display:none}
+.rv-stars-wrap label{font-size:26px;cursor:pointer;color:#ddd;transition:.1s}
+.rv-stars-wrap input:checked~label,.rv-stars-wrap label:hover,.rv-stars-wrap label:hover~label{color:#FCA311}
+.rv-submit-btn{display:inline-flex;align-items:center;gap:9px;padding:12px 26px;background:var(--primary);color:#fff;font-weight:700;font-size:14px;border:none;cursor:pointer;font-family:inherit;transition:.2s}
+.rv-submit-btn:hover{background:var(--accent);color:#0b1526}
+.rv-submit-btn:disabled{opacity:.6;cursor:not-allowed}
+.rv-login-gate{background:#FFF8E6;border:1.5px solid #FCA311;padding:20px 22px;text-align:center}
+.rv-login-gate p{color:var(--primary);font-size:15px;font-weight:600;margin-bottom:14px}
+.rv-login-gate a{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;font-weight:700;text-decoration:none;font-size:13.5px;margin:4px;transition:.2s}
+.rv-login-gate a.btn-navy{background:var(--primary);color:#fff}
+.rv-login-gate a.btn-accent{background:var(--accent);color:#0b1526}
+@media(max-width:600px){.rv-form-wrap{padding:18px 14px 22px}}
 </style>
 </head>
 <body>
@@ -419,6 +444,131 @@ main{max-width:1200px;margin:32px auto;padding:0 20px}
   syncBadges();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', loadProduct);
   else loadProduct();
+})();
+</script>
+
+<script>
+/* ─── Review / Question form with login gate ─────────────────────── */
+(function(){
+  var TK = 'bs_customer_token', UK = 'bs_customer_user';
+  var RV_API = (location.hostname==='localhost'||location.hostname==='127.0.0.1')
+    ? 'http://localhost:5000/api' : 'https://bscollectionbd.onrender.com/api';
+  function tok(){ return localStorage.getItem(TK)||''; }
+  function usr(){ try{return JSON.parse(localStorage.getItem(UK)||'null');}catch(e){return null;} }
+  function loggedIn(){ return !!tok()&&!!usr(); }
+
+  var params = new URLSearchParams(location.search);
+  var _sku = params.get('sku'), _id = params.get('id');
+  var _tab = 'review';
+
+  function buildForm(productId, productName){
+    var u = usr();
+    var section = document.createElement('section');
+    section.className = 'rv-form-wrap';
+    section.innerHTML =
+      '<h2><i class="fas fa-comment-dots" style="color:var(--accent)"></i> রিভিউ বা প্রশ্ন করুন</h2>' +
+      '<div class="rv-tabs">' +
+        '<button class="rv-tab active" onclick="window._rvTab(this,'review')"><i class="fas fa-star"></i> রিভিউ লিখুন</button>' +
+        '<button class="rv-tab" onclick="window._rvTab(this,'question')"><i class="fas fa-question-circle"></i> প্রশ্ন করুন</button>' +
+      '</div>' +
+      '<div id="rvBody">' + (loggedIn() ? formHTML(u, productId, productName) : gateHTML()) + '</div>';
+    var mc = document.getElementById('mainContent');
+    if(mc) mc.appendChild(section);
+  }
+
+  function gateHTML(){
+    return '<div class="rv-login-gate">' +
+      '<p><i class="fas fa-lock" style="color:var(--accent);margin-right:6px"></i> রিভিউ বা প্রশ্ন করতে প্রথমে লগইন করুন।</p>' +
+      '<a href="account.html" class="btn-navy"><i class="fas fa-sign-in-alt"></i> লগইন করুন</a>' +
+      '<a href="account.html?tab=register" class="btn-accent"><i class="fas fa-user-plus"></i> নিবন্ধন করুন</a>' +
+    '</div>';
+  }
+
+  function formHTML(u, productId, productName){
+    var stars = [5,4,3,2,1].map(function(n){
+      return '<input type="radio" name="rating" id="rv'+n+'" value="'+n+'"'+(n===5?' checked':'')+'/><label for="rv'+n+'" title="'+n+'★">★</label>';
+    }).join('');
+    return '<form id="rvForm" onsubmit="window._rvSubmit(event)">' +
+      '<input type="hidden" name="productId" value="'+(productId||'')+'"/>' +
+      '<input type="hidden" name="productName" value="'+encodeURIComponent(productName||'')+'"/>' +
+      '<input type="hidden" name="type" id="rvTypeHidden" value="review"/>' +
+      '<div class="rv-form-group" id="rvStarGroup">' +
+        '<label>রেটিং <span style="color:#ef4444">*</span></label>' +
+        '<div class="rv-stars-wrap">'+stars+'</div>' +
+      '</div>' +
+      '<div class="rv-form-group">' +
+        '<label>আপনার নাম <span style="color:#ef4444">*</span></label>' +
+        '<input type="text" name="name" value="'+(u&&u.name?u.name:'')+'" required placeholder="আপনার নাম"/>' +
+      '</div>' +
+      '<div class="rv-form-group">' +
+        '<label id="rvTextLabel">আপনার মতামত <span style="color:#ef4444">*</span></label>' +
+        '<textarea name="text" rows="4" required placeholder="এই পণ্য সম্পর্কে আপনার অভিজ্ঞতা লিখুন..."></textarea>' +
+      '</div>' +
+      '<button type="submit" class="rv-submit-btn" id="rvSubmitBtn"><i class="fas fa-paper-plane"></i> সাবমিট করুন</button>' +
+    '</form>';
+  }
+
+  window._rvTab = function(btn, tab){
+    _tab = tab;
+    document.querySelectorAll('.rv-tab').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    var hidden = document.getElementById('rvTypeHidden');
+    if(hidden) hidden.value = tab;
+    var sg = document.getElementById('rvStarGroup');
+    if(sg) sg.style.display = tab==='question' ? 'none' : '';
+    var lbl = document.getElementById('rvTextLabel');
+    if(lbl) lbl.innerHTML = tab==='question' ? 'আপনার প্রশ্ন <span style="color:#ef4444">*</span>' : 'আপনার মতামত <span style="color:#ef4444">*</span>';
+    var ta = document.querySelector('#rvForm textarea[name=text]');
+    if(ta) ta.placeholder = tab==='question' ? 'পণ্য সম্পর্কে আপনার প্রশ্ন লিখুন...' : 'এই পণ্য সম্পর্কে আপনার অভিজ্ঞতা লিখুন...';
+  };
+
+  window._rvSubmit = async function(e){
+    e.preventDefault();
+    if(!loggedIn()){ alert('রিভিউ করতে প্রথমে লগইন করুন।'); return; }
+    var fd = new FormData(e.target);
+    var payload = {
+      productId: fd.get('productId'),
+      productName: decodeURIComponent(fd.get('productName')||''),
+      type: fd.get('type')||'review',
+      name: fd.get('name'),
+      text: fd.get('text'),
+      rating: parseInt(fd.get('rating')||'5', 10),
+      email: usr()&&usr().email||''
+    };
+    var btn = document.getElementById('rvSubmitBtn');
+    if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...'; }
+    try{
+      var res = await fetch(RV_API+'/reviews', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok()},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){ var d=await res.json().catch(function(){return {};}); throw new Error(d.error||'সাবমিট ব্যর্থ হয়েছে'); }
+      var body = document.getElementById('rvBody');
+      if(body) body.innerHTML = '<div style="background:#e8fbf0;border:1.5px solid #12B76A;padding:22px;text-align:center">' +
+        '<i class="fas fa-check-circle" style="color:#12B76A;font-size:32px;display:block;margin-bottom:10px"></i>' +
+        '<b style="color:#0D7A4A;font-size:16px">' + (_tab==='question'?'প্রশ্ন পাঠানো হয়েছে!':'রিভিউ সাবমিট হয়েছে!') + '</b>' +
+        '<p style="color:#64748b;margin-top:6px">ধন্যবাদ! আপনার ' + (_tab==='question'?'প্রশ্নটি':'রিভিউটি') + ' প্রকাশের পর দেখা যাবে।</p></div>';
+    }catch(err){
+      alert(err.message||'সমস্যা হয়েছে, আবার চেষ্টা করুন।');
+      if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> সাবমিট করুন'; }
+    }
+  };
+
+  /* Wait for product to load, then append form */
+  var _tries=0;
+  var _iv = setInterval(function(){
+    var mc = document.getElementById('mainContent');
+    _tries++;
+    if((mc&&mc.children.length>1&&!mc.querySelector('.rv-form-wrap'))||_tries>12){
+      clearInterval(_iv);
+      if(!mc||mc.querySelector('.rv-form-wrap')) return;
+      var pid = _sku||_id||'';
+      var ptitle = document.querySelector('.product-name,.product-title,h1');
+      var pname = ptitle ? ptitle.textContent.trim() : '';
+      buildForm(pid, pname);
+    }
+  }, 600);
 })();
 </script>
 </body>

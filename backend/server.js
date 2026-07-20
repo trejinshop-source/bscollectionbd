@@ -453,6 +453,16 @@ app.post("/api/products", authAdmin, async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+
+// ── Product by SKU ──────────────────────────────────────────────────
+app.get("/api/products/sku/:sku", async (req, res) => {
+  try {
+    const p = await Product.findOne({ sku: req.params.sku });
+    if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
+    res.json(p);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.get("/api/products/id/:id", async (req, res) => {
   try {
     const p = await Product.findById(req.params.id);

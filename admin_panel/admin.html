@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --orange:#F97316;
-  --orange-light:#FDBA74;
-  --orange-bg:#FFF1E4;
-  --orange-bg-2:#FFE8D1;
+  --orange:#FCA311;
+  --orange-light:#F6C842;
+  --orange-bg:#FFF8E6;
+  --orange-bg-2:#FFEFB8;
   --bg:#F7F7F8;
   --card:#ffffff;
   --border:#EDEDF0;
@@ -26,7 +26,7 @@
   --blue-bg:#EAF1FF;
   --purple:#7A5AF8;
   --purple-bg:#F2EEFF;
-  --navy:#01112A;
+  --navy:#14213D;
   --radius:16px;
   --sidebar-w:220px;
 }
@@ -346,8 +346,8 @@ body[data-theme="dark"] .cancel-btn{background:var(--card);}
    Retheme to match storefront: Navy (#14213D) + Orange (#FCA311)
    ============================================================ */
 body{
-  --orange:#FCA311!important; --orange-light:#FCD79E!important;
-  --orange-bg:#FFF7ED!important; --orange-bg-2:#FEE4C7!important;
+  --orange:#FCA311!important; --orange-light:#F6C842!important;
+  --orange-bg:#FFF8E6!important; --orange-bg-2:#FFEFB8!important;
   --navy:#14213D!important;
   --primary:#14213D; --accent:#FCA311;
 }
@@ -2286,6 +2286,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     const homeFields = pageKey === 'home' ? (() => {
       const banners = cnt.promoBanners || [];
       const deal = cnt.dealOfMonth || {};
+      bsRenderPromos(cnt.promoBanners || []);
       const why = cnt.whyChooseUs || [];
       const revs = cnt.reviews || [];
       const news = cnt.newsletter || {};
@@ -2351,6 +2352,10 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <div class="row">
             <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/></label>
             <label>কতদিনের কাউন্টডাউন <input type="number" id="bsDealDays" value="${deal.days||8}"/></label>
+            <label style="margin-top:10px">অফার শেষের নির্দিষ্ট তারিখ ও সময় (সেট করলে অগ্রাধিকার পাবে)
+              <input type="datetime-local" id="bsDealDeadline" value="${deal.deadline ? new Date(deal.deadline).toISOString().slice(0,16) : ''}" style="margin-top:4px"/>
+              <small style="color:#64748b;font-size:11px;display:block;margin-top:2px">নির্দিষ্ট তারিখ সেট থাকলে ফ্রন্টএন্ডে সরাসরি সেই সময় পর্যন্ত কাউন্টডাউন চলবে।</small>
+            </label>
           </div>
         </div>
 
@@ -2474,6 +2479,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           btnLink: row.querySelector('[data-b-btnlink]')?.value || 'shop.html',
           img: row.querySelector('[data-b-img]')?.value || '',
         }));
+        const _dlVal = document.getElementById('bsDealDeadline')?.value;
         content.dealOfMonth = {
           tag: document.getElementById('bsDealTag')?.value || '',
           title: document.getElementById('bsDealTitle')?.value || '',
@@ -2518,6 +2524,49 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       } catch (err) { toast(err.message, 'err'); }
     };
   }
+
+  
+// ── Promo Banner (Hero Card) Manager ─────────────────────────────────
+function bsRenderPromos(banners){
+  var c = document.getElementById('bsPromoContainer');
+  if(!c) return;
+  c.innerHTML = (banners||[]).map(function(b,i){
+    return '<div style="border:1px solid #e2e8f0;padding:12px;margin-bottom:10px;background:#fff" data-promo-idx="'+i+'">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<b style="font-size:13px;color:#14213D">কার্ড '+(i+1)+'</b>' +
+        '<button type="button" onclick="bsRemovePromo('+i+')" style="background:none;border:none;cursor:pointer;color:#ef4444"><i class="fas fa-trash"></i></button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">শিরোনাম<input type="text" class="promo-field" data-field="title" value="'+esc(b.title||'')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">স্টাইল<select class="promo-field" data-field="style" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"><option value="amber"'+(b.style==='amber'?' selected':'')+'>Amber (হলুদ)</option><option value="dark"'+(b.style==='dark'?' selected':'')+'>Dark (নীল)</option></select></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">ডিসকাউন্ট / ব্যাজ<input type="text" class="promo-field" data-field="discount" value="'+esc(b.discount||b.highlight||'')+'" placeholder="যেমন: 25% OFF" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">বাটন টেক্সট<input type="text" class="promo-field" data-field="btnText" value="'+esc(b.btnText||'Shop Now')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D;grid-column:1/-1">লিংক (URL)<input type="text" class="promo-field" data-field="btnLink" value="'+esc(b.btnLink||'')+'" placeholder="shop.html বা পূর্ণ URL" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D;grid-column:1/-1">ছবি URL<input type="text" class="promo-field" data-field="img" value="'+esc(b.img||'')+'" placeholder="https://..." style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+      '</div>' +
+    '</div>';
+  }).join('') || '<p style="font-size:13px;color:#94a3b8;text-align:center;padding:16px">কোনো কার্ড নেই — নিচের বাটনে ক্লিক করুন</p>';
+}
+function bsGetPromos(){
+  var rows = document.querySelectorAll('#bsPromoContainer [data-promo-idx]');
+  var result = [];
+  rows.forEach(function(row){
+    var obj = {};
+    row.querySelectorAll('.promo-field').forEach(function(f){ obj[f.dataset.field]=f.value; });
+    result.push(obj);
+  });
+  return result;
+}
+window.bsAddPromo = function(){
+  var cur = bsGetPromos();
+  cur.push({title:'',style:'amber',discount:'',btnText:'Shop Now',btnLink:'shop.html',img:''});
+  bsRenderPromos(cur);
+};
+window.bsRemovePromo = function(idx){
+  var cur = bsGetPromos();
+  cur.splice(idx,1);
+  bsRenderPromos(cur);
+};
 
   // ── TAB: Users ─────────────────────────────────────────────
   async function loadUsers() {

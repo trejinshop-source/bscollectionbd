@@ -2085,7 +2085,7 @@ function toggleRelatedWishlist(btn){
 
   var orderCloseBtn = document.getElementById('orderModalClose');
   if(orderCloseBtn) orderCloseBtn.addEventListener('click', closeOrderForm);
-  if(orderOverlay) orderOverlay.addEventListener('click', function(e){ if(e.target===this) closeOrderForm(); });
+  // Clicking backdrop does NOT close order form
 
   var orderForm = document.getElementById('orderForm');
   if(orderForm) orderForm.addEventListener('submit', function(e){

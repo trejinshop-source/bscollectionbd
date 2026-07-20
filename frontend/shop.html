@@ -1716,7 +1716,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
   var orderCloseBtn = document.getElementById('orderModalClose');
   if(orderCloseBtn) orderCloseBtn.addEventListener('click', closeOrderForm);
-  if(orderOverlay) orderOverlay.addEventListener('click', function(e){ if(e.target===this) closeOrderForm(); });
+  // Clicking backdrop does NOT close order form — prevents accidental cancellation
 
   var orderForm = document.getElementById('orderForm');
   if(orderForm) orderForm.addEventListener('submit', function(e){
