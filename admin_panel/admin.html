@@ -770,7 +770,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="pill-btn ghost" id="refreshProductsBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
           <button class="pill-btn" id="addProductBtn">Add Product <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
-          <button class="pill-btn" id="addAdvancedProductBtn">এডভান্সড পন্য <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
           <button class="pill-btn" id="addLandingPageBtn2">ল্যান্ডিং পেজ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
@@ -880,6 +879,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div class="form-group2"><label>Category Slug</label><input type="text" id="pCatSlug" placeholder="rechargeable-fans"></div>
       </div>
       <div class="form-row">
+        <div class="form-group2"><label>ব্র্যান্ড (Brand)</label><input type="text" id="pBrand" placeholder="bscollectionbd"></div>
+        <div class="form-group2"><label>Tags (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pTags" placeholder="rechargeable, LED, 12-inch, USB"></div>
+      </div>
+      <div class="form-row">
         <div class="form-group2"><label>Current Price (৳) *</label><input type="number" id="pNow" placeholder="1200" min="0"></div>
         <div class="form-group2"><label>Old Price (৳)</label><input type="number" id="pOld" placeholder="1500" min="0"></div>
       </div>
@@ -888,6 +891,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div class="form-group2"><label>Featured?</label><select id="pFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
       </div>
       <div class="form-group2"><label>Description</label><textarea id="pDesc" placeholder="পণ্যের বিবরণ..."></textarea></div>
+      <div class="form-group2"><label>সংক্ষিপ্ত বিবরণ (Short Description)</label><input type="text" id="pShortDesc" placeholder="Brief product summary"></div>
       <div class="form-row">
         <div class="form-group2"><label>রঙ (Color) — অপশনাল</label><input type="text" id="pColors" placeholder="Red, Blue, White"></div>
         <div class="form-group2"><label>সাইজ (Size) — অপশনাল</label><input type="text" id="pSizes" placeholder="S, M, L, XL"></div>
@@ -899,17 +903,46 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
       <div class="form-group2" id="pDetailPageNote" style="display:none;background:#fefce8;border:1px solid #fde68a;padding:10px;font-size:13px;color:#92400e">
-        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহার করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে।
+        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহার করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে। খালি রাখলে SKU থেকে স্বয়ংক্রিয়ভাবে ফাইলনেম তৈরি হবে।
+        <input type="text" id="pDetailPageFile" placeholder="product-jy2218.html" style="margin-top:8px;">
       </div>
+
+      <div class="form-group2" style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;border-radius:8px">
+        <label style="display:flex;align-items:center;justify-content:space-between;margin:0">
+          <span><i class="fas fa-search" style="color:#FCA311"></i> SEO সেটিংস</span>
+          <button type="button" class="bs-ext-btn ghost" id="pAutoSeoBtn"><i class="fas fa-magic"></i> Auto SEO</button>
+        </label>
+        <div class="form-group2" style="margin-top:10px"><label>SEO Title</label><input type="text" id="pSeoTitle"></div>
+        <div class="form-group2"><label>SEO Description</label><textarea id="pSeoDesc" rows="2"></textarea></div>
+        <div class="form-group2"><label>SEO Keywords (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pSeoKeywords" placeholder="rechargeable fan, jy2218, fan bangladesh"></div>
+      </div>
+
       <div class="form-group2">
-        <label>Product Image</label>
+        <label>কোথায় দেখাবে (Placement)</label>
+        <div class="bs-ext-placements">
+          <label><input type="checkbox" id="pPlShop"> শপ পেজ</label>
+          <label><input type="checkbox" id="pPlPop"> হোম — জনপ্রিয় পন্য</label>
+          <label><input type="checkbox" id="pPlBest"> হোম — সেরা বিক্রিত</label>
+          <label><input type="checkbox" id="pPlNew"> হোম — নতুন পন্য</label>
+        </div>
+      </div>
+
+      <div class="form-group2">
+        <label>Specs (label + value)</label>
+        <div id="pSpecsWrap"></div>
+        <button type="button" class="bs-ext-btn ghost" id="pAddSpecBtn"><i class="fas fa-plus"></i> নতুন স্পেক যোগ</button>
+      </div>
+
+      <div class="form-group2">
+        <label>Product Images (একাধিক ছবি যোগ করা যাবে)</label>
         <div class="bs-ext-dropzone" id="pImgDropzone">
           <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
           <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
-          <input type="file" id="pImgFile" accept="image/*" style="display:none">
+          <input type="file" id="pImgFile" accept="image/*" multiple style="display:none">
         </div>
         <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadBar"></div></div>
-        <span class="upload-hint">অথবা সরাসরি URL দিন:</span>
+        <div class="bs-ext-thumbs" id="pImgThumbs"></div>
+        <span class="upload-hint">অথবা সরাসরি URL দিন (প্রধান ছবি):</span>
         <input type="url" id="pImg" placeholder="https://..." style="margin-top:6px;">
         <img id="pImgPreview" class="img-preview" alt="Preview">
       </div>
@@ -1427,10 +1460,6 @@ document.querySelectorAll('#productSortMenu .dd-item').forEach(item=>{
 let allCatsForModal = [];
 
 document.getElementById('addProductBtn').addEventListener('click', ()=>openProductModal());
-document.getElementById('addAdvancedProductBtn').addEventListener('click', ()=>{
-  if(window.bsExtEditProduct) window.bsExtEditProduct();
-  else showToast('একটু অপেক্ষা করুন, লোড হচ্ছে...','info');
-});
 document.getElementById('addLandingPageBtn2').addEventListener('click', ()=> openLandingPageModal());
 
 function openProductModal(id){
@@ -1439,7 +1468,7 @@ function openProductModal(id){
   document.getElementById('productModalTitle').textContent = isEdit ? 'Edit Product' : 'Add Product';
   document.getElementById('pEditId').value = id || '';
   if(!isEdit){
-    ['pName','pSku','pDesc','pImg','pColors','pSizes','pWeight'].forEach(f=>{ const e=document.getElementById(f); if(e) e.value=''; });
+    ['pName','pSku','pDesc','pImg','pColors','pSizes','pWeight','pBrand','pTags','pShortDesc','pSeoTitle','pSeoDesc','pSeoKeywords','pDetailPageFile'].forEach(f=>{ const e=document.getElementById(f); if(e) e.value=''; });
     ['pNow','pOld','pStock'].forEach(f=>document.getElementById(f).value='');
     document.getElementById('pFeatured').value='false';
     document.getElementById('pHasDetailPage').value='false';
@@ -1448,6 +1477,9 @@ function openProductModal(id){
     document.getElementById('pCatSlug').value='';
     document.getElementById('pImgPreview').classList.remove('show');
     document.getElementById('pImgFile').value='';
+    document.getElementById('pImgThumbs').innerHTML='';
+    ['pPlShop','pPlPop','pPlBest','pPlNew'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
+    document.getElementById('pSpecsWrap').innerHTML='';
   } else {
     const p = allProducts.find(x=>x._id===id);
     if(p){
@@ -1465,6 +1497,29 @@ function openProductModal(id){
       const we=document.getElementById('pWeight'); if(we) we.value=p.weight||'';
       const hde=document.getElementById('pHasDetailPage'); if(hde) hde.value=p.hasDetailPage?'true':'false';
       const dn=document.getElementById('pDetailPageNote'); if(dn) dn.style.display=p.hasDetailPage?'':'none';
+      const br=document.getElementById('pBrand'); if(br) br.value=p.brand||'';
+      const tg=document.getElementById('pTags'); if(tg) tg.value=(p.tags||[]).join(', ');
+      const sd=document.getElementById('pShortDesc'); if(sd) sd.value=p.shortDescription||'';
+      const st=document.getElementById('pSeoTitle'); if(st) st.value=p.seoTitle||'';
+      const sde=document.getElementById('pSeoDesc'); if(sde) sde.value=p.seoDescription||'';
+      const sk=document.getElementById('pSeoKeywords'); if(sk) sk.value=p.seoKeywords||'';
+      const dpf=document.getElementById('pDetailPageFile'); if(dpf) dpf.value=p.detailPage||'';
+      const placements = p.placements||{};
+      const plShop=document.getElementById('pPlShop'); if(plShop) plShop.checked=!!placements.shop;
+      const plPop=document.getElementById('pPlPop'); if(plPop) plPop.checked=!!placements.homePopular;
+      const plBest=document.getElementById('pPlBest'); if(plBest) plBest.checked=!!placements.homeBestseller;
+      const plNew=document.getElementById('pPlNew'); if(plNew) plNew.checked=!!placements.homeNew;
+      const specsWrap=document.getElementById('pSpecsWrap');
+      if(specsWrap){
+        specsWrap.innerHTML='';
+        (p.specs||[]).forEach(s=>addSpecRow(s.label||'', s.value||''));
+      }
+      const thumbs=document.getElementById('pImgThumbs');
+      if(thumbs){
+        thumbs.innerHTML='';
+        const gallery = p.gallery && p.gallery.length ? p.gallery : (p.img ? [p.img] : []);
+        gallery.forEach(u=>addThumb(u));
+      }
       if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').classList.add('show'); }
       else document.getElementById('pImgPreview').classList.remove('show');
     }
@@ -1472,6 +1527,45 @@ function openProductModal(id){
   // Populate category select
   populateCatSelect();
   modal.classList.remove('hidden');
+}
+
+/* Specs (label/value pairs) */
+function addSpecRow(label, value){
+  const wrap = document.getElementById('pSpecsWrap');
+  if(!wrap) return;
+  const row = document.createElement('div');
+  row.className = 'form-row';
+  row.style.marginBottom = '8px';
+  row.innerHTML = `<div class="form-group2"><input type="text" placeholder="লেবেল (যেমন: Battery)" class="pSpecLabel" value="${(label||'').replace(/"/g,'&quot;')}"></div>
+    <div class="form-group2" style="display:flex;gap:8px;align-items:center;">
+      <input type="text" placeholder="ভ্যালু (যেমন: 6V/4.5Ah)" class="pSpecValue" value="${(value||'').replace(/"/g,'&quot;')}" style="flex:1;">
+      <button type="button" class="act-btn danger" style="flex:none;" onclick="this.closest('.form-row').remove()"><i class="fas fa-trash"></i></button>
+    </div>`;
+  wrap.appendChild(row);
+}
+document.getElementById('pAddSpecBtn').addEventListener('click', ()=>addSpecRow('',''));
+
+/* Auto SEO fill */
+document.getElementById('pAutoSeoBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('pName').value.trim();
+  const cat = document.getElementById('pCat').options[document.getElementById('pCat').selectedIndex]?.text || '';
+  const sku = document.getElementById('pSku').value.trim();
+  const now = document.getElementById('pNow').value.trim();
+  const desc = document.getElementById('pDesc').value.trim();
+  document.getElementById('pSeoTitle').value = name + ' - Buy Online in Bangladesh | BS Collection BD';
+  document.getElementById('pSeoDesc').value = ('Buy ' + name + ' at Tk ' + now + ' in Bangladesh. ' + desc.substring(0,100)).substring(0,155);
+  document.getElementById('pSeoKeywords').value = [sku, name.toLowerCase(), cat.toLowerCase(), 'fan bangladesh', 'bscollectionbd'].filter(Boolean).join(', ');
+  showToast('SEO ফিল্ড স্বয়ংক্রিয়ভাবে পূরণ হয়েছে','success');
+});
+
+/* Multi-image gallery thumbs */
+function addThumb(url){
+  const thumbs = document.getElementById('pImgThumbs');
+  if(!thumbs || !url) return;
+  const d = document.createElement('div');
+  d.className = 'thumb'; d.dataset.url = url;
+  d.innerHTML = `<img src="${url}"><button type="button" onclick="this.parentElement.remove()">×</button>`;
+  thumbs.appendChild(d);
 }
 function openEditProduct(id){ openProductModal(id); }
 
@@ -1490,48 +1584,54 @@ async function populateCatSelect(){
 }
 
 // ── Reusable single-image drag-and-drop uploader ──────────────
-function bsWireImageDropzone({ dropzoneId, fileInputId, urlInputId, previewId, progressId, barId }){
-  const dz = document.getElementById(dropzoneId);
-  const fileInput = document.getElementById(fileInputId);
-  const urlInput = document.getElementById(urlInputId);
-  const preview = previewId ? document.getElementById(previewId) : null;
-  const progress = progressId ? document.getElementById(progressId) : null;
-  const bar = barId ? document.getElementById(barId) : null;
+/* Product image dropzone — supports multiple images, adds thumbnails, keeps primary URL field in sync */
+(function(){
+  const dz = document.getElementById('pImgDropzone');
+  const fileInput = document.getElementById('pImgFile');
+  const urlInput = document.getElementById('pImg');
+  const preview = document.getElementById('pImgPreview');
+  const progress = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadBar');
+  const thumbs = document.getElementById('pImgThumbs');
   if(!dz || !fileInput || !urlInput) return;
 
-  async function upload(file){
-    if(!file) return;
-    if(progress && bar){ progress.classList.add('show'); bar.style.width='30%'; }
+  function syncPrimaryFromThumbs(){
+    const first = thumbs.querySelector('.thumb');
+    if(first && !urlInput.value){
+      urlInput.value = first.dataset.url;
+      preview.src = first.dataset.url; preview.classList.add('show');
+    }
+  }
+
+  async function uploadFiles(files){
+    if(!files || !files.length) return;
+    progress.classList.add('show'); bar.style.width='30%';
     try{
-      const fd = new FormData(); fd.append('image', file);
-      const r = await apiFetch('/products/upload', { method:'POST', body:fd });
-      if(bar) bar.style.width='100%';
-      const d = await r.json();
-      if(!r.ok) throw new Error(d.error);
-      urlInput.value = d.url;
-      if(preview){ preview.src = d.url; preview.classList.add('show'); }
+      for(const file of Array.from(files)){
+        const fd = new FormData(); fd.append('image', file);
+        const r = await apiFetch('/products/upload', { method:'POST', body:fd });
+        const d = await r.json();
+        if(!r.ok) throw new Error(d.error);
+        addThumb(d.url);
+      }
+      bar.style.width='100%';
+      syncPrimaryFromThumbs();
       showToast('ছবি আপলোড হয়েছে','success');
     } catch(e){ showToast('ছবি আপলোড ব্যর্থ: '+e.message,'error'); }
-    finally{ if(progress && bar) setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
+    finally{ setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
   }
 
   dz.addEventListener('click', ()=> fileInput.click());
   dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.classList.add('dragover'); });
   dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
-  dz.addEventListener('drop', (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); upload(e.dataTransfer.files[0]); });
-  fileInput.addEventListener('change', function(){ upload(this.files[0]); });
+  dz.addEventListener('drop', (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); uploadFiles(e.dataTransfer.files); });
+  fileInput.addEventListener('change', function(){ uploadFiles(this.files); });
 
   urlInput.addEventListener('input', function(){
-    if(!preview) return;
     if(this.value){ preview.src=this.value; preview.classList.add('show'); }
     else preview.classList.remove('show');
   });
-}
-
-bsWireImageDropzone({
-  dropzoneId:'pImgDropzone', fileInputId:'pImgFile', urlInputId:'pImg',
-  previewId:'pImgPreview', progressId:'uploadProgress', barId:'uploadBar'
-});
+})();
 
 // Wire category image upload to /categories/upload endpoint
 (function(){
@@ -1577,20 +1677,43 @@ document.getElementById('productModalSave').addEventListener('click', async ()=>
   if(!name || !now){ showToast('নাম ও দাম দিন','error'); return; }
   const btn = document.getElementById('productModalSave');
   btn.disabled=true; btn.textContent='সংরক্ষণ হচ্ছে...';
+  const gallery = Array.from(document.getElementById('pImgThumbs')?.querySelectorAll('.thumb')||[]).map(t=>t.dataset.url).filter(Boolean);
+  const specs = [];
+  document.querySelectorAll('#pSpecsWrap .form-row').forEach(row=>{
+    const label = row.querySelector('.pSpecLabel')?.value.trim();
+    const value = row.querySelector('.pSpecValue')?.value.trim();
+    if(label && value) specs.push({ label, value });
+  });
+  const hasDetailPage = document.getElementById('pHasDetailPage')?.value==='true';
+  const detailPageFile = document.getElementById('pDetailPageFile')?.value.trim();
   const body = {
     name, sku:document.getElementById('pSku').value.trim()||undefined,
     now, old:parseFloat(document.getElementById('pOld').value)||undefined,
     stock:parseInt(document.getElementById('pStock').value)||0,
     description:document.getElementById('pDesc').value.trim()||undefined,
-    img:document.getElementById('pImg').value.trim()||undefined,
+    shortDescription:document.getElementById('pShortDesc')?.value.trim()||undefined,
+    img:(gallery[0]||document.getElementById('pImg').value.trim())||undefined,
+    gallery,
     featured:document.getElementById('pFeatured').value==='true',
     cat:document.getElementById('pCat').options[document.getElementById('pCat').selectedIndex]?.text || undefined,
     categorySlug:document.getElementById('pCatSlug').value.trim()||undefined,
+    brand:document.getElementById('pBrand')?.value.trim()||undefined,
+    tags:(document.getElementById('pTags')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+    seoTitle:document.getElementById('pSeoTitle')?.value.trim()||undefined,
+    seoDescription:document.getElementById('pSeoDesc')?.value.trim()||undefined,
+    seoKeywords:document.getElementById('pSeoKeywords')?.value.trim()||undefined,
     colors:(document.getElementById('pColors')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
     sizes:(document.getElementById('pSizes')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
     weight:document.getElementById('pWeight')?.value?.trim()||undefined,
-    hasDetailPage:document.getElementById('pHasDetailPage')?.value==='true',
-    detailPage:document.getElementById('pHasDetailPage')?.value==='true'?('product-'+(document.getElementById('pSku').value.trim().toLowerCase()||'template')+'.html'):undefined,
+    specs,
+    placements:{
+      shop:document.getElementById('pPlShop')?.checked||false,
+      homePopular:document.getElementById('pPlPop')?.checked||false,
+      homeBestseller:document.getElementById('pPlBest')?.checked||false,
+      homeNew:document.getElementById('pPlNew')?.checked||false,
+    },
+    hasDetailPage,
+    detailPage:hasDetailPage?(detailPageFile||('product-'+(document.getElementById('pSku').value.trim().toLowerCase()||'template')+'.html')):undefined,
   };
   const editId = document.getElementById('pEditId').value;
   try{
@@ -2084,222 +2207,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
   }
   window.bsExtOrderStatus = async (id, status) => {
     try { await fetchJSON('/orders/' + id, { method: 'PATCH', body: JSON.stringify({ status }) }); toast('স্ট্যাটাস আপডেট', 'ok'); loadFake(); }
-    catch (e) { toast(e.message, 'err'); }
-  };
-
-  // ── Advanced Products (opened from Products page "এডভান্সড পন্য" button) ──
-  async function loadProducts() {
-    try {
-      const list = await fetchJSON('/products?limit=200');
-      const rows = list.map(p => `
-        <tr>
-          <td><img src="${esc(p.img || '')}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;background:#f1f5f9" onerror="this.style.visibility='hidden'"/></td>
-          <td><b>${esc(p.name)}</b><br><small style="color:#64748b">${esc(p.sku || '')}</small></td>
-          <td>Tk ${p.now}${p.old ? ' <s style="color:#94a3b8">Tk ' + p.old + '</s>' : ''}</td>
-          <td><span class="bs-ext-badge ${p.stock > 5 ? 'ok' : p.stock > 0 ? 'warn' : 'hide'}">${p.stock}</span></td>
-          <td>
-            ${p.placements?.shop ? '<span class="bs-ext-badge ok">Shop</span> ' : ''}
-            ${p.placements?.homePopular ? '<span class="bs-ext-badge warn">Popular</span> ' : ''}
-            ${p.placements?.homeBestseller ? '<span class="bs-ext-badge warn">Bestseller</span> ' : ''}
-            ${p.placements?.homeNew ? '<span class="bs-ext-badge warn">New</span>' : ''}
-          </td>
-          <td>${p.hasDetailPage ? '<span class="bs-ext-badge ok">' + esc(p.detailPage) + '</span>' : '<span class="bs-ext-badge hide">নেই</span>'}</td>
-          <td>
-            <button class="bs-ext-btn primary" onclick="bsExtEditProduct('${p._id}')">এডিট</button>
-          </td>
-        </tr>`).join('');
-      document.getElementById('bsExtBody').innerHTML = `
-        <div class="bs-ext-panel">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="margin:0;color:#14213D">এডভান্সড পন্য ব্যবস্থাপনা</h3>
-            <button class="bs-ext-btn orange" onclick="bsExtEditProduct()">
-              <i class="fas fa-plus"></i> নতুন পন্য (বিস্তারিত পেজ সহ)
-            </button>
-          </div>
-          <table class="bs-ext-table">
-            <thead><tr><th></th><th>নাম / SKU</th><th>দাম</th><th>স্টক</th><th>দৃশ্যমান</th><th>বিস্তারিত পেজ</th><th></th></tr></thead>
-            <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">কোনো পন্য নেই</td></tr>'}</tbody>
-          </table>
-        </div>`;
-    } catch (e) { toast(e.message, 'err'); }
-  }
-
-  window.bsExtEditProduct = async (id) => {
-    let p = { placements: { shop: true }, specs: [], gallery: [] };
-    if (id) p = await fetchJSON('/products/id/' + id);
-    p.placements = p.placements || { shop: true };
-    p.specs = p.specs || []; p.gallery = p.gallery || [];
-    const specsRows = (p.specs || []).map((s, i) => `
-      <div class="row" style="margin-bottom:8px" data-spec-row="${i}">
-        <input placeholder="লেবেল (যেমন: Battery)" value="${esc(s.label || '')}" data-spec-label="${i}"/>
-        <input placeholder="ভ্যালু (যেমন: 6V/4.5Ah)" value="${esc(s.value || '')}" data-spec-value="${i}"/>
-      </div>`).join('');
-
-    openModal(`
-      <h3 style="color:#14213D;margin:0 0 20px"><i class="fas fa-box"></i> ${id ? 'পন্য এডিট' : 'নতুন পন্য যোগ'}</h3>
-      <form class="bs-ext-form" id="bsExtProdForm">
-        <div class="row">
-          <label>SKU * <input required name="sku" value="${esc(p.sku || '')}" placeholder="যেমন: jy2218"/></label>
-          <label>পন্যের নাম * <input required name="name" value="${esc(p.name || '')}" placeholder="JYSUPER JY-2218"/></label>
-        </div>
-        <div class="row-3">
-          <label>ক্যাটাগরি <input name="cat" value="${esc(p.cat || '')}"/></label>
-          <label>ব্র্যান্ড <input name="brand" value="${esc(p.brand || 'bscollectionbd')}"/></label>
-          <label>ক্যাটাগরি স্লাগ <input name="categorySlug" value="${esc(p.categorySlug || '')}"/></label>
-        </div>
-        <div class="row-3">
-          <label>দাম (Now) * <input required type="number" name="now" value="${p.now || ''}"/></label>
-          <label>পূর্ব দাম (Old) <input type="number" name="old" value="${p.old || ''}"/></label>
-          <label>স্টক * <input required type="number" name="stock" value="${p.stock || 0}"/></label>
-        </div>
-        <label>বর্ণনা <textarea name="description" rows="4">${esc(p.description || '')}</textarea></label>
-        <label>সংক্ষিপ্ত বিবরণ <input name="shortDescription" value="${esc(p.shortDescription || '')}" placeholder="Brief product summary"/></label>
-
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:14px 0">
-          <h4 style="margin:0 0 10px;color:#14213D;font-size:14px"><i class="fas fa-search" style="color:#FCA311"></i> SEO সেটিংস
-            <button type="button" class="bs-ext-btn ghost" style="float:right;padding:4px 10px;font-size:12px" onclick="bsExtAutoSEO()"><i class="fas fa-magic"></i> Auto SEO</button>
-          </h4>
-          <label>SEO Title <input name="seoTitle" value="${esc(p.seoTitle || '')}"/></label>
-          <label>SEO Description <textarea name="seoDescription" rows="2">${esc(p.seoDescription || '')}</textarea></label>
-          <label>SEO Keywords (কমা দিয়ে আলাদা করুন) <input name="seoKeywords" value="${esc(p.seoKeywords || '')}" placeholder="rechargeable fan, jy2218, fan bangladesh"/></label>
-        </div>
-
-        <label>Tags (কমা দিয়ে আলাদা করুন) <input name="tags" value="${esc((p.tags||[]).join(', '))}" placeholder="rechargeable, LED, 12-inch, USB"/></label>
-
-        <label>ছবি (ড্র্যাগ করে ছেড়ে দিন — একাধিক):</label>
-        <div class="bs-ext-dropzone" id="bsExtDropzone">
-          <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:#FCA311"></i>
-          <p style="margin:8px 0 0;color:#64748b;font-size:13px">এখানে ফাইল টেনে ছাড়ুন অথবা ক্লিক করুন</p>
-          <input type="file" id="bsExtFileInput" accept="image/*" multiple style="display:none"/>
-        </div>
-        <div class="bs-ext-thumbs" id="bsExtThumbs">
-          ${(p.gallery || []).map((u, i) => `<div class="thumb" data-url="${esc(u)}"><img src="${esc(u)}"/><button type="button" onclick="this.parentElement.remove()">×</button></div>`).join('')}
-          ${p.img && !(p.gallery || []).includes(p.img) ? `<div class="thumb" data-url="${esc(p.img)}"><img src="${esc(p.img)}"/><button type="button" onclick="this.parentElement.remove()">×</button></div>` : ''}
-        </div>
-
-        <label style="margin-top:14px">কোথায় দেখাবে (placement):</label>
-        <div class="bs-ext-placements">
-          <label><input type="checkbox" name="pl_shop" ${p.placements.shop ? 'checked' : ''}/> শপ পেজ</label>
-          <label><input type="checkbox" name="pl_pop" ${p.placements.homePopular ? 'checked' : ''}/> হোম — জনপ্রিয় পন্য</label>
-          <label><input type="checkbox" name="pl_best" ${p.placements.homeBestseller ? 'checked' : ''}/> হোম — সেরা বিক্রিত</label>
-          <label><input type="checkbox" name="pl_new" ${p.placements.homeNew ? 'checked' : ''}/> হোম — নতুন পন্য</label>
-          <label><input type="checkbox" name="featured" ${p.featured ? 'checked' : ''}/> Featured</label>
-        </div>
-
-        <label style="margin-top:14px">Specs (label + value):
-          <div id="bsExtSpecs">${specsRows}</div>
-          <button type="button" class="bs-ext-btn ghost" onclick="bsExtAddSpec()"><i class="fas fa-plus"></i> নতুন স্পেক যোগ</button>
-        </label>
-
-        <div class="row" style="margin-top:14px">
-          <label>বিস্তারিত পেজের ফাইলনেম <input name="detailPage" value="${esc(p.detailPage || '')}" placeholder="product-jy2218.html"/></label>
-          <label style="align-self:end">
-            <input type="checkbox" name="hasDetailPage" ${p.hasDetailPage ? 'checked' : ''} style="width:auto;margin-right:6px"/>
-            বিস্তারিত পেজ আছে
-          </label>
-        </div>
-        <p style="color:#64748b;font-size:12px;margin:-10px 0 14px">খালি রাখলে SKU থেকে <code>product-&lt;sku&gt;.html</code> স্বয়ংক্রিয়ভাবে তৈরি হবে</p>
-
-        <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end">
-          <button type="button" class="bs-ext-btn ghost" onclick="bsExtCloseModal()">বাতিল</button>
-          ${id ? `<button type="button" class="bs-ext-btn danger" onclick="bsExtDeleteProduct('${id}')">মুছে ফেলুন</button>` : ''}
-          <button type="submit" class="bs-ext-btn primary"><i class="fas fa-save"></i> সেভ করুন</button>
-        </div>
-      </form>
-    `);
-
-    // dropzone wiring
-    const dz = document.getElementById('bsExtDropzone');
-    const fi = document.getElementById('bsExtFileInput');
-    const th = document.getElementById('bsExtThumbs');
-    dz.onclick = () => fi.click();
-    dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('dragover'); };
-    dz.ondragleave = () => dz.classList.remove('dragover');
-    dz.ondrop = (e) => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
-    fi.onchange = () => handleFiles(fi.files);
-    async function handleFiles(files) {
-      if (!files || !files.length) return;
-      const fd = new FormData();
-      Array.from(files).forEach(f => fd.append('images', f));
-      try {
-        const res = await fetch(API + '/products/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token() }, body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'আপলোড ব্যর্থ');
-        (data.urls || []).forEach(u => {
-          const d = document.createElement('div'); d.className = 'thumb'; d.dataset.url = u;
-          d.innerHTML = `<img src="${u}"/><button type="button" onclick="this.parentElement.remove()">×</button>`;
-          th.appendChild(d);
-        });
-        toast('ছবি আপলোড হয়েছে', 'ok');
-      } catch (e) { toast(e.message, 'err'); }
-    }
-
-    // submit
-    document.getElementById('bsExtProdForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const gallery = Array.from(th.querySelectorAll('.thumb')).map(t => t.dataset.url).filter(Boolean);
-      const specs = [];
-      document.querySelectorAll('#bsExtSpecs [data-spec-row]').forEach(r => {
-        const i = r.dataset.specRow;
-        const label = r.querySelector(`[data-spec-label="${i}"]`)?.value.trim();
-        const value = r.querySelector(`[data-spec-value="${i}"]`)?.value.trim();
-        if (label && value) specs.push({ label, value });
-      });
-      const tagsRaw = fd.get('tags') || '';
-      const tags = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
-      const body = {
-        sku: fd.get('sku'), name: fd.get('name'), cat: fd.get('cat'), brand: fd.get('brand'),
-        categorySlug: fd.get('categorySlug'), now: +fd.get('now'), old: +fd.get('old') || undefined,
-        stock: +fd.get('stock'), description: fd.get('description'),
-        shortDescription: fd.get('shortDescription') || undefined,
-        detailPage: fd.get('detailPage') || undefined,
-        hasDetailPage: fd.get('hasDetailPage') === 'on',
-        featured: fd.get('featured') === 'on',
-        tags,
-        seoTitle: fd.get('seoTitle') || undefined,
-        seoDescription: fd.get('seoDescription') || undefined,
-        seoKeywords: fd.get('seoKeywords') || undefined,
-        img: gallery[0] || '', gallery, specs,
-        placements: {
-          shop: fd.get('pl_shop') === 'on',
-          homePopular: fd.get('pl_pop') === 'on',
-          homeBestseller: fd.get('pl_best') === 'on',
-          homeNew: fd.get('pl_new') === 'on',
-        },
-      };
-      try {
-        if (id) await fetchJSON('/products/id/' + id, { method: 'PUT', body: JSON.stringify(body) });
-        else await fetchJSON('/products', { method: 'POST', body: JSON.stringify(body) });
-        toast('সেভ হয়েছে', 'ok'); bsExtCloseModal(); loadProducts();
-      } catch (err) { toast(err.message, 'err'); }
-    };
-  };
-  window.bsExtAutoSEO = () => {
-    const form = document.getElementById('bsExtProdForm');
-    if(!form) return;
-    const name = form.querySelector('[name=name]')?.value || '';
-    const cat  = form.querySelector('[name=cat]')?.value || '';
-    const sku  = form.querySelector('[name=sku]')?.value || '';
-    const now  = form.querySelector('[name=now]')?.value || '';
-    const desc = form.querySelector('[name=description]')?.value || '';
-    form.querySelector('[name=seoTitle]').value = name + ' - Buy Online in Bangladesh | BS Collection BD';
-    form.querySelector('[name=seoDescription]').value = ('Buy ' + name + ' at Tk ' + now + ' in Bangladesh. ' + desc.substring(0,100)).substring(0,155);
-    form.querySelector('[name=seoKeywords]').value = [sku, name.toLowerCase(), cat.toLowerCase(), 'fan bangladesh', 'bscollectionbd'].filter(Boolean).join(', ');
-    toast('SEO ফিল্ড স্বয়ংক্রিয়ভাবে পূরণ হয়েছে', 'ok');
-  };
-
-  window.bsExtAddSpec = () => {
-    const wrap = document.getElementById('bsExtSpecs');
-    const i = wrap.querySelectorAll('[data-spec-row]').length;
-    const div = document.createElement('div');
-    div.className = 'row'; div.style.marginBottom = '8px'; div.dataset.specRow = i;
-    div.innerHTML = `<input placeholder="লেবেল" data-spec-label="${i}"/><input placeholder="ভ্যালু" data-spec-value="${i}"/>`;
-    wrap.appendChild(div);
-  };
-  window.bsExtDeleteProduct = async (id) => {
-    if (!confirm('পন্য মুছে ফেলবেন?')) return;
-    try { await fetchJSON('/products/id/' + id, { method: 'DELETE' }); toast('মুছে ফেলা হয়েছে', 'ok'); bsExtCloseModal(); loadProducts(); }
     catch (e) { toast(e.message, 'err'); }
   };
 
