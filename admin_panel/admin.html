@@ -279,6 +279,34 @@ body[data-theme="dark"] .act-btn{background:var(--card);}
 .report-meta{font-size:11.5px;color:var(--text-soft);margin-top:2px;}
 .download-btn{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--text-mid);cursor:pointer;}
 .download-btn svg{width:14px;height:14px;}
+
+/* ── Landing Pages page ── */
+.icon-btn.danger{color:var(--red);}
+.lp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:48px 20px;color:var(--text-soft);}
+.lp-empty .lp-empty-icon{width:52px;height:52px;border-radius:14px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:22px;}
+.lp-empty strong{color:var(--text-mid);font-size:13.5px;font-weight:600;}
+.lp-empty span{font-size:12.5px;}
+.lp-row-title{display:flex;align-items:center;gap:11px;}
+.lp-thumb{width:38px;height:38px;border-radius:10px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+body[data-theme="dark"] .lp-thumb{background:#241B12;}
+.lp-name{font-size:13.5px;font-weight:700;color:var(--text);display:block;}
+.lp-slug{font-size:11px;color:var(--text-soft);background:var(--bg);padding:1px 6px;border-radius:5px;display:inline-block;margin-top:2px;}
+body[data-theme="dark"] .lp-slug{background:#20232B;}
+.lp-preview-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none;}
+.lp-preview-link:hover{text-decoration:underline;}
+.lp-preview-link svg{width:11px;height:11px;}
+.lp-link-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;margin-top:6px;padding:2px 8px;border-radius:20px;}
+.lp-link-badge.linked{background:var(--green-bg);color:var(--green);}
+.lp-link-badge.unlinked{background:var(--orange-bg);color:#b45309;}
+body[data-theme="dark"] .lp-link-badge.unlinked{color:var(--orange-light);}
+.lp-steps{display:flex;flex-direction:column;gap:16px;}
+.lp-step{display:flex;gap:14px;align-items:flex-start;}
+.lp-step-num{width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lp-step-body{font-size:13.5px;line-height:1.7;color:var(--text-mid);padding-top:2px;}
+.lp-step-body b{color:var(--text);}
+.lp-step-body code{background:var(--bg);padding:1px 6px;border-radius:5px;font-size:12px;}
+body[data-theme="dark"] .lp-step-body code{background:#20232B;}
+@media(max-width:620px){.lp-row-title{gap:8px;}.lp-thumb{width:32px;height:32px;font-size:13px;}}
 .page{display:none;}
 .page.active{display:block;}
 
@@ -771,6 +799,20 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 
   <!-- ===================== LANDING PAGES PAGE ===================== -->
   <section class="page" id="page-landingpages">
+    <div class="stats-row cols-3">
+      <div class="card stat-card highlight">
+        <div class="stat-top"><span class="stat-label">মোট ল্যান্ডিং পেজ</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="lpTotalVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">সক্রিয় পেজ</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="lpActiveVal">—</span></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><span class="stat-label">পণ্যের সাথে লিংকড</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg></span></div>
+        <div class="stat-bottom"><span class="stat-value" id="lpLinkedVal">—</span></div>
+      </div>
+    </div>
     <div class="card">
       <div class="card-head">
         <h2><i class="fas fa-file-alt" style="color:#FCA311"></i> ল্যান্ডিং পেজ ব্যবস্থাপনা</h2>
@@ -778,7 +820,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           নতুন পেজ তৈরি করুন <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
-      <p style="color:#64748b;font-size:13px;margin-bottom:18px">প্রতিটি পণ্যের জন্য একটি কাস্টম ল্যান্ডিং পেজ তৈরি করুন। পণ্য কার্ডে ক্লিক করলে সেই পেজে নিয়ে যাবে।</p>
+      <p style="color:var(--text-soft);font-size:13px;margin-bottom:18px">প্রতিটি পণ্যের জন্য একটি কাস্টম ল্যান্ডিং পেজ তৈরি করুন। পণ্য কার্ডে ক্লিক করলে সেই পেজে নিয়ে যাবে।</p>
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -797,14 +839,26 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </table>
       </div>
     </div>
-    <div class="card" style="margin-top:16px;background:#fff7ed;border-color:#FCD79E;">
-      <h3 style="color:#92400e;margin-bottom:10px"><i class="fas fa-info-circle"></i> কিভাবে ব্যবহার করবেন</h3>
-      <ol style="color:#78350f;font-size:13.5px;line-height:2;padding-left:20px">
-        <li>উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন, পণ্যের তথ্য দিন এবং <b>"পেজ যেই পণ্যের সাথে লিংক হবে"</b> ড্রপডাউন থেকে পণ্যটি বেছে নিন।</li>
-        <li><b>"সেভ করুন"</b> চাপুন — ব্যস, এতটুকুই। পেজটি সাথে সাথেই লাইভ হয়ে যাবে এবং নির্বাচিত পণ্যের <b>"বিস্তারিত পেজ"</b> ফিল্ড ও <b>"বিস্তারিত পেজ আছে"</b> চেকবক্স স্বয়ংক্রিয়ভাবে সেট হয়ে যাবে — কোনো ফাইল ডাউনলোড বা <code>frontend/</code> ফোল্ডারে রাখার প্রয়োজন নেই।</li>
-        <li>এখন থেকে পণ্য কার্ডে ক্লিক করলেই সরাসরি ঐ পেজে নিয়ে যাবে। পরে পেজটি এডিট করে সেভ করলে লাইভ পেজও নিজে থেকেই আপডেট হয়ে যাবে।</li>
-        <li>চাইলে টেবিলে <b><i class="fas fa-download"></i> ডাউনলোড</b> বাটন দিয়ে একটি অফলাইন/ব্যাকআপ কপি আলাদাভাবে সংরক্ষণ করতে পারবেন — এটি ঐচ্ছিক, কার্ড লিংক কাজ করতে এটির দরকার নেই।</li>
-      </ol>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head"><h2><i class="fas fa-circle-info" style="color:#FCA311"></i> কিভাবে ব্যবহার করবেন</h2></div>
+      <div class="lp-steps">
+        <div class="lp-step">
+          <div class="lp-step-num">১</div>
+          <div class="lp-step-body">উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন, পণ্যের তথ্য দিন এবং <b>"পেজ যেই পণ্যের সাথে লিংক হবে"</b> ড্রপডাউন থেকে পণ্যটি বেছে নিন।</div>
+        </div>
+        <div class="lp-step">
+          <div class="lp-step-num">২</div>
+          <div class="lp-step-body"><b>"সেভ করুন"</b> চাপুন — ব্যস, এতটুকুই। পেজটি সাথে সাথেই লাইভ হয়ে যাবে এবং নির্বাচিত পণ্যের <b>"বিস্তারিত পেজ"</b> ফিল্ড ও <b>"বিস্তারিত পেজ আছে"</b> চেকবক্স স্বয়ংক্রিয়ভাবে সেট হয়ে যাবে — কোনো ফাইল ডাউনলোড বা <code>frontend/</code> ফোল্ডারে রাখার প্রয়োজন নেই।</div>
+        </div>
+        <div class="lp-step">
+          <div class="lp-step-num">৩</div>
+          <div class="lp-step-body">এখন থেকে পণ্য কার্ডে ক্লিক করলেই সরাসরি ঐ পেজে নিয়ে যাবে। পরে পেজটি এডিট করে সেভ করলে লাইভ পেজও নিজে থেকেই আপডেট হয়ে যাবে।</div>
+        </div>
+        <div class="lp-step">
+          <div class="lp-step-num">৪</div>
+          <div class="lp-step-body">চাইলে টেবিলে <b><i class="fas fa-download"></i> ডাউনলোড</b> বাটন দিয়ে একটি অফলাইন/ব্যাকআপ কপি আলাদাভাবে সংরক্ষণ করতে পারবেন — এটি ঐচ্ছিক, কার্ড লিংক কাজ করতে এটির দরকার নেই।</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -2918,6 +2972,11 @@ window.bsRemovePromo = function(idx){
 /* ============================================================
    LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা
    ============================================================ */
+function lpSetStats(total,active,linked){
+  const t=document.getElementById('lpTotalVal'); if(t) t.textContent=total;
+  const a=document.getElementById('lpActiveVal'); if(a) a.textContent=active;
+  const l=document.getElementById('lpLinkedVal'); if(l) l.textContent=linked;
+}
 async function loadLandingPages(){
   const tbody=document.getElementById('landingPagesTableBody');
   if(!tbody) return;
@@ -2925,31 +2984,54 @@ async function loadLandingPages(){
   if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
   apiJSON('/landing-pages').then(pages=>{
     if(!pages||!pages.length){
-      tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8">কোনো ল্যান্ডিং পেজ নেই। উপরের বাটন দিয়ে তৈরি করুন।</td></tr>';
+      lpSetStats(0,0,0);
+      tbody.innerHTML=`<tr><td colspan="6">
+        <div class="lp-empty">
+          <div class="lp-empty-icon"><i class="fas fa-file-circle-plus"></i></div>
+          <strong>কোনো ল্যান্ডিং পেজ নেই</strong>
+          <span>উপরের "নতুন পেজ তৈরি করুন" বাটনে ক্লিক করে প্রথম পেজটি তৈরি করুন।</span>
+        </div>
+      </td></tr>`;
       return;
     }
-    tbody.innerHTML=pages.map(p=>{
+    let activeCount=0, linkedCount=0;
+    const rows=pages.map(p=>{
       const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+p.slug)!==-1);
+      if(p.active) activeCount++;
+      if(linked) linkedCount++;
       return `
       <tr>
-        <td><strong>${esc(p.title||'')}</strong><br><code style="font-size:11px;color:#64748b">${esc(p.slug)}</code></td>
+        <td>
+          <div class="lp-row-title">
+            <div class="lp-thumb"><i class="fas fa-file-lines"></i></div>
+            <div>
+              <span class="lp-name">${esc(p.title||'')}</span>
+              <span class="lp-slug">${esc(p.slug)}</span>
+            </div>
+          </div>
+        </td>
         <td>${esc(p.hero&&p.hero.headline||'—')}</td>
         <td>
-          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">প্রিভিউ (অনলাইন, লাইভ)</a><br>
+          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" class="lp-preview-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+            প্রিভিউ দেখুন
+          </a><br>
           ${linked
-            ? `<span style="font-size:10px;color:#166534">🔗 লিংকড: ${esc(linked.name)}</span>`
-            : `<span style="font-size:10px;color:#b45309">⚠ কোনো পণ্যের সাথে লিংক করা নেই</span>`}
+            ? `<span class="lp-link-badge linked"><i class="fas fa-link"></i> লিংকড: ${esc(linked.name)}</span>`
+            : `<span class="lp-link-badge unlinked"><i class="fas fa-triangle-exclamation"></i> কোনো পণ্যের সাথে লিংক করা নেই</span>`}
         </td>
-        <td><span style="background:${p.active?'#dcfce7':'#fee2e2'};color:${p.active?'#166534':'#991b1b'};padding:2px 10px;font-size:12px;font-weight:600">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
-        <td style="font-size:12px;color:#64748b">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
+        <td><span class="badge ${p.active?'green':'red'}">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
+        <td style="font-size:12px;color:var(--text-soft)">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
         <td>
           <button class="icon-btn" title="সম্পাদনা" onclick="editLandingPage('${esc(p.slug)}')"><i class="fas fa-pen"></i></button>
           <button class="icon-btn" title="ঐচ্ছিক অফলাইন কপি ডাউনলোড করুন (কার্ড লিংকের জন্য প্রয়োজন নেই)" onclick="downloadLandingHtml('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-download"></i></button>
           <button class="icon-btn danger" title="মুছুন" onclick="deleteLandingPage('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`;}).join('');
+    tbody.innerHTML=rows;
+    lpSetStats(pages.length, activeCount, linkedCount);
   }).catch(err=>{
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#ef4444">লোড করতে সমস্যা: '+esc(err.message)+'</td></tr>';
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--red)">লোড করতে সমস্যা: '+esc(err.message)+'</td></tr>';
   });
 }
 
