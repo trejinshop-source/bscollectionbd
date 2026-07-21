@@ -501,54 +501,6 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
 .bs-ext-placements label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f1f5f9;border-radius:20px;font-size:13px;cursor:pointer;font-weight:500;color:#334155}
 .bs-ext-placements input{margin:0}
 
-/* Home page settings — সেকশন মেনু (রেফারেন্স ইমেজের মতো সাদা কার্ড-বাটন স্টাইল) */
-.bs-home-tabs-wrap{margin-top:6px}
-.bs-home-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:0}
-.bs-home-tabs button{padding:10px 16px;border:1px solid #e2e8f0;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06);cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#14213D;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:.15s}
-.bs-home-tabs button i{color:#FCA311;font-size:13px}
-.bs-home-tabs button:hover{border-color:#FCA311;background:#fff7ed}
-.bs-home-tabs button.active{background:#14213D;color:#fff;border-color:#14213D}
-.bs-home-tabs button.active i{color:#FCA311}
-.bs-home-panel{display:none;background:#f8fafc;border:1px solid #e2e8f0;padding:16px;max-height:440px;overflow-y:auto}
-.bs-home-panel.active{display:block}
-.bs-home-placeholder{color:#94a3b8;text-align:center;padding:34px 14px;background:#f8fafc;border:1px dashed #e2e8f0;font-size:13px}
-@media(max-width:700px){
-  .bs-home-tabs{gap:8px}
-  .bs-home-tabs button{font-size:12px;padding:9px 13px}
-  .bs-home-panel{max-height:380px}
-}
-
-/* তৈরিকৃত ল্যান্ডিং পেজসমূহ — কমপ্যাক্ট, স্ক্রলযোগ্য দুই-লাইনের লিস্ট */
-#landingPagesListModal .modal-head{position:sticky;top:0;z-index:2;background:var(--card);}
-#landingPagesListModal .modal-footer{position:sticky;bottom:0;z-index:2;background:var(--card);}
-#landingPagesListModal .modal-body{padding:10px 14px;}
-.lp-list-wrap{max-height:58vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px;}
-.lp-list-wrap::-webkit-scrollbar{width:7px;}
-.lp-list-wrap::-webkit-scrollbar-thumb{background:#cbd5e1;}
-.lp-list-wrap::-webkit-scrollbar-track{background:transparent;}
-.lp-card-row{display:flex;align-items:center;gap:12px;padding:11px 8px;border-bottom:1px solid var(--border);}
-.lp-card-row:last-child{border-bottom:none;}
-.lp-card-row:hover{background:#FAFAFB;}
-body[data-theme="dark"] .lp-card-row:hover{background:#1D2027;}
-.lp-card-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:15px;}
-body[data-theme="dark"] .lp-card-thumb{background:#241B12;}
-.lp-card-main{flex:1;min-width:0;}
-.lp-card-line1{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lp-card-line1 .stock-dot{flex-shrink:0;}
-.lp-card-line2{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-soft);margin-top:3px;white-space:nowrap;overflow:hidden;}
-.lp-card-line2 .lp-slug{flex-shrink:0;}
-.lp-card-line2 .lp-card-cat{overflow:hidden;text-overflow:ellipsis;}
-.lp-card-line2 .lp-link-badge{margin-top:0;flex-shrink:0;}
-.lp-card-line2 .lp-preview-link{flex-shrink:0;}
-.lp-card-actions{display:flex;gap:6px;flex-shrink:0;}
-.lp-card-actions .act-btn{flex:none;padding:6px 10px;white-space:nowrap;}
-@media(max-width:620px){
-  .lp-card-row{flex-wrap:wrap;}
-  .lp-card-main{min-width:calc(100% - 54px);}
-  .lp-card-actions{width:100%;padding-left:54px;margin-top:2px;}
-  .lp-list-wrap{max-height:50vh;}
-}
-
 /* ============================================================
    User update: font family from product-jy2218 + no border-radius
    + strict sidebar tab isolation
@@ -2317,24 +2269,29 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
-  // ── TAB: Page Settings (dropdown-style pill menu) ─────────────────────
+  // ── TAB: Page Settings (compact dropdown) ─────────────────────
   async function loadSettings() {
     try {
       const pages = await fetchJSON('/page-settings');
       const html = `
         <div class="bs-ext-panel">
-          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-file-alt" style="color:#FCA311"></i> পেজ নির্বাচন করুন</h4>
-          <div class="bs-home-tabs" id="bsExtPagePills">
-            ${pages.map(p => `<button type="button" data-page-key="${esc(p.page)}" onclick="bsSelectSettingsPage('${esc(p.page)}')"><i class="fas fa-file-lines"></i> ${esc(p.label || p.page)}</button>`).join('')}
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px">
+            <label style="font-size:13px;font-weight:700;color:#14213D;white-space:nowrap">পেজ নির্বাচন করুন</label>
+            <select id="bsExtPageSelect" style="flex:1;min-width:180px;max-width:300px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:13.5px;background:#fff">
+              <option value="">— একটি পেজ বাছাই করুন —</option>
+              ${pages.map(p => `<option value="${p.page}">${esc(p.label || p.page)}</option>`).join('')}
+            </select>
           </div>
-          <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের মেনু থেকে একটি পেজ ক্লিক করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
+          <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
         </div>`;
       document.getElementById('bsExtBody').innerHTML = html;
-      window.bsSelectSettingsPage = function(pageKey){
-        const wrap = document.getElementById('bsExtPagePills');
-        if(wrap) wrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pageKey === pageKey));
-        editPage(pageKey, pages.find(x => x.page === pageKey));
-      };
+      document.getElementById('bsExtPageSelect').addEventListener('change', function(){
+        if(!this.value){
+          document.getElementById('bsExtPageEditor').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করুন।</p>';
+          return;
+        }
+        editPage(this.value, pages.find(x => x.page === this.value));
+      });
     } catch (e) { toast(e.message, 'err'); }
   }
 
@@ -2462,121 +2419,73 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </div>`).join('');
 
       return `
-        <div class="bs-home-tabs-wrap">
-          <div class="bs-home-tabs">
-            <button type="button" data-home-tab-btn="general" onclick="bsSwitchHomeTab(this,'general')"><i class="fas fa-gear"></i> সাধারণ ও SEO</button>
-            <button type="button" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
-            <button type="button" data-home-tab-btn="banners" onclick="bsSwitchHomeTab(this,'banners')"><i class="fas fa-images"></i> Promo Banners</button>
-            <button type="button" data-home-tab-btn="deal" onclick="bsSwitchHomeTab(this,'deal')"><i class="fas fa-tag"></i> Deal of Month</button>
-            <button type="button" data-home-tab-btn="why" onclick="bsSwitchHomeTab(this,'why')"><i class="fas fa-thumbs-up"></i> Why Choose Us</button>
-            <button type="button" data-home-tab-btn="reviews" onclick="bsSwitchHomeTab(this,'reviews')"><i class="fas fa-star-half-alt"></i> Reviews</button>
-            <button type="button" data-home-tab-btn="newsletter" onclick="bsSwitchHomeTab(this,'newsletter')"><i class="fas fa-envelope-open-text"></i> Newsletter</button>
-            <button type="button" data-home-tab-btn="filters" onclick="bsSwitchHomeTab(this,'filters')"><i class="fas fa-filter"></i> Filter Tabs</button>
+        ${heroMainBlock}
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> Promo Banners</h4>
+          <div id="bsHomeBanners">${bannerRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddPromoBanner()"><i class="fas fa-plus"></i> নতুন Banner যোগ</button>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-tag" style="color:#FCA311"></i> Deal of the Month</h4>
+          <div class="row">
+            <label>Tag/লেবেল <input id="bsDealTag" value="${esc(deal.tag||'')}"/></label>
+            <label>হাইলাইট (যেমন: 45% OFF) <input id="bsDealHighlight" value="${esc(deal.highlight||'')}"/></label>
           </div>
-
-          <p class="bs-home-placeholder" id="bsHomePlaceholder">উপরের মেনু থেকে একটি বিভাগ ক্লিক করুন — সেটির বিস্তারিত সেটিংস এখানে খুলবে।</p>
-
-          <div class="bs-home-panel" data-home-tab="general">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-gear" style="color:#FCA311"></i> সাধারণ ও SEO তথ্য</h4>
-            <label>Page Title <input name="title" value="${esc(c.title || '')}"/></label>
-            <label>Meta Description <textarea name="metaDescription" rows="2">${esc(c.metaDescription || '')}</textarea></label>
-            <h4 style="color:#14213D;margin:16px 0 10px;font-size:14px">Hero Section (জেনেরিক)</h4>
-            <label>Hero Headline <input name="hero_headline" value="${esc(hero.headline || '')}"/></label>
-            <label>Hero Subheadline <input name="hero_subheadline" value="${esc(hero.subheadline || '')}"/></label>
-            <label>Hero Image URL <input name="hero_image" value="${esc(hero.image || '')}"/></label>
-            <div class="row">
-              <label>CTA Label <input name="hero_ctaLabel" value="${esc(hero.ctaLabel || '')}"/></label>
-              <label>CTA Link <input name="hero_ctaHref" value="${esc(hero.ctaHref || '')}"/></label>
-            </div>
-            <label>Extra Content (JSON):
-              <textarea name="content" rows="4" style="font-family:monospace;font-size:12px">${esc(JSON.stringify(c.content || {}, null, 2))}</textarea>
+          <label>টাইটেল <input id="bsDealTitle" value="${esc(deal.title||'')}"/></label>
+          <label>বিবরণ <textarea id="bsDealText" rows="2">${esc(deal.text||'')}</textarea></label>
+          <div class="row">
+            <label>বাটন টেক্সট <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
+            <label>বাটন লিংক <input id="bsDealBtnLink" value="${esc(deal.btnLink||'shop.html')}"/></label>
+          </div>
+          <div class="row">
+            <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/>${bsDzHtml('bsDealImg', deal.img)}</label>
+            <label>কতদিনের কাউন্টডাউন <input type="number" id="bsDealDays" value="${deal.days||8}"/></label>
+            <label style="margin-top:10px">অফার শেষের নির্দিষ্ট তারিখ ও সময় (সেট করলে অগ্রাধিকার পাবে)
+              <input type="datetime-local" id="bsDealDeadline" value="${deal.deadline ? new Date(deal.deadline).toISOString().slice(0,16) : ''}" style="margin-top:4px"/>
+              <small style="color:#64748b;font-size:11px;display:block;margin-top:2px">নির্দিষ্ট তারিখ সেট থাকলে ফ্রন্টএন্ডে সরাসরি সেই সময় পর্যন্ত কাউন্টডাউন চলবে।</small>
             </label>
           </div>
+        </div>
 
-          <div class="bs-home-panel" data-home-tab="hero">
-            ${heroMainBlock}
-          </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-thumbs-up" style="color:#FCA311"></i> Why Choose Us</h4>
+          <div id="bsHomeWhy">${whyRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddWhyCard()"><i class="fas fa-plus"></i> নতুন Card যোগ</button>
+        </div>
 
-          <div class="bs-home-panel" data-home-tab="banners">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> Promo Banners</h4>
-            <div id="bsHomeBanners">${bannerRows}</div>
-            <button type="button" class="bs-ext-btn ghost" onclick="bsAddPromoBanner()"><i class="fas fa-plus"></i> নতুন Banner যোগ</button>
-          </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> Reviews (হোমপেজ)</h4>
+          <div id="bsHomeReviews">${revRows}</div>
+          <button type="button" class="bs-ext-btn ghost" onclick="bsAddReviewRow()"><i class="fas fa-plus"></i> নতুন Review যোগ</button>
+        </div>
 
-          <div class="bs-home-panel" data-home-tab="deal">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-tag" style="color:#FCA311"></i> Deal of the Month</h4>
-            <div class="row">
-              <label>Tag/লেবেল <input id="bsDealTag" value="${esc(deal.tag||'')}"/></label>
-              <label>হাইলাইট (যেমন: 45% OFF) <input id="bsDealHighlight" value="${esc(deal.highlight||'')}"/></label>
-            </div>
-            <label>টাইটেল <input id="bsDealTitle" value="${esc(deal.title||'')}"/></label>
-            <label>বিবরণ <textarea id="bsDealText" rows="2">${esc(deal.text||'')}</textarea></label>
-            <div class="row">
-              <label>বাটন টেক্সট <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
-              <label>বাটন লিংক <input id="bsDealBtnLink" value="${esc(deal.btnLink||'shop.html')}"/></label>
-            </div>
-            <div class="row">
-              <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/>${bsDzHtml('bsDealImg', deal.img)}</label>
-              <label>কতদিনের কাউন্টডাউন <input type="number" id="bsDealDays" value="${deal.days||8}"/></label>
-              <label style="margin-top:10px">অফার শেষের নির্দিষ্ট তারিখ ও সময় (সেট করলে অগ্রাধিকার পাবে)
-                <input type="datetime-local" id="bsDealDeadline" value="${deal.deadline ? new Date(deal.deadline).toISOString().slice(0,16) : ''}" style="margin-top:4px"/>
-                <small style="color:#64748b;font-size:11px;display:block;margin-top:2px">নির্দিষ্ট তারিখ সেট থাকলে ফ্রন্টএন্ডে সরাসরি সেই সময় পর্যন্ত কাউন্টডাউন চলবে।</small>
-              </label>
-            </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-envelope-open-text" style="color:#FCA311"></i> Newsletter</h4>
+          <div class="row">
+            <label>টাইটেল <input id="bsNewsTitle" value="${esc(news.title||'')}"/></label>
+            <label>হাইলাইট (যেমন: 10% OFF) <input id="bsNewsHighlight" value="${esc(news.highlight||'')}"/></label>
           </div>
+          <label>বিবরণ <input id="bsNewsText" value="${esc(news.text||'')}"/></label>
+          <div class="row">
+            <label>ইনপুট প্লেসহোল্ডার <input id="bsNewsPlaceholder" value="${esc(news.placeholder||'Enter your email address')}"/></label>
+            <label>বাটন টেক্সট <input id="bsNewsBtnText" value="${esc(news.btnText||'Subscribe')}"/></label>
+          </div>
+        </div>
 
-          <div class="bs-home-panel" data-home-tab="why">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-thumbs-up" style="color:#FCA311"></i> Why Choose Us</h4>
-            <div id="bsHomeWhy">${whyRows}</div>
-            <button type="button" class="bs-ext-btn ghost" onclick="bsAddWhyCard()"><i class="fas fa-plus"></i> নতুন Card যোগ</button>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h4 style="margin:0;color:#14213D;font-size:14px"><i class="fas fa-filter" style="color:#FCA311"></i> Filter Tabs (জনপ্রিয় পণ্য সেকশন)</h4>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddFilterTab()"><i class="fas fa-plus"></i> নতুন Tab</button>
           </div>
-
-          <div class="bs-home-panel" data-home-tab="reviews">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> Reviews (হোমপেজ)</h4>
-            <div id="bsHomeReviews">${revRows}</div>
-            <button type="button" class="bs-ext-btn ghost" onclick="bsAddReviewRow()"><i class="fas fa-plus"></i> নতুন Review যোগ</button>
-          </div>
-
-          <div class="bs-home-panel" data-home-tab="newsletter">
-            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-envelope-open-text" style="color:#FCA311"></i> Newsletter</h4>
-            <div class="row">
-              <label>টাইটেল <input id="bsNewsTitle" value="${esc(news.title||'')}"/></label>
-              <label>হাইলাইট (যেমন: 10% OFF) <input id="bsNewsHighlight" value="${esc(news.highlight||'')}"/></label>
-            </div>
-            <label>বিবরণ <input id="bsNewsText" value="${esc(news.text||'')}"/></label>
-            <div class="row">
-              <label>ইনপুট প্লেসহোল্ডার <input id="bsNewsPlaceholder" value="${esc(news.placeholder||'Enter your email address')}"/></label>
-              <label>বাটন টেক্সট <input id="bsNewsBtnText" value="${esc(news.btnText||'Subscribe')}"/></label>
-            </div>
-          </div>
-
-          <div class="bs-home-panel" data-home-tab="filters">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-              <h4 style="margin:0;color:#14213D;font-size:14px"><i class="fas fa-filter" style="color:#FCA311"></i> Filter Tabs (জনপ্রিয় পণ্য সেকশন)</h4>
-              <button type="button" class="bs-ext-btn ghost" onclick="bsAddFilterTab()"><i class="fas fa-plus"></i> নতুন Tab</button>
-            </div>
-            <p style="color:#64748b;font-size:12px;margin:0 0 10px">Filter field: <code>all</code>, <code>homePopular</code>, <code>homeBestseller</code>, <code>homeNew</code>, বা <code>cat:slug</code> (যেমন: <code>cat:table-fans</code>)। এই ট্যাবগুলো হোমপেজের "জনপ্রিয় পণ্যসমূহ" সেকশনের উপরে দেখায়।</p>
-            <table class="bs-ext-table" id="filterTabsTable">
-              <thead><tr><th>লেবেল</th><th>ফিল্টার</th><th>ক্রম</th><th>দৃশ্যমান</th><th></th></tr></thead>
-              <tbody id="bsHomeFilterTabsBody"><tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">লোড হচ্ছে...</td></tr></tbody>
-            </table>
-          </div>
+          <p style="color:#64748b;font-size:12px;margin:0 0 10px">Filter field: <code>all</code>, <code>homePopular</code>, <code>homeBestseller</code>, <code>homeNew</code>, বা <code>cat:slug</code> (যেমন: <code>cat:table-fans</code>)। এই ট্যাবগুলো হোমপেজের "জনপ্রিয় পণ্যসমূহ" সেকশনের উপরে দেখায়।</p>
+          <table class="bs-ext-table" id="filterTabsTable">
+            <thead><tr><th>লেবেল</th><th>ফিল্টার</th><th>ক্রম</th><th>দৃশ্যমান</th><th></th></tr></thead>
+            <tbody id="bsHomeFilterTabsBody"><tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">লোড হচ্ছে...</td></tr></tbody>
+          </table>
         </div>
       `;
     })() : '';
-
-    // সাব-ট্যাব সুইচার: শুধু ক্লিক করা মেনুর কন্টেন্ট দেখাবে, বাকিগুলো লুকানো থাকবে
-    window.bsSwitchHomeTab = function(btn, key){
-      const wrap = btn.closest('.bs-home-tabs-wrap');
-      if(!wrap) return;
-      wrap.querySelectorAll('.bs-home-tabs button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const ph = wrap.querySelector('.bs-home-placeholder');
-      if(ph) ph.style.display = 'none';
-      wrap.querySelectorAll('.bs-home-panel').forEach(p => p.classList.remove('active'));
-      const target = wrap.querySelector('.bs-home-panel[data-home-tab="' + key + '"]');
-      if(target) target.classList.add('active');
-    };
 
     window.bsAddPromoBanner = () => {
       const wrap = document.getElementById('bsHomeBanners'); if(!wrap) return;
@@ -2630,10 +2539,12 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </label>`;
       wrap.appendChild(div);
     };
-    const commonFieldsHTML = pageKey === 'home' ? '' : `
+    document.getElementById('bsExtPageEditor').innerHTML = `
+      <form class="bs-ext-form" id="bsExtPageForm">
+        <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-file-alt"></i> ${esc(c.label || pageKey)} — পেজ সেটিংস</h3>
         <label>Page Title <input name="title" value="${esc(c.title || '')}"/></label>
         <label>Meta Description <textarea name="metaDescription" rows="2">${esc(c.metaDescription || '')}</textarea></label>
-        ${contactFields}${aboutFields}
+        ${contactFields}${aboutFields}${homeFields}
         <h4 style="color:#14213D;margin:16px 0 10px;font-size:14px">Hero Section</h4>
         <label>Hero Headline <input name="hero_headline" value="${esc(hero.headline || '')}"/></label>
         <label>Hero Subheadline <input name="hero_subheadline" value="${esc(hero.subheadline || '')}"/></label>
@@ -2644,12 +2555,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </div>
         <label>Extra Content (JSON):
           <textarea name="content" rows="4" style="font-family:monospace;font-size:12px">${esc(JSON.stringify(c.content || {}, null, 2))}</textarea>
-        </label>`;
-    document.getElementById('bsExtPageEditor').innerHTML = `
-      <form class="bs-ext-form" id="bsExtPageForm">
-        <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-file-alt"></i> ${esc(c.label || pageKey)} — পেজ সেটিংস</h3>
-        ${commonFieldsHTML}
-        ${homeFields}
+        </label>
         <button type="submit" class="bs-ext-btn primary"><i class="fas fa-save"></i> এই পেজ সেভ করুন</button>
       </form>
     `;
@@ -3800,36 +3706,27 @@ function renderLandingPagesList(pages){
     return;
   }
   if(countEl) countEl.textContent = pages.length + ' টি পেজ পাওয়া গেছে';
-  body.innerHTML = '<div class="lp-list-wrap">' +
+  body.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>পেজ</th><th>ক্যাটাগরি</th><th>স্ট্যাটাস</th><th>লিংক / যুক্ততা</th><th>Actions</th></tr></thead><tbody>' +
     pages.map(function(p){
       const linked = (typeof allProducts!=='undefined'?allProducts:[]).find(function(x){ return x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+p.slug)!==-1; });
       const heroImg = p.hero && p.hero.image;
-      const thumb = heroImg ? ('<img src="'+heroImg+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">') : '<i class="fas fa-file-lines"></i>';
+      const thumb = heroImg ? ('<img src="'+heroImg+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display=\'none\'">') : '<i class="fas fa-file-lines"></i>';
       const active = p.active!==false;
       const safeSlug = String(p.slug||'').replace(/'/g,"\\'");
       const safeTitle = esc(p.title||p.slug||'').replace(/'/g,"\\'");
-      // লাইন ১: থাম্বনেইল + টাইটেল + স্ট্যাটাস | লাইন ২: স্লাগ + ক্যাটাগরি + যুক্ততা + প্রিভিউ
-      return '<div class="lp-card-row">' +
-          '<div class="lp-card-thumb">'+thumb+'</div>' +
-          '<div class="lp-card-main">' +
-            '<div class="lp-card-line1">' +
-              '<span style="overflow:hidden;text-overflow:ellipsis;">'+esc(p.title||p.slug)+'</span>' +
-              '<span class="stock-dot '+(active?'in':'out')+'">'+(active?'সক্রিয়':'নিষ্ক্রিয়')+'</span>' +
-            '</div>' +
-            '<div class="lp-card-line2">' +
-              '<span class="lp-slug">'+esc(p.slug)+'</span>' +
-              '<span class="lp-card-cat">'+esc(p.category||'—')+'</span>' +
-              (linked?('<span class="lp-link-badge linked"><i class="fas fa-link"></i> '+esc(linked.name)+'</span>'):('<span class="lp-link-badge unlinked"><i class="fas fa-link-slash"></i> যুক্ত নয়</span>')) +
-              '<a class="lp-preview-link" href="../frontend/landing.html?slug='+encodeURIComponent(p.slug)+'" target="_blank"><i class="fas fa-arrow-up-right-from-square"></i> প্রিভিউ</a>' +
-            '</div>' +
-          '</div>' +
-          '<div class="lp-card-actions">'+
-            '<button class="act-btn" onclick="document.getElementById(\'landingPagesListModal\').classList.add(\'hidden\');openLandingPageModal(\''+safeSlug+'\')"><i class="fas fa-pen"></i> সম্পাদনা</button>'+
-            '<button class="act-btn danger" onclick="deleteLandingPageFromList(\''+safeSlug+'\',\''+safeTitle+'\')"><i class="fas fa-trash"></i> মুছুন</button>'+
-          '</div>' +
-        '</div>';
+      return '<tr>' +
+        '<td><div class="lp-row-title"><div class="lp-thumb">'+thumb+'</div><div><span class="lp-name">'+esc(p.title||p.slug)+'</span><br><span class="lp-slug">'+esc(p.slug)+'</span></div></div></td>' +
+        '<td>'+esc(p.category||'—')+'</td>' +
+        '<td><span class="stock-dot '+(active?'in':'out')+'">'+(active?'সক্রিয়':'নিষ্ক্রিয়')+'</span></td>' +
+        '<td>'+(linked?('<span class="lp-link-badge linked"><i class="fas fa-link"></i> '+esc(linked.name)+'</span>'):('<span class="lp-link-badge unlinked"><i class="fas fa-link-slash"></i> কোনো পণ্যে যুক্ত নয়</span>'))+
+          '<br><a class="lp-preview-link" href="../frontend/landing.html?slug='+encodeURIComponent(p.slug)+'" target="_blank"><i class="fas fa-arrow-up-right-from-square"></i> প্রিভিউ</a></td>' +
+        '<td><div style="display:flex;gap:6px;flex-wrap:wrap;">'+
+          '<button class="act-btn" onclick="document.getElementById(\'landingPagesListModal\').classList.add(\'hidden\');openLandingPageModal(\''+safeSlug+'\')"><i class="fas fa-pen"></i> সম্পাদনা</button>'+
+          '<button class="act-btn danger" onclick="deleteLandingPageFromList(\''+safeSlug+'\',\''+safeTitle+'\')"><i class="fas fa-trash"></i> মুছুন</button>'+
+        '</div></td>' +
+        '</tr>';
     }).join('') +
-    '</div>';
+    '</tbody></table></div>';
 }
 
 function deleteLandingPageFromList(slug, title){
