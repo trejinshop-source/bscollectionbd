@@ -306,33 +306,10 @@ body[data-theme="dark"] .lp-link-badge.unlinked{color:var(--orange-light);}
 .lp-step-body b{color:var(--text);}
 .lp-step-body code{background:var(--bg);padding:1px 6px;border-radius:5px;font-size:12px;}
 body[data-theme="dark"] .lp-step-body code{background:#20232B;}
-@media(max-width:620px){
-  .topbar{
-    padding:10px 0;
-  }
+@media(max-width:620px){.topbar{padding:10px 0;}.topbar h1{font-size:18px;}}.lp-row-title{gap:8px;}.lp-thumb{width:32px;height:32px;font-size:13px;}}
+.page{display:none;}
+.page.active{display:block;}
 
-  .topbar h1{
-    font-size:18px;
-  }
-
-  .lp-row-title{
-    gap:8px;
-  }
-
-  .lp-thumb{
-    width:32px;
-    height:32px;
-    font-size:13px;
-  }
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
 /* ==================== REUSABLE IMAGE DRAG-DROP UPLOADER ==================== */
 .bs-dropzone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;text-align:center;font-size:12.5px;color:#64748b;cursor:pointer;background:#f8fafc;transition:.15s;margin-top:6px;}
 .bs-dropzone.drag,.bs-dropzone:hover{border-color:var(--orange);background:#fff7ed;color:#b45309;}
@@ -548,7 +525,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 </aside>
 
 <main class="main" id="mainContent">
-  <div class="topbar" id="topbar">
+  <div class="topbar" id="topbar" style="padding: 10px 16px !important;">
     <div class="topbar-left">
       <button class="hamburger" id="hamburgerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
       <h1 id="pageTitle">Dashboard</h1>
@@ -739,6 +716,98 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div class="p-btns" id="ordersPagBtns"></div>
       </div>
     </div>
+
+      <div class="card" style="margin-top:18px;">
+        <div class="card-head">
+          <h2>ফেক অর্ডার (8)</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <tbody>
+              <tr>
+                <td>#8001</td>
+                <td>রহিম আহমেদ</td>
+                <td>3</td>
+                <td>২০২৬-০৭-১৫</td>
+                <td>3,450 ৳</td>
+                <td>বিকাশ</td>
+                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8002</td>
+                <td>ফাতিমা খাতুন</td>
+                <td>2</td>
+                <td>২০২৬-০৭-১৪</td>
+                <td>2,100 ৳</td>
+                <td>নগদ</td>
+                <td><span class="badge" style="background:#f97316;color:white;">প্রক্রিয়াধীন</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8003</td>
+                <td>করিম মিয়া</td>
+                <td>5</td>
+                <td>২০२६-०७-१३</td>
+                <td>5,890 ৳</td>
+                <td>রকেট</td>
+                <td><span class="badge" style="background:#3b82f6;color:white;">প্রেরণ করা</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8004</td>
+                <td>নাজমা বেগম</td>
+                <td>1</td>
+                <td>२०२६-०७-१२</td>
+                <td>1,250 ৳</td>
+                <td>বিকাশ</td>
+                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8005</td>
+                <td>শাকিল হোসেন</td>
+                <td>4</td>
+                <td>२०२६-०७-११</td>
+                <td>4,320 ৳</td>
+                <td>নগদ</td>
+                <td><span class="badge" style="background:#6366f1;color:white;">বাতিল</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8006</td>
+                <td>সালমা আক্তার</td>
+                <td>2</td>
+                <td>२०२६-०७-१०</td>
+                <td>2,750 ৳</td>
+                <td>রকেট</td>
+                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8007</td>
+                <td>জাহিদ ইউসুফ</td>
+                <td>3</td>
+                <td>२०२६-०७-०९</td>
+                <td>3,680 ৳</td>
+                <td>বিকাশ</td>
+                <td><span class="badge" style="background:#3b82f6;color:white;">প্রেরণ করা</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+              <tr>
+                <td>#8008</td>
+                <td>মেহজাবিন সুলতানা</td>
+                <td>6</td>
+                <td>२०२६-०७-०८</td>
+                <td>6,450 ৳</td>
+                <td>নগদ</td>
+                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
+                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
   </section>
 
   <!-- ===================== PRODUCTS PAGE ===================== -->
@@ -767,6 +836,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="pill-btn ghost" id="refreshProductsBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
           <button class="pill-btn" id="addProductBtn">Add Product <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="pill-btn" id="addAdvancedProductBtn">এডভান্সড পন্য <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="pill-btn" id="addLandingPageBtn2">ল্যান্ডিং পেজ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
       <div class="filter-bar">
@@ -900,14 +971,14 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 
   <!-- ===================== ADVANCED OPTIONS PAGE ===================== -->
   <section class="page" id="page-advanced">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
-      <!-- Page Settings -->
+    <div style="display:grid;grid-template-columns:1fr;gap:18px;">
+      <!-- Page Settings Card - Full Width -->
       <div class="card">
         <div class="card-head"><h2>পেজ সেটিংস</h2></div>
         <div style="padding:12px 0;">
           <details style="border-bottom:1px solid var(--border);padding:12px 0;" open>
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
-              <i class="fas fa-cog"></i> সাইট তথ্য
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">▼</span> সাইট তথ্য
             </summary>
             <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
               <div class="form-group2" style="margin-bottom:10px;">
@@ -922,13 +993,13 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           </details>
           
           <details style="border-bottom:1px solid var(--border);padding:12px 0;">
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
-              <i class="fas fa-palette"></i> ডিজাইন সেটিংস
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">▶</span> ডিজাইন সেটিংস
             </summary>
             <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
               <div class="form-group2" style="margin-bottom:10px;">
                 <label>থিম রঙ</label>
-                <select style="font-size:12px;padding:8px;">
+                <select style="font-size:12px;padding:8px;width:100%;">
                   <option>নেভি + অরেঞ্জ (ডিফল্ট)</option>
                   <option>নীল + সাদা</option>
                   <option>সবুজ + কালো</option>
@@ -936,7 +1007,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
               </div>
               <div class="form-group2">
                 <label>ফন্ট স্টাইল</label>
-                <select style="font-size:12px;padding:8px;">
+                <select style="font-size:12px;padding:8px;width:100%;">
                   <option>Noto Sans Bengali</option>
                   <option>Poppins</option>
                   <option>Hind Siliguri</option>
@@ -946,8 +1017,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           </details>
           
           <details style="border-bottom:1px solid var(--border);padding:12px 0;">
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
-              <i class="fas fa-bell"></i> বিজ্ঞপ্তি সেটিংস
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">▶</span> বিজ্ঞপ্তি সেটিংস
             </summary>
             <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
               <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -964,8 +1035,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
 
-      <!-- Other sections -->
-      <div style="display:flex;flex-direction:column;gap:18px;">
+      <!-- Other sections in grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
         <!-- Customers -->
         <div class="card">
           <div class="card-head"><h2>গ্রাহক</h2></div>
@@ -990,7 +1061,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
 
         <!-- Contacts -->
-        <div class="card">
+        <div class="card" style="grid-column:1/-1;">
           <div class="card-head"><h2>যোগাযোগ (1)</h2></div>
           <div style="padding:12px;">
             <div style="border:1px solid var(--border);padding:10px;border-radius:6px;font-size:12px;">
@@ -1001,6 +1072,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
     </div>
+  </section>
   </section>
 </main>
 
