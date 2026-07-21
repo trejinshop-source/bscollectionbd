@@ -1439,6 +1439,7 @@ async function loadProducts(){
     const data = await apiJSON('/products');
     if(!data) return;
     allProducts = Array.isArray(data) ? data : [];
+    if(typeof allCategories==='undefined' || !allCategories.length){ try{ await loadCategories(); }catch(_){} }
     buildProductCatChips();
     renderProductGrid();
     loadStats();
@@ -1451,8 +1452,13 @@ document.getElementById('refreshProductsBtn').addEventListener('click', loadProd
 function buildProductCatChips(){
   const chips = document.getElementById('productCatChips');
   const slugs = [...new Set(allProducts.map(p=>p.categorySlug).filter(Boolean))];
+  const cats = (typeof allCategories!=='undefined' ? allCategories : []) || [];
+  function labelFor(slug){
+    const c = cats.find(x=>x.slug===slug);
+    return c ? esc(c.name) : esc(slug);
+  }
   chips.innerHTML = `<span class="chip active" data-cat="">সকল ক্যাটাগরি</span>` +
-    slugs.map(s=>`<span class="chip" data-cat="${s}">${s}</span>`).join('');
+    slugs.map(s=>`<span class="chip" data-cat="${esc(s)}">${labelFor(s)}</span>`).join('');
   chips.querySelectorAll('.chip').forEach(c=>{
     c.addEventListener('click', ()=>{
       chips.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
@@ -1461,6 +1467,14 @@ function buildProductCatChips(){
       renderProductGrid();
     });
   });
+}
+
+// পণ্যের ক্যাটাগরির নাম বের করা — cat নাম না থাকলে slug দিয়ে ক্যাটাগরি লিস্ট থেকে বাংলা নাম খুঁজে দেখায়, একদম না পেলে slug-টাই দেখায়
+function catLabelFor(p){
+  if(p && p.cat) return p.cat;
+  const cats = (typeof allCategories!=='undefined' ? allCategories : []) || [];
+  const c = cats.find(x=>x.slug===(p&&p.categorySlug));
+  return (c && c.name) || (p && p.categorySlug) || '—';
 }
 
 function renderProductGrid(){
@@ -1481,7 +1495,7 @@ function renderProductGrid(){
     const ratingHtml = p.rating ? `<span style="color:#FCA311;font-size:12px;font-weight:600;"><i class="fas fa-star"></i> ${Number(p.rating).toFixed(1)}</span>` : '';
     return `<div class="card product-card" data-cat="${p.categorySlug||''}" data-pid="${esc(p._id)}">
       <div class="product-thumb" style="position:relative;">${thumbContent}${isActive?'':'<span style="position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">বন্ধ</span>'}</div>
-      <div class="product-cat" style="display:flex;align-items:center;justify-content:space-between;">${esc(p.cat||p.categorySlug||'—')}${ratingHtml}</div>
+      <div class="product-cat" style="display:flex;align-items:center;justify-content:space-between;">${esc(catLabelFor(p))}${ratingHtml}</div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-bottom">
         <span class="product-price">৳${(p.now||0).toLocaleString()}${p.old?` <s style="color:#94a3b8;font-size:12px;">৳${(p.old||0).toLocaleString()}</s>`:''}</span>
@@ -1969,7 +1983,7 @@ function renderGlobalSearchResults(term){
   if(matchedProducts.length){
     html += '<div class="gsr-section-label">পণ্য</div>';
     matchedProducts.forEach(p=>{
-      html += '<div class="gsr-item" data-prod-id="'+esc(p._id)+'"><div class="gsr-thumb">'+(p.img?('<img src="'+p.img+'" onerror="this.parentNode.innerHTML=\''+gsrIcon.replace(/'/g,"\\'")+'\'">'):gsrIcon)+'</div><div><div class="gsr-name">'+esc(p.name)+'</div><div class="gsr-meta">'+esc(p.cat||p.categorySlug||'—')+' · ৳'+(p.now||0).toLocaleString()+'</div></div></div>';
+      html += '<div class="gsr-item" data-prod-id="'+esc(p._id)+'"><div class="gsr-thumb">'+(p.img?('<img src="'+p.img+'" onerror="this.parentNode.innerHTML=\''+gsrIcon.replace(/'/g,"\\'")+'\'">'):gsrIcon)+'</div><div><div class="gsr-name">'+esc(p.name)+'</div><div class="gsr-meta">'+esc(catLabelFor(p))+' · ৳'+(p.now||0).toLocaleString()+'</div></div></div>';
     });
   }
   if(!html){ html = '<div class="gsr-empty">কোনো ফলাফল পাওয়া যায়নি</div>'; }
@@ -3603,7 +3617,7 @@ function lpAutofillFromProduct(){
   if(!p) return;
   if(!lpV('lpTitle')) lpSet('lpTitle', p.name + ' — বিশেষ অফার');
   if(!lpV('lpSlug')) lpSet('lpSlug', ('product-'+(p.sku||p.name)).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
-  lpSet('lpCategory', p.cat || p.categorySlug || '');
+  lpSet('lpCategory', catLabelFor(p));
   lpSet('lpRating', p.rating || 5);
   lpSet('lpStock', p.stock || 10);
   lpSet('lpHeroHeadline', p.name);
@@ -3625,7 +3639,7 @@ function lpProductContext(){
   const p = (sel && sel.value) ? (allProducts||[]).find(x=>x._id===sel.value) : null;
   return {
     name: (p && p.name) || lpV('lpHeroHeadline') || lpV('lpTitle') || 'এই পণ্য',
-    cat: (p && (p.cat||p.categorySlug)) || lpV('lpCategory') || '',
+    cat: (p ? catLabelFor(p) : '') || lpV('lpCategory') || '',
     now: (p && p.now) || Number(lpV('lpHeroPriceNow'))||0,
     old: (p && p.old) || Number(lpV('lpHeroPriceOld'))||0,
   };
@@ -4109,7 +4123,7 @@ function renderBulkImageRows(missing){
     const safeName = esc(p.name||'').replace(/'/g,"\\'");
     return '<div data-bulk-row data-pid="'+esc(p._id)+'" style="'+LP_ROW_STYLE+';display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'+
       '<div class="product-thumb bulk-preview" style="width:52px;height:52px;flex-shrink:0;">'+(suggested?('<img src="'+suggested+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display=\'none\'">'):gsrIcon)+'</div>'+
-      '<div style="flex:1;min-width:160px;"><div style="font-weight:700;font-size:13px;">'+esc(p.name)+'</div><div style="font-size:11.5px;color:var(--text-soft);">'+esc(p.cat||p.categorySlug||'—')+(suggested?' · ক্যাটাগরির ছবি স্বয়ংক্রিয়ভাবে বসানো হয়েছে':' · উপযুক্ত ছবি খুঁজে পাওয়া যায়নি')+'</div></div>'+
+      '<div style="flex:1;min-width:160px;"><div style="font-weight:700;font-size:13px;">'+esc(p.name)+'</div><div style="font-size:11.5px;color:var(--text-soft);">'+esc(catLabelFor(p))+(suggested?' · ক্যাটাগরির ছবি স্বয়ংক্রিয়ভাবে বসানো হয়েছে':' · উপযুক্ত ছবি খুঁজে পাওয়া যায়নি')+'</div></div>'+
       '<input type="url" class="bulk-img-input" placeholder="ছবির URL পেস্ট করুন" style="flex:2;min-width:220px;'+LP_INP+'" value="'+esc(suggested)+'" oninput="bulkImgPreview(this)">'+
       '<button type="button" class="act-btn" onclick="skybuySearchFor(\''+safeName+'\')"><i class="fas fa-magnifying-glass"></i> SkyBuy-তে খুঁজুন</button>'+
     '</div>';
