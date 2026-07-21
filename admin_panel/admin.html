@@ -797,6 +797,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           </div>
           <button class="pill-btn ghost" id="openBulkImageBtn"><i class="fas fa-image"></i> সব পণ্যে ছবি বসান</button>
           <button class="pill-btn ghost" id="resetPlacementsBtn"><i class="fas fa-store"></i> শুধু Shop-এ দেখান (সব পণ্য)</button>
+          <button class="pill-btn ghost" id="disableHomePlacementsBtn"><i class="fas fa-house-circle-xmark"></i> হোম প্লেসমেন্ট বন্ধ করুন (সব পণ্য)</button>
         </div>
       </div>
       <div class="filter-bar">
@@ -1478,6 +1479,7 @@ document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
 /* সব পণ্যে ছবি বসানোর টুল */
 document.getElementById('openBulkImageBtn').addEventListener('click', ()=> openBulkImageModal());
 document.getElementById('resetPlacementsBtn').addEventListener('click', ()=> resetAllProductPlacementsToShopOnly());
+document.getElementById('disableHomePlacementsBtn').addEventListener('click', ()=> disableAllHomePlacements());
 
 function openProductModal(id){
   const modal = document.getElementById('productModal');
@@ -3857,6 +3859,54 @@ async function resetAllProductPlacementsToShopOnly(){
   }
   btn.disabled = false; btn.innerHTML = originalHTML;
   showToast(ok+' টি পণ্য "শুধু শপ পেজ"-এ সেট হয়েছে'+(skipped?(', '+skipped+' টি আগে থেকেই ঠিক ছিল'):'')+(fail?(', '+fail+' টি ব্যর্থ হয়েছে'):''), fail?'error':'success');
+  try{ await loadProducts(); renderProductGrid(); }catch(_){}
+}
+
+/* ============================================================
+   সকল পণ্যের হোম প্লেসমেন্ট (জনপ্রিয় / সেরা বিক্রিত / নতুন পণ্য) বন্ধ করা
+   — শপ পেজের সেটিং অপরিবর্তিত থাকবে
+   ============================================================ */
+async function disableAllHomePlacements(){
+  try{
+    if(typeof allProducts==='undefined' || !allProducts.length){ await loadProducts(); }
+  }catch(_){}
+  const products = (typeof allProducts!=='undefined' ? allProducts : []) || [];
+  if(!products.length){ showToast('কোনো পণ্য পাওয়া যায়নি','error'); return; }
+
+  function homeAlreadyOff(p){
+    const pl = p.placements||{};
+    return !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
+  }
+
+  const needCount = products.filter(function(p){ return !homeAlreadyOff(p); }).length;
+  if(needCount===0){ showToast('সবগুলো পণ্যের হোম প্লেসমেন্ট ইতিমধ্যে বন্ধ আছে','success'); return; }
+
+  const ok1 = confirm('মোট '+products.length+' টি পণ্যের মধ্যে '+needCount+' টি পণ্যের "হোম — জনপ্রিয় পণ্য", "হোম — সেরা বিক্রিত" ও "হোম — নতুন পণ্য" আনসিলেক্ট করা হবে। শপ পেজের সেটিং অপরিবর্তিত থাকবে। এগিয়ে যেতে চান?');
+  if(!ok1) return;
+
+  const btn = document.getElementById('disableHomePlacementsBtn');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  let ok = 0, fail = 0, skipped = 0, done = 0;
+  for(const p of products){
+    if(homeAlreadyOff(p)){ skipped++; continue; }
+    done++;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপডেট হচ্ছে... ('+done+'/'+needCount+')';
+    try{
+      const existingPl = p.placements||{};
+      const body = Object.assign({}, p, {placements:{
+        shop: existingPl.shop===true,
+        homePopular:false,
+        homeBestseller:false,
+        homeNew:false
+      }});
+      delete body._id; delete body.__v;
+      const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
+      if(r && r.ok) ok++; else fail++;
+    }catch(_){ fail++; }
+  }
+  btn.disabled = false; btn.innerHTML = originalHTML;
+  showToast(ok+' টি পণ্যের হোম প্লেসমেন্ট বন্ধ হয়েছে'+(skipped?(', '+skipped+' টি আগে থেকেই ঠিক ছিল'):'')+(fail?(', '+fail+' টি ব্যর্থ হয়েছে'):''), fail?'error':'success');
   try{ await loadProducts(); renderProductGrid(); }catch(_){}
 }
 </script>
