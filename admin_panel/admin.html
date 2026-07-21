@@ -796,6 +796,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
             </div>
           </div>
           <button class="pill-btn ghost" id="openBulkImageBtn"><i class="fas fa-image"></i> সব পণ্যে ছবি বসান</button>
+          <button class="pill-btn ghost" id="resetPlacementsBtn"><i class="fas fa-store"></i> শুধু Shop-এ দেখান (সব পণ্য)</button>
         </div>
       </div>
       <div class="filter-bar">
@@ -1476,6 +1477,7 @@ document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
 
 /* সব পণ্যে ছবি বসানোর টুল */
 document.getElementById('openBulkImageBtn').addEventListener('click', ()=> openBulkImageModal());
+document.getElementById('resetPlacementsBtn').addEventListener('click', ()=> resetAllProductPlacementsToShopOnly());
 
 function openProductModal(id){
   const modal = document.getElementById('productModal');
@@ -3815,6 +3817,47 @@ async function saveBulkImages(){
   showToast(ok+' টি পণ্যে ছবি সেভ হয়েছে'+(fail?(', '+fail+' টি ব্যর্থ হয়েছে'):''), fail?'error':'success');
   try{ await loadProducts(); renderProductGrid(); }catch(_){}
   openBulkImageModal();
+}
+
+/* ============================================================
+   সকল পণ্যের Placement রিসেট — শুধু "শপ পেজ" সিলেক্টেড থাকবে
+   ============================================================ */
+async function resetAllProductPlacementsToShopOnly(){
+  try{
+    if(typeof allProducts==='undefined' || !allProducts.length){ await loadProducts(); }
+  }catch(_){}
+  const products = (typeof allProducts!=='undefined' ? allProducts : []) || [];
+  if(!products.length){ showToast('কোনো পণ্য পাওয়া যায়নি','error'); return; }
+
+  function isShopOnly(p){
+    const pl = p.placements||{};
+    return pl.shop===true && !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
+  }
+
+  const needCount = products.filter(function(p){ return !isShopOnly(p); }).length;
+  if(needCount===0){ showToast('সবগুলো পণ্য ইতিমধ্যে শুধু শপ পেজে সেট করা আছে','success'); return; }
+
+  const ok1 = confirm('মোট '+products.length+' টি পণ্যের মধ্যে '+needCount+' টি পণ্যের Placement পরিবর্তন করা হবে — শুধু "শপ পেজ" সিলেক্টেড থাকবে, হোম পেজের জনপ্রিয়/সেরা বিক্রিত/নতুন পণ্য থেকে আনসিলেক্টেড হয়ে যাবে। এগিয়ে যেতে চান?');
+  if(!ok1) return;
+
+  const btn = document.getElementById('resetPlacementsBtn');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  let ok = 0, fail = 0, skipped = 0, done = 0;
+  for(const p of products){
+    if(isShopOnly(p)){ skipped++; continue; }
+    done++;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপডেট হচ্ছে... ('+done+'/'+needCount+')';
+    try{
+      const body = Object.assign({}, p, {placements:{shop:true, homePopular:false, homeBestseller:false, homeNew:false}});
+      delete body._id; delete body.__v;
+      const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
+      if(r && r.ok) ok++; else fail++;
+    }catch(_){ fail++; }
+  }
+  btn.disabled = false; btn.innerHTML = originalHTML;
+  showToast(ok+' টি পণ্য "শুধু শপ পেজ"-এ সেট হয়েছে'+(skipped?(', '+skipped+' টি আগে থেকেই ঠিক ছিল'):'')+(fail?(', '+fail+' টি ব্যর্থ হয়েছে'):''), fail?'error':'success');
+  try{ await loadProducts(); renderProductGrid(); }catch(_){}
 }
 </script>
 
