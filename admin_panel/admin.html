@@ -2738,6 +2738,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           catName: row.querySelector('[data-hs-catname]')?.value || '',
           tag: row.querySelector('[data-hs-tag]')?.value || '',
           title: row.querySelector('[data-hs-title]')?.value || '',
+          desc: row.querySelector('[data-hs-desc]')?.value || '',
           img: row.querySelector('[data-hs-img]')?.value || '',
           btnText: row.querySelector('[data-hs-btntext]')?.value || 'Shop Now',
           btnLink: row.querySelector('[data-hs-btnlink]')?.value || '',
@@ -2830,6 +2831,11 @@ window.bsAddHeroSlide = function(data, idx){
     <label>স্লাইড শিরোনাম (সর্বোচ্চ ৫০ অক্ষর)
       <input data-hs-title value="${esc(s.title||'')}" maxlength="50" placeholder="যেমন: প্রিমিয়াম সিলিং ফ্যান কালেকশন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
     </label>
+    <label style="display:flex;align-items:center;justify-content:space-between;">ক্যাটাগরি সম্পর্কে বিস্তারিত বিবরণ (সর্বোচ্চ ৩০০ অক্ষর)
+      <button type="button" class="bs-ext-btn ghost" style="padding:3px 8px;font-size:11px;margin:0" onclick="bsHeroSlideAutoDesc(this)"><i class="fas fa-wand-magic-sparkles"></i> স্বয়ংক্রিয় তৈরি</button>
+    </label>
+    <textarea data-hs-desc maxlength="300" rows="3" placeholder="এই ক্যাটাগরির পণ্য সম্পর্কে গ্রাহকদের জন্য বিস্তারিত তথ্য লিখুন — যেমন বৈশিষ্ট্য, গুণগত মান, কেন এই ক্যাটাগরির পণ্য কেনা উচিত ইত্যাদি..." style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px;resize:vertical">${esc(s.desc||'')}</textarea>
+    <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px" data-hs-desc-count></div>
     <div class="row">
       <label style="flex:1">বাটন টেক্সট
         <input data-hs-btntext value="${esc(s.btnText||'Shop Now')}" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
@@ -2851,6 +2857,10 @@ window.bsAddHeroSlide = function(data, idx){
       <input type="file" accept="image/*" style="display:none" onchange="bsUploadImageFile(this.files[0],'bsHsImg_${i}')"/>
     </div>`;
   wrap.appendChild(div);
+  const descArea = div.querySelector('[data-hs-desc]');
+  const descCount = div.querySelector('[data-hs-desc-count]');
+  function updateDescCount(){ if(descCount) descCount.textContent = (descArea.value||'').length + ' / ৩০০ অক্ষর'; }
+  if(descArea){ descArea.addEventListener('input', updateDescCount); updateDescCount(); }
 };
 
 window.bsHeroSlideOnCatChange = function(sel){
@@ -2867,6 +2877,33 @@ window.bsHeroSlideOnCatChange = function(sel){
   // Auto-fill title if empty
   const titleInp = row.querySelector('[data-hs-title]');
   if(titleInp && !titleInp.value && catName) titleInp.value = catName + ' কালেকশন';
+  // Auto-fill detailed description if empty
+  const descArea = row.querySelector('[data-hs-desc]');
+  if(descArea && !descArea.value.trim() && catName){
+    descArea.value = bsGenerateCatDesc(catName);
+    descArea.dispatchEvent(new Event('input'));
+  }
+};
+
+// ক্যাটাগরির নাম দিয়ে একটি ডিফল্ট বিস্তারিত বিবরণ তৈরি করে (গ্রাহকদের জন্য)
+function bsGenerateCatDesc(catName){
+  const name = (catName || 'এই ক্যাটাগরির').trim();
+  const text = 'আমাদের ' + name + ' কালেকশনে পাবেন সেরা মানের পণ্য, সাশ্রয়ী মূল্যে ও দ্রুত হোম ডেলিভারি সহ। প্রতিটি পণ্য যাচাই করে বাছাই করা হয়েছে যাতে আপনি পান দীর্ঘস্থায়ী পারফরম্যান্স ও পূর্ণ গ্রাহক সন্তুষ্টি।';
+  return text.length > 300 ? text.slice(0, 300) : text;
+}
+
+window.bsHeroSlideAutoDesc = function(btn){
+  const row = btn.closest('[data-slide-row]');
+  if(!row) return;
+  const sel = row.querySelector('[data-hs-cat]');
+  const opt = sel ? sel.options[sel.selectedIndex] : null;
+  const catName = (opt && (opt.dataset.name || opt.text)) || '';
+  if(!catName){ showToast('আগে একটি ক্যাটাগরি সিলেক্ট করুন', 'error'); return; }
+  const descArea = row.querySelector('[data-hs-desc]');
+  if(descArea){
+    descArea.value = bsGenerateCatDesc(catName);
+    descArea.dispatchEvent(new Event('input'));
+  }
 };
 
 
