@@ -3492,6 +3492,7 @@ window.bsRemovePromo = function(idx){
             <input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/>
           </div>
           <div class="form-group2"><label>ক্যাটাগরি লেবেল</label><input type="text" id="lpCategory" placeholder="Table Fan / সিলিং ফ্যান"/></div>
+          <input type="hidden" id="lpCategorySlug"/>
         </div>
         <div class="form-row">
           <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="lpRating" min="1" max="5" step="0.1" placeholder="5"/></div>
@@ -3573,14 +3574,6 @@ window.bsRemovePromo = function(idx){
         <p style="font-size:12px;color:#64748b;margin-bottom:10px">ডানদিকের সাইডবারে দেখানো কমপ্যাক্ট পণ্য কার্ডসমূহ।</p>
         <div id="lpSidebarRelContainer"></div>
         <button type="button" class="bs-ext-btn ghost" onclick="lpAddSidebarRel()"><i class="fas fa-plus"></i> সাইডবার পণ্য যোগ করুন</button>
-      </div>
-
-      <!-- ⑧ Bottom Related Grid -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-grid" style="color:#FCA311"></i> নিচের রিলেটেড প্রোডাক্ট গ্রিড</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">পেজের নিচে ৫টি পর্যন্ত রিলেটেড পণ্য দেখাবে (আপনার জন্য প্রস্তাবিত)।</p>
-        <div id="lpRelatedGridContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddRelatedGrid()"><i class="fas fa-plus"></i> রিলেটেড পণ্য যোগ করুন</button>
       </div>
 
       <!-- ⑨ Reviews -->
@@ -3681,6 +3674,7 @@ function lpAutofillFromProduct(){
   if(!lpV('lpTitle')) lpSet('lpTitle', p.name + ' — বিশেষ অফার');
   if(!lpV('lpSlug')) lpSet('lpSlug', ('product-'+(p.sku||p.name)).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
   lpSet('lpCategory', catLabelFor(p));
+  lpSet('lpCategorySlug', p.categorySlug||'');
   lpSet('lpRating', p.rating || 5);
   lpSet('lpStock', p.stock || 10);
   lpSet('lpHeroHeadline', p.name);
@@ -3731,13 +3725,13 @@ function lpSuggestAll(){
 function openLandingPageModal(slug){
   const modal=document.getElementById('landingPageModal');
   const titleEl=document.getElementById('lpModalTitle');
-  ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpCategory','lpRating','lpRatingCount','lpStock',
+  ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpCategory','lpCategorySlug','lpRating','lpRatingCount','lpStock',
    'lpHighlightColor','lpHighlightCharge','lpHeroHeadline','lpHeroSub','lpHeroPriceNow','lpHeroPriceOld',
    'lpHeroCtaLabel','lpHeroCtaLink','lpHeroImage','lpPriceStripText','lpDescription']
     .forEach(id=>lpSet(id,''));
   const activeChk=document.getElementById('lpActive');if(activeChk)activeChk.checked=true;
   ['lpFeaturesContainer','lpSpecsContainer','lpReviewsContainer','lpFaqContainer',
-   'lpThumbsContainer','lpColorsContainer','lpSidebarRelContainer','lpRelatedGridContainer'].forEach(id=>{
+   'lpThumbsContainer','lpColorsContainer','lpSidebarRelContainer'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.innerHTML='';
   });
   const imgPrev=document.getElementById('lpHeroImgPreview');if(imgPrev)imgPrev.style.display='none';
@@ -3760,6 +3754,7 @@ function openLandingPageModal(slug){
     lpSet('lpSlug',p.slug);
     lpSet('lpMetaDesc',p.metaDescription);
     lpSet('lpCategory',p.category);
+    lpSet('lpCategorySlug',p.categorySlug||'');
     lpSet('lpRating',p.rating);
     lpSet('lpRatingCount',p.ratingCount);
     lpSet('lpStock',p.stock);
@@ -3783,7 +3778,7 @@ function openLandingPageModal(slug){
     (p.reviews||[]).forEach(r=>lpAddReview(r.name,r.rating,r.title,r.text,r.date));
     (p.faq||[]).forEach(q=>lpAddFaq(q.q,q.a));
     (p.sidebarRelated||[]).forEach(r=>lpAddSidebarRel(r.name,r.price,r.oldPrice,r.image,r.link,r.rating,r.ratingCount));
-    (p.relatedGrid||[]).forEach(r=>lpAddRelatedGrid(r.cat,r.name,r.price,r.oldPrice,r.badge,r.image,r.link,r.rating,r.ratingCount));
+    // relatedGrid is now auto-populated from category on frontend
     if(previewLink){previewLink.href='../frontend/landing.html?slug='+encodeURIComponent(p.slug);previewLink.style.display='';}
     modal.classList.remove('hidden');
   }).catch(err=>{ const fn=window.toast||function(m){alert(m);}; fn('ডেটা লোড সমস্যা: '+err.message,'err'); });
@@ -3820,23 +3815,14 @@ async function saveLandingPage(){
     ratingCount:Number((row.querySelector('.lp-sr-rcount')||{}).value)||0
   })).filter(r=>r.name);
 
-  const relatedGrid=Array.from(document.querySelectorAll('#lpRelatedGridContainer .lp-rg-row')).map(row=>({
-    cat:(row.querySelector('.lp-rg-cat')||{}).value||'',
-    name:(row.querySelector('.lp-rg-name')||{}).value||'',
-    price:Number((row.querySelector('.lp-rg-price')||{}).value)||0,
-    oldPrice:Number((row.querySelector('.lp-rg-oldprice')||{}).value)||0,
-    badge:Number((row.querySelector('.lp-rg-badge')||{}).value)||0,
-    image:(row.querySelector('.lp-rg-img')||{}).value||'',
-    link:(row.querySelector('.lp-rg-link')||{}).value||'',
-    rating:Number((row.querySelector('.lp-rg-rating')||{}).value)||5,
-    ratingCount:Number((row.querySelector('.lp-rg-rcount')||{}).value)||0
-  })).filter(r=>r.name);
+  const relatedGrid=[]; // auto-populated from category on frontend
 
   const body={
     slug, title,
     metaDescription: lpV('lpMetaDesc'),
     active: document.getElementById('lpActive').checked,
     category: lpV('lpCategory'),
+    categorySlug: lpV('lpCategorySlug'),
     rating: Number(lpV('lpRating'))||5,
     ratingCount: Number(lpV('lpRatingCount'))||0,
     stock: Number(lpV('lpStock'))||0,
