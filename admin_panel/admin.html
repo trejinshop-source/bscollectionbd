@@ -979,10 +979,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <label>কোথায় দেখাবে (Placement)</label>
         <div class="bs-ext-placements">
           <label><input type="checkbox" id="pPlShop"> শপ পেজ</label>
+          <label><input type="checkbox" id="pPlHome"> হোম — ফিচার্ড পন্য</label>
           <label><input type="checkbox" id="pPlPop"> হোম — জনপ্রিয় পন্য</label>
           <label><input type="checkbox" id="pPlBest"> হোম — সেরা বিক্রিত</label>
           <label><input type="checkbox" id="pPlNew"> হোম — নতুন পন্য</label>
-          <label><input type="checkbox" id="pPlFeatured"> হোম — ফিচার্ড প্রোডাক্টস</label>
         </div>
       </div>
     </div>
@@ -1543,7 +1543,7 @@ function openProductModal(id){
     document.getElementById('pCatSlug').value='';
     document.getElementById('pImgPreview').classList.remove('show');
     document.getElementById('pImgFile').value='';
-    ['pPlShop','pPlPop','pPlBest','pPlNew','pPlFeatured'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
+    ['pPlShop','pPlHome','pPlPop','pPlBest','pPlNew'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
   } else {
     const p = allProducts.find(x=>x._id===id);
     if(p){
@@ -1557,10 +1557,10 @@ function openProductModal(id){
       document.getElementById('pCatSlug').value = p.categorySlug||'';
       const placements = p.placements||{};
       const plShop=document.getElementById('pPlShop'); if(plShop) plShop.checked=!!placements.shop;
+      const plHome=document.getElementById('pPlHome'); if(plHome) plHome.checked=!!placements.homeProduct;
       const plPop=document.getElementById('pPlPop'); if(plPop) plPop.checked=!!placements.homePopular;
       const plBest=document.getElementById('pPlBest'); if(plBest) plBest.checked=!!placements.homeBestseller;
       const plNew=document.getElementById('pPlNew'); if(plNew) plNew.checked=!!placements.homeNew;
-      const plFeatured=document.getElementById('pPlFeatured'); if(plFeatured) plFeatured.checked=!!placements.homeFeatured;
       if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').classList.add('show'); }
       else document.getElementById('pImgPreview').classList.remove('show');
     }
@@ -1681,10 +1681,10 @@ document.getElementById('productModalSave').addEventListener('click', async ()=>
     categorySlug:document.getElementById('pCatSlug').value.trim()||undefined,
     placements:{
       shop:document.getElementById('pPlShop')?.checked||false,
+      homeProduct:document.getElementById('pPlHome')?.checked||false,
       homePopular:document.getElementById('pPlPop')?.checked||false,
       homeBestseller:document.getElementById('pPlBest')?.checked||false,
       homeNew:document.getElementById('pPlNew')?.checked||false,
-      homeFeatured:document.getElementById('pPlFeatured')?.checked||false,
     },
   };
   const editId = document.getElementById('pEditId').value;
@@ -2375,148 +2375,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       '<img data-prev="' + targetId + '" src="' + (curImg || '') + '" class="bs-drop-prev" style="' + (curImg ? '' : 'display:none') + '"/>';
   };
 
-  // ── হিরো স্লাইড ও Hero Side Cards — সাধারণ ডেটা ক্যাশ + রো টেমপ্লেট ──────────
-  const HERO_SLIDE_TEXT_LIMIT = 120;
-  const HERO_CARD_TEXT_LIMIT = 60;
-  let _bsHomeCategories = [];
-  let _bsHomeProducts = [];
-
-  function bsHeroSlideRowHTML(s, i){
-    s = s || {};
-    const textLen = (s.text||'').length;
-    return `
-    <div class="bs-ext-panel" style="margin-bottom:10px" data-hero-slide-row="${i}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <b style="color:#14213D;font-size:13px">স্লাইড ${i+1}</b>
-        <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-hero-slide-row]').remove()"><i class="fas fa-trash"></i></button>
-      </div>
-      <div class="row">
-        <label>ক্যাটাগরি <select class="bs-hero-slide-cat" data-hs-category data-cur="${esc(s.category||'')}"><option value="">— ক্যাটাগরি লোড হচ্ছে —</option></select></label>
-        <label>ট্যাগ/লেবেল <input data-hs-tag value="${esc(s.tag||'')}" placeholder="ক্যাটাগরি"/></label>
-      </div>
-      <label>টাইটেল <input data-hs-title value="${esc(s.title||'')}"/></label>
-      <label>বিবরণ (আকর্ষণীয় টেক্সট)
-        <textarea data-hs-text rows="2" maxlength="${HERO_SLIDE_TEXT_LIMIT}" oninput="this.nextElementSibling.textContent=this.value.length+'/'+${HERO_SLIDE_TEXT_LIMIT}">${esc(s.text||'')}</textarea>
-        <small class="bs-char-count" style="color:#94a3b8;font-size:11px">${textLen}/${HERO_SLIDE_TEXT_LIMIT}</small>
-      </label>
-      <div class="row">
-        <label>বাটন টেক্সট <input data-hs-btntext value="${esc(s.btnText||'Shop Now')}"/></label>
-        <label>বাটন লিংক (খালি রাখলে ক্যাটাগরি অনুযায়ী অটো) <input data-hs-btnlink value="${esc(s.btnLink||'')}"/></label>
-      </div>
-      <label>ছবি (ম্যানুয়ালি আপলোড করুন) <input id="bsHSImg_${i}" data-hs-img value="${esc(s.img||'')}"/>${bsDzHtml('bsHSImg_'+i, s.img)}</label>
-    </div>`;
-  }
-
-  function bsHeroSideCardRowHTML(cd, i){
-    cd = cd || {};
-    const textLen = (cd.text||'').length;
-    return `
-    <div class="bs-ext-panel" style="margin-bottom:10px" data-hero-card-row="${i}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <b style="color:#14213D;font-size:13px">কার্ড ${i+1}</b>
-        <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-hero-card-row]').remove()"><i class="fas fa-trash"></i></button>
-      </div>
-      <div class="row">
-        <label>ক্যাটাগরি (পণ্য ফিল্টার করতে) <select class="bs-hero-card-cat" data-hc-category data-cur="${esc(cd.categorySlug||'')}"><option value="">— সব ক্যাটাগরি —</option></select></label>
-        <label>পণ্য খুঁজুন ও সিলেক্ট করুন
-          <input type="text" class="bs-hero-card-search" data-hc-search placeholder="পণ্যের নাম লিখুন..." autocomplete="off"/>
-          <select class="bs-hero-card-product" data-hc-product data-cur-id="${esc(cd.productId||'')}" style="margin-top:4px"><option value="">— পণ্য লোড হচ্ছে —</option></select>
-        </label>
-      </div>
-      <div class="row">
-        <label>নাম (অটো-ফিল, প্রয়োজনে বদলান) <input data-hc-name value="${esc(cd.name||'')}"/></label>
-        <label>ডিসকাউন্ট/ব্যাজ (ঐচ্ছিক) <input data-hc-discount value="${esc(cd.discount||'')}" placeholder="যেমন: 25% OFF"/></label>
-      </div>
-      <div class="row">
-        <label>বর্তমান মূল্য (অটো-ফিল) <input data-hc-now value="${esc(cd.now||'')}"/></label>
-        <label>পুরনো মূল্য (অটো-ফিল) <input data-hc-old value="${esc(cd.old||'')}"/></label>
-      </div>
-      <label>কাস্টম টেক্সট (আকর্ষণ বাড়াতে)
-        <input data-hc-text value="${esc(cd.text||'')}" maxlength="${HERO_CARD_TEXT_LIMIT}" oninput="this.nextElementSibling.textContent=this.value.length+'/'+${HERO_CARD_TEXT_LIMIT}"/>
-        <small class="bs-char-count" style="color:#94a3b8;font-size:11px">${textLen}/${HERO_CARD_TEXT_LIMIT}</small>
-      </label>
-      <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
-        <img data-hc-img-preview src="${esc(cd.img||'')}" style="width:56px;height:56px;object-fit:cover;border:1px solid #e2e8f0;${cd.img?'':'display:none'}"/>
-        <input type="hidden" data-hc-img value="${esc(cd.img||'')}"/>
-        <input type="hidden" data-hc-url value="${esc(cd.detailUrl||'')}"/>
-        <input type="hidden" data-hc-sku value="${esc(cd.sku||'')}"/>
-        <span style="font-size:11px;color:#64748b">পণ্য সিলেক্ট করলে ছবি, দাম ও পেজ লিংক এখানেই অটো-ফিল হবে</span>
-      </div>
-    </div>`;
-  }
-
-  // ক্যাটাগরি ড্রপডাউন পপুলেট করে (আগে থেকে সিলেক্ট করা থাকলে সেটাই দেখাবে)
-  function bsPopulateCategorySelect(sel, placeholderLabel){
-    if(!sel) return;
-    const cur = sel.dataset.cur || '';
-    sel.innerHTML = '<option value="">' + (placeholderLabel || '— সব ক্যাটাগরি —') + '</option>' +
-      _bsHomeCategories.map(c => `<option value="${esc(c.slug)}" ${c.slug===cur?'selected':''}>${esc(c.name)}</option>`).join('');
-  }
-
-  // Hero Side Card রো-এর প্রোডাক্ট ড্রপডাউন রিফ্রেশ করে (ক্যাটাগরি/সার্চ ফিল্টার সহ)
-  function bsRefreshHeroCardProductOptions(row, keepCurId){
-    const catSel = row.querySelector('.bs-hero-card-cat');
-    const searchInp = row.querySelector('.bs-hero-card-search');
-    const prodSel = row.querySelector('.bs-hero-card-product');
-    if(!prodSel) return;
-    const catSlug = catSel ? catSel.value : '';
-    const q = (searchInp ? searchInp.value : '').trim().toLowerCase();
-    const curId = keepCurId !== undefined ? keepCurId : prodSel.value;
-    let list = _bsHomeProducts;
-    if(catSlug) list = list.filter(p => p.categorySlug === catSlug);
-    if(q) list = list.filter(p => (p.name||'').toLowerCase().includes(q));
-    const limited = list.slice(0, 60); // পারফরম্যান্সের জন্য ড্রপডাউনে সর্বোচ্চ ৬০টা দেখানো হচ্ছে, সার্চ দিয়ে সংকুচিত করা যাবে
-    prodSel.innerHTML = '<option value="">— পণ্য বেছে নিন —</option>' +
-      limited.map(p => `<option value="${esc(p._id)}" ${String(p._id)===String(curId)?'selected':''}>${esc(p.name)} — ৳${p.now||0}</option>`).join('');
-    limited.forEach((p, idx) => { prodSel.options[idx+1].dataset.product = JSON.stringify(p); });
-  }
-
-  // Hero Side Card রো পুরোপুরি ওয়্যার করে: ক্যাটাগরি/সার্চ/প্রোডাক্ট সিলেক্ট + অটো-ফিল
-  function bsWireHeroCardRow(row){
-    if(!row || row.dataset.wired === '1') return;
-    row.dataset.wired = '1';
-    const catSel = row.querySelector('.bs-hero-card-cat');
-    const searchInp = row.querySelector('.bs-hero-card-search');
-    const prodSel = row.querySelector('.bs-hero-card-product');
-    if(catSel) bsPopulateCategorySelect(catSel);
-    const curId = prodSel ? prodSel.dataset.curId : '';
-    bsRefreshHeroCardProductOptions(row, curId);
-    if(catSel) catSel.addEventListener('change', () => bsRefreshHeroCardProductOptions(row));
-    if(searchInp) searchInp.addEventListener('input', () => bsRefreshHeroCardProductOptions(row));
-    if(prodSel) prodSel.addEventListener('change', function(){
-      const opt = this.options[this.selectedIndex];
-      if(!opt || !opt.dataset.product) return;
-      let p; try{ p = JSON.parse(opt.dataset.product); } catch(e){ return; }
-      const nameInp = row.querySelector('[data-hc-name]');
-      const nowInp = row.querySelector('[data-hc-now]');
-      const oldInp = row.querySelector('[data-hc-old]');
-      const imgHidden = row.querySelector('[data-hc-img]');
-      const imgPrev = row.querySelector('[data-hc-img-preview]');
-      const urlHidden = row.querySelector('[data-hc-url]');
-      const skuHidden = row.querySelector('[data-hc-sku]');
-      if(nameInp) nameInp.value = p.name || '';
-      if(nowInp) nowInp.value = p.now || '';
-      if(oldInp) oldInp.value = p.old || '';
-      if(imgHidden) imgHidden.value = p.img || '';
-      if(imgPrev){ if(p.img){ imgPrev.src = p.img; imgPrev.style.display=''; } else { imgPrev.style.display='none'; } }
-      if(urlHidden) urlHidden.value = p.detailPage || p.url || ('product-detail.html?id=' + (p.sku || p._id || ''));
-      if(skuHidden) skuHidden.value = p.sku || '';
-    });
-  }
-
-  // পেজ সেটিংস "Home" খোলা হলে ক্যাটাগরি ও প্রোডাক্ট ডেটা লোড করে সব রো ওয়্যার করে দেয়
-  function bsLoadHomeCatsAndProducts(){
-    fetchJSON('/categories').then(cats => {
-      _bsHomeCategories = Array.isArray(cats) ? cats : [];
-      document.querySelectorAll('.bs-hero-slide-cat').forEach(sel => bsPopulateCategorySelect(sel, '— ক্যাটাগরি বেছে নিন —'));
-      document.querySelectorAll('.bs-hero-card-cat').forEach(sel => bsPopulateCategorySelect(sel));
-    }).catch(() => {});
-    fetchJSON('/products?limit=1000').then(products => {
-      _bsHomeProducts = Array.isArray(products) ? products : (products.products || products.data || []);
-      document.querySelectorAll('#bsHomeHeroSideCards [data-hero-card-row]').forEach(row => bsWireHeroCardRow(row));
-    }).catch(() => {});
-  }
-
   function editPage(pageKey, current) {
     const c = current || {};
     const hero = c.hero || {};
@@ -2544,10 +2402,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       const revs = cnt.reviews || [];
       const news = cnt.newsletter || {};
       const hm = cnt.heroMain || {};
-      const heroSlidesData = cnt.heroSlides || [];
-      const heroSideCardsData = cnt.heroSideCards || [];
-      const heroSlideRowHTML = bsHeroSlideRowHTML;
-      const heroSideCardRowHTML = bsHeroSideCardRowHTML;
 
       const heroMainBlock = `
         <div style="background:#fff7ed;border:1px solid #fed7aa;padding:14px;margin:18px 0;border-radius:10px">
@@ -2615,8 +2469,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <div class="bs-home-tabs">
             <button type="button" data-home-tab-btn="general" onclick="bsSwitchHomeTab(this,'general')"><i class="fas fa-gear"></i> সাধারণ ও SEO</button>
             <button type="button" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
-            <button type="button" data-home-tab-btn="heroSlides" onclick="bsSwitchHomeTab(this,'heroSlides')"><i class="fas fa-images"></i> হিরো স্লাইড</button>
-            <button type="button" data-home-tab-btn="heroSideCards" onclick="bsSwitchHomeTab(this,'heroSideCards')"><i class="fas fa-tags"></i> Hero Side Cards</button>
+            <button type="button" data-home-tab-btn="heroslides" onclick="bsSwitchHomeTab(this,'heroslides')"><i class="fas fa-layer-group"></i> হিরো স্লাইড</button>
+            <button type="button" data-home-tab-btn="heroside" onclick="bsSwitchHomeTab(this,'heroside')"><i class="fas fa-th-large"></i> হিরো সাইড কার্ড</button>
             <button type="button" data-home-tab-btn="banners" onclick="bsSwitchHomeTab(this,'banners')"><i class="fas fa-images"></i> Promo Banners</button>
             <button type="button" data-home-tab-btn="deal" onclick="bsSwitchHomeTab(this,'deal')"><i class="fas fa-tag"></i> Deal of Month</button>
             <button type="button" data-home-tab-btn="why" onclick="bsSwitchHomeTab(this,'why')"><i class="fas fa-thumbs-up"></i> Why Choose Us</button>
@@ -2648,20 +2502,20 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             ${heroMainBlock}
           </div>
 
-          <div class="bs-home-panel" data-home-tab="heroSlides">
-            <h4 style="margin:0 0 4px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> হিরো স্লাইড (মূল ব্যানারের পাশে ঘুরতে থাকা স্লাইডসমূহ)</h4>
-            <p style="color:#64748b;font-size:12px;margin:0 0 12px">প্রতিটা স্লাইডের জন্য আলাদা ক্যাটাগরি বেছে নিন, নিজের ইমেজ আপলোড করুন এবং আকর্ষণ বাড়ানোর জন্য নিজের মতো টেক্সট লিখুন। কিছু যোগ না করলে অটোমেটিক ক্যাটাগরি স্লাইড দেখানো হবে।</p>
-            <div id="bsHomeHeroSlides">${heroSlidesData.map(heroSlideRowHTML).join('')}</div>
-            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSlide()"><i class="fas fa-plus"></i> নতুন স্লাইড যোগ</button>
+
+          <div class="bs-home-panel" data-home-tab="heroslides">
+            <h4 style="margin:0 0 4px;color:#14213D;font-size:15px"><i class="fas fa-layer-group" style="color:#FCA311"></i> হিরো স্লাইড ম্যানেজার</h4>
+            <p style="color:#64748b;font-size:12px;margin:0 0 14px">এখানে প্রতিটি স্লাইড যোগ/সম্পাদনা করুন। প্রতিটি স্লাইডে ক্যাটাগরি সিলেক্ট, ছবি আপলোড ও কাস্টম টেক্সট দেওয়া যাবে।</p>
+            <div id="bsHeroSlidesList"></div>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSlide()"><i class="fas fa-plus"></i> নতুন স্লাইড যোগ করুন</button>
           </div>
 
-          <div class="bs-home-panel" data-home-tab="heroSideCards">
-            <h4 style="margin:0 0 4px;color:#14213D;font-size:14px"><i class="fas fa-tags" style="color:#FCA311"></i> Hero Side Cards (মূল ব্যানারের পাশের ছোট কার্ড)</h4>
-            <p style="color:#64748b;font-size:12px;margin:0 0 12px">ক্যাটাগরি অনুযায়ী পণ্য খুঁজে সিলেক্ট করুন — দাম ও ছবি পণ্য থেকে অটো-ফিল হবে। কাস্টম টেক্সট লিখুন (সীমিত অক্ষরে)। কার্ডে ক্লিক করলে সরাসরি ওই পণ্যের বিস্তারিত পেজে যাবে।</p>
-            <div id="bsHomeHeroSideCards">${heroSideCardsData.map(heroSideCardRowHTML).join('')}</div>
-            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSideCard()"><i class="fas fa-plus"></i> নতুন কার্ড যোগ</button>
+          <div class="bs-home-panel" data-home-tab="heroside">
+            <h4 style="margin:0 0 4px;color:#14213D;font-size:15px"><i class="fas fa-th-large" style="color:#FCA311"></i> হিরো সাইড কার্ড (ডানপাশের ২টি কার্ড)</h4>
+            <p style="color:#64748b;font-size:12px;margin:0 0 14px">হোমপেজের হিরো সেকশনের ডানপাশে দুটি পণ্য কার্ড। পণ্য সার্চ করে সিলেক্ট করুন — দাম ও ছবি স্বয়ংক্রিয়ভাবে যোগ হবে।</p>
+            <div id="bsHeroSideList"></div>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSideCard()" id="bsAddHeroSideBtn"><i class="fas fa-plus"></i> নতুন সাইড কার্ড যোগ</button>
           </div>
-
           <div class="bs-home-panel" data-home-tab="banners">
             <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> Promo Banners</h4>
             <div id="bsHomeBanners">${bannerRows}</div>
@@ -2820,6 +2674,11 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     `;
 
     if (pageKey === 'home') {
+      // Load hero slides panel
+      bsRenderHeroSlides(cnt.heroSlides || []);
+      // Load hero side cards panel
+      bsRenderHeroSideCards(cnt.heroSideCards || []);
+
       const ftBody = document.getElementById('bsHomeFilterTabsBody');
       if (ftBody) {
         fetchJSON('/filter-tabs').then(tabs => {
@@ -2833,8 +2692,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">কোনো ট্যাব নেই — "নতুন Tab" দিয়ে যোগ করুন</td></tr>';
         }).catch(() => { ftBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:16px">Filter Tabs লোড করা যায়নি</td></tr>'; });
       }
-      // হিরো স্লাইড ও Hero Side Cards ট্যাবের ক্যাটাগরি/প্রোডাক্ট ড্রপডাউন লোড ও ওয়্যার করা
-      bsLoadHomeCatsAndProducts();
     }
 
     document.getElementById('bsExtPageForm').onsubmit = async (e) => {
@@ -2898,6 +2755,30 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           btnLink: document.getElementById('bsHeroBtnLink')?.value || 'shop.html',
           img: document.getElementById('bsHeroImg')?.value || '',
         };
+        // Save heroSlides
+        content.heroSlides = Array.from(document.querySelectorAll('#bsHeroSlidesList [data-slide-row]')).map(row => ({
+          catSlug: row.querySelector('[data-hs-cat]')?.value || '',
+          catName: row.querySelector('[data-hs-catname]')?.value || '',
+          tag: row.querySelector('[data-hs-tag]')?.value || '',
+          title: row.querySelector('[data-hs-title]')?.value || '',
+          text: row.querySelector('[data-hs-text]')?.value || '',
+          img: row.querySelector('[data-hs-img]')?.value || '',
+          btnText: row.querySelector('[data-hs-btntext]')?.value || 'Shop Now',
+          btnLink: row.querySelector('[data-hs-btnlink]')?.value || '',
+        }));
+        // Save heroSideCards
+        content.heroSideCards = Array.from(document.querySelectorAll('#bsHeroSideList [data-hsc-row]')).map(row => ({
+          productId: row.querySelector('[data-hsc-pid]')?.value || '',
+          productName: row.querySelector('[data-hsc-pname]')?.value || '',
+          style: row.querySelector('[data-hsc-style]')?.value || 'amber',
+          discount: row.querySelector('[data-hsc-discount]')?.value || '',
+          title: row.querySelector('[data-hsc-title]')?.value || '',
+          text: row.querySelector('[data-hsc-text]')?.value || '',
+          price: row.querySelector('[data-hsc-price]')?.value || '',
+          img: row.querySelector('[data-hsc-img]')?.value || '',
+          btnText: row.querySelector('[data-hsc-btntext]')?.value || 'শপনাও',
+          btnLink: row.querySelector('[data-hsc-btnlink]')?.value || '',
+        }));
 
         const ftRows = document.querySelectorAll('#filterTabsTable tbody tr[data-idx]');
         if (ftRows.length || document.getElementById('filterTabsTable')) {
@@ -2929,6 +2810,233 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
   }
 
   
+// ── Hero Slides Manager ──────────────────────────────────────────────
+function bsGetAllCategories(){
+  // Get categories from BSAdmin (already loaded in page)
+  if(window.BSAdmin && typeof BSAdmin.getCategories === 'function') return BSAdmin.getCategories() || [];
+  return [];
+}
+
+function bsRenderHeroSlides(slides){
+  const wrap = document.getElementById('bsHeroSlidesList');
+  if(!wrap) return;
+  if(!slides || !slides.length){ wrap.innerHTML = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">কোনো স্লাইড নেই — নিচের বাটন দিয়ে যোগ করুন।</p>'; return; }
+  wrap.innerHTML = '';
+  slides.forEach(function(s, i){ bsAddHeroSlide(s, i); });
+}
+
+window.bsAddHeroSlide = function(data, idx){
+  const wrap = document.getElementById('bsHeroSlidesList');
+  if(!wrap) return;
+  const i = idx !== undefined ? idx : wrap.querySelectorAll('[data-slide-row]').length;
+  const s = data || {};
+  const cats = bsGetAllCategories();
+  const catOptions = cats.map(c => `<option value="${esc(c.slug)}" data-name="${esc(c.name)}" ${s.catSlug===c.slug?'selected':''}>${esc(c.name)}</option>`).join('');
+  const div = document.createElement('div');
+  div.setAttribute('data-slide-row', i);
+  div.style.cssText = 'border:1px solid #e2e8f0;padding:14px;margin-bottom:10px;background:#fff;border-radius:8px;position:relative';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <b style="color:#14213D;font-size:13px"><i class="fas fa-layer-group" style="color:#FCA311"></i> স্লাইড ${i+1}</b>
+      <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-slide-row]').remove()"><i class="fas fa-trash"></i> মুছুন</button>
+    </div>
+    <div class="row">
+      <label style="flex:1">ক্যাটাগরি সিলেক্ট করুন
+        <select data-hs-cat onchange="bsHeroSlideOnCatChange(this)" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px">
+          <option value="">— ক্যাটাগরি বেছে নিন —</option>
+          ${catOptions}
+        </select>
+        <input type="hidden" data-hs-catname value="${esc(s.catName||'')}"/>
+      </label>
+      <label style="flex:1">ট্যাগ/লেবেল (সর্বোচ্চ ২০ অক্ষর)
+        <input data-hs-tag value="${esc(s.tag||'')}" maxlength="20" placeholder="যেমন: নতুন সংযোজন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+    </div>
+    <label>স্লাইড শিরোনাম (সর্বোচ্চ ৫০ অক্ষর)
+      <input data-hs-title value="${esc(s.title||'')}" maxlength="50" placeholder="যেমন: প্রিমিয়াম সিলিং ফ্যান কালেকশন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+    </label>
+    <label>সংক্ষিপ্ত বিবরণ (সর্বোচ্চ ১২০ অক্ষর)
+      <textarea data-hs-text maxlength="120" rows="2" placeholder="পণ্যের বিবরণ বা আকর্ষণীয় তথ্য দিন..." style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px;resize:vertical">${esc(s.text||'')}</textarea>
+    </label>
+    <div class="row">
+      <label style="flex:1">বাটন টেক্সট
+        <input data-hs-btntext value="${esc(s.btnText||'Shop Now')}" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+      <label style="flex:1">বাটন লিংক (URL)
+        <input data-hs-btnlink value="${esc(s.btnLink||'')}" placeholder="shop.html?category=slug বা পণ্যের পেজ" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+    </div>
+    <label>স্লাইড ছবি
+      <input type="text" id="bsHsImg_${i}" data-hs-img value="${esc(s.img||'')}" placeholder="ছবি আপলোড করুন বা URL দিন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      ${s.img ? `<img data-prev="bsHsImg_${i}" src="${esc(s.img)}" style="display:block;width:120px;height:80px;object-fit:cover;margin-top:6px;border-radius:6px;border:1px solid #e2e8f0"/>` : `<img data-prev="bsHsImg_${i}" style="display:none;width:120px;height:80px;object-fit:cover;margin-top:6px;border-radius:6px"/>`}
+    </label>
+    <div class="bs-dropzone" style="margin-top:6px;padding:10px;text-align:center;border:2px dashed #e2e8f0;border-radius:6px;cursor:pointer;font-size:13px;color:#64748b"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="bsDropHandler(event,'bsHsImg_${i}')"
+      onclick="this.querySelector('input').click()">
+      <i class="fas fa-cloud-upload-alt"></i> ছবি টেনে এনে ছাড়ুন বা ক্লিক করুন
+      <input type="file" accept="image/*" style="display:none" onchange="bsUploadImageFile(this.files[0],'bsHsImg_${i}')"/>
+    </div>`;
+  wrap.appendChild(div);
+};
+
+window.bsHeroSlideOnCatChange = function(sel){
+  const row = sel.closest('[data-slide-row]');
+  if(!row) return;
+  const opt = sel.options[sel.selectedIndex];
+  const catName = opt ? opt.dataset.name || opt.text : '';
+  const nameInput = row.querySelector('[data-hs-catname]');
+  if(nameInput) nameInput.value = catName;
+  // Auto-fill btnLink
+  const slug = sel.value;
+  const btnLink = row.querySelector('[data-hs-btnlink]');
+  if(btnLink && slug) btnLink.value = 'shop.html?category=' + slug;
+  // Auto-fill title if empty
+  const titleInp = row.querySelector('[data-hs-title]');
+  if(titleInp && !titleInp.value && catName) titleInp.value = catName + ' কালেকশন';
+};
+
+
+// ── Hero Side Card Manager ───────────────────────────────────────────
+function bsRenderHeroSideCards(cards){
+  const wrap = document.getElementById('bsHeroSideList');
+  if(!wrap) return;
+  if(!cards || !cards.length){ wrap.innerHTML = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">কোনো সাইড কার্ড নেই — নিচের বাটন দিয়ে যোগ করুন।</p>'; return; }
+  wrap.innerHTML = '';
+  cards.forEach(function(c, i){ bsAddHeroSideCard(c); });
+  // Update add button state
+  const addBtn = document.getElementById('bsAddHeroSideBtn');
+  if(addBtn) addBtn.style.display = (wrap.querySelectorAll('[data-hsc-row]').length >= 2) ? 'none' : '';
+}
+
+window.bsAddHeroSideCard = function(data){
+  const wrap = document.getElementById('bsHeroSideList');
+  if(!wrap) return;
+  if(wrap.querySelectorAll('[data-hsc-row]').length >= 2){ toast('সর্বোচ্চ ২টি সাইড কার্ড যোগ করা যাবে', 'err'); return; }
+  const i = wrap.querySelectorAll('[data-hsc-row]').length;
+  const sc = data || {};
+  // Get all products for dropdown
+  const products = (window.BSAdmin && typeof BSAdmin.getProducts==='function') ? BSAdmin.getProducts() : [];
+  // Group by category
+  const catMap = {};
+  products.forEach(function(p){
+    const cname = p.cat || p.categoryName || 'অন্যান্য';
+    if(!catMap[cname]) catMap[cname] = [];
+    catMap[cname].push(p);
+  });
+  let optHtml = '<option value="">— পণ্য সার্চ করুন বা বেছে নিন —</option>';
+  Object.keys(catMap).sort().forEach(function(cname){
+    optHtml += '<optgroup label="' + esc(cname) + '">';
+    catMap[cname].forEach(function(p){
+      const pid = String(p._id || p.id || p.sku || '');
+      const sel = sc.productId && String(sc.productId) === pid ? ' selected' : '';
+      optHtml += '<option value="' + esc(pid) + '" data-name="' + esc(p.name||'') + '" data-price="' + esc(String(p.now||p.price||'')) + '" data-img="' + esc(p.img||'') + '" data-url="' + esc(p.url||p.detailPage||('product-detail.html?id='+(p.sku||p.id||''))) + '"' + sel + '>' + esc(p.name||'') + (p.now ? ' — ৳'+p.now : '') + '</option>';
+    });
+    optHtml += '</optgroup>';
+  });
+
+  const div = document.createElement('div');
+  div.setAttribute('data-hsc-row', i);
+  div.style.cssText = 'border:1px solid #e2e8f0;padding:14px;margin-bottom:12px;background:#fff;border-radius:8px';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <b style="color:#14213D;font-size:13px"><i class="fas fa-th-large" style="color:#FCA311"></i> সাইড কার্ড ${i+1}</b>
+      <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-hsc-row]').remove();document.getElementById('bsAddHeroSideBtn').style.display=''"><i class="fas fa-trash"></i> মুছুন</button>
+    </div>
+
+    <label>পণ্য সিলেক্ট করুন (ক্যাটাগরি অনুযায়ী)
+      <select data-hsc-pid onchange="bsHeroSideOnProductChange(this)" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px">
+        ${optHtml}
+      </select>
+    </label>
+    <input type="hidden" data-hsc-pname value="${esc(sc.productName||'')}"/>
+
+    <div class="row" style="margin-top:10px">
+      <label style="flex:1">কার্ড স্টাইল
+        <select data-hsc-style style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px">
+          <option value="amber" ${sc.style!=='dark'?'selected':''}>Amber (হলুদ)</option>
+          <option value="dark" ${sc.style==='dark'?'selected':''}>Dark (নীল)</option>
+        </select>
+      </label>
+      <label style="flex:1">ডিসকাউন্ট/ব্যাজ টেক্সট
+        <input data-hsc-discount value="${esc(sc.discount||'')}" maxlength="15" placeholder="যেমন: 25% OFF" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+    </div>
+
+    <label>কার্ড শিরোনাম (সর্বোচ্চ ৫০ অক্ষর)
+      <input data-hsc-title value="${esc(sc.title||sc.productName||'')}" maxlength="50" placeholder="পণ্যের নাম বা শিরোনাম" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+    </label>
+    <label>সংক্ষিপ্ত টেক্সট (সর্বোচ্চ ৮০ অক্ষর)
+      <input data-hsc-text value="${esc(sc.text||'')}" maxlength="80" placeholder="যেমন: রিচার্জেবল, ৩ স্পিড, LED লাইট সহ" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+    </label>
+
+    <div class="row">
+      <label style="flex:1">মূল্য (স্বয়ংক্রিয় বা ম্যানুয়াল)
+        <input data-hsc-price value="${esc(sc.price||'')}" placeholder="৳ 2150 (পণ্য সিলেক্ট করলে স্বয়ং যোগ হবে)" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+      <label style="flex:1">বাটন টেক্সট
+        <input data-hsc-btntext value="${esc(sc.btnText||'শপনাও')}" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      </label>
+    </div>
+
+    <label>পণ্যের লিংক (বাটনে ক্লিক করলে এখানে যাবে)
+      <input data-hsc-btnlink value="${esc(sc.btnLink||'')}" placeholder="পণ্য সিলেক্ট করলে স্বয়ংক্রিয়ভাবে যোগ হবে" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+    </label>
+
+    <label>পণ্যের ছবি URL
+      <input type="text" id="bsHscImg_${i}" data-hsc-img value="${esc(sc.img||'')}" placeholder="পণ্য সিলেক্ট করলে স্বয়ং যোগ হবে, অথবা ম্যানুয়ালি দিন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
+      ${sc.img ? `<img data-prev="bsHscImg_${i}" src="${esc(sc.img)}" style="display:block;width:100px;height:70px;object-fit:cover;margin-top:6px;border-radius:6px;border:1px solid #e2e8f0"/>` : `<img data-prev="bsHscImg_${i}" style="display:none;width:100px;height:70px;object-fit:cover;margin-top:6px;border-radius:6px"/>`}
+    </label>
+    <div class="bs-dropzone" style="margin-top:6px;padding:10px;text-align:center;border:2px dashed #e2e8f0;border-radius:6px;cursor:pointer;font-size:13px;color:#64748b"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="bsDropHandler(event,'bsHscImg_${i}')"
+      onclick="this.querySelector('input').click()">
+      <i class="fas fa-cloud-upload-alt"></i> ছবি টেনে আনুন বা ক্লিক করুন
+      <input type="file" accept="image/*" style="display:none" onchange="bsUploadImageFile(this.files[0],'bsHscImg_${i}')"/>
+    </div>`;
+  wrap.appendChild(div);
+  // Hide add button if 2 cards reached
+  const addBtn = document.getElementById('bsAddHeroSideBtn');
+  if(addBtn) addBtn.style.display = (wrap.querySelectorAll('[data-hsc-row]').length >= 2) ? 'none' : '';
+};
+
+window.bsHeroSideOnProductChange = function(sel){
+  const row = sel.closest('[data-hsc-row]');
+  if(!row) return;
+  const opt = sel.options[sel.selectedIndex];
+  if(!opt || !opt.value) return;
+  const pname = opt.dataset.name || '';
+  const price = opt.dataset.price || '';
+  const img = opt.dataset.img || '';
+  const url = opt.dataset.url || '';
+  // Update hidden name
+  const nameInp = row.querySelector('[data-hsc-pname]');
+  if(nameInp) nameInp.value = pname;
+  // Auto-fill title if empty
+  const titleInp = row.querySelector('[data-hsc-title]');
+  if(titleInp && (!titleInp.value || titleInp.value === titleInp.getAttribute('data-autofill'))) {
+    titleInp.value = pname;
+    titleInp.setAttribute('data-autofill', pname);
+  }
+  // Auto-fill price
+  const priceInp = row.querySelector('[data-hsc-price]');
+  if(priceInp && price) priceInp.value = '৳ ' + Number(price).toLocaleString('en-IN');
+  // Auto-fill image
+  const imgIdx = row.getAttribute('data-hsc-row');
+  const imgInp = document.getElementById('bsHscImg_' + imgIdx) || row.querySelector('[data-hsc-img]');
+  if(imgInp && img) {
+    imgInp.value = img;
+    const prev = document.querySelector('[data-prev="bsHscImg_' + imgIdx + '"]');
+    if(prev){ prev.src = img; prev.style.display = 'block'; }
+  }
+  // Auto-fill link
+  const linkInp = row.querySelector('[data-hsc-btnlink]');
+  if(linkInp && url) linkInp.value = url;
+};
+
+
 // ── Promo Banner (Hero Card) Manager ─────────────────────────────────
 function bsRenderPromos(banners){
   var c = document.getElementById('bsPromoContainer');
@@ -4103,7 +4211,7 @@ async function resetAllProductPlacementsToShopOnly(){
 
   function isShopOnly(p){
     const pl = p.placements||{};
-    return pl.shop===true && !pl.homePopular && !pl.homeBestseller && !pl.homeNew && !pl.homeFeatured;
+    return pl.shop===true && !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
   }
 
   const needCount = products.filter(function(p){ return !isShopOnly(p); }).length;
@@ -4121,7 +4229,7 @@ async function resetAllProductPlacementsToShopOnly(){
     done++;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপডেট হচ্ছে... ('+done+'/'+needCount+')';
     try{
-      const body = Object.assign({}, p, {placements:{shop:true, homePopular:false, homeBestseller:false, homeNew:false, homeFeatured:false}});
+      const body = Object.assign({}, p, {placements:{shop:true, homePopular:false, homeBestseller:false, homeNew:false}});
       delete body._id; delete body.__v;
       const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
       if(r && r.ok) ok++; else fail++;
@@ -4145,7 +4253,7 @@ async function disableAllHomePlacements(){
 
   function homeAlreadyOff(p){
     const pl = p.placements||{};
-    return !pl.homePopular && !pl.homeBestseller && !pl.homeNew && !pl.homeFeatured;
+    return !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
   }
 
   const needCount = products.filter(function(p){ return !homeAlreadyOff(p); }).length;
@@ -4168,8 +4276,7 @@ async function disableAllHomePlacements(){
         shop: existingPl.shop===true,
         homePopular:false,
         homeBestseller:false,
-        homeNew:false,
-        homeFeatured:false
+        homeNew:false
       }});
       delete body._id; delete body.__v;
       const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});

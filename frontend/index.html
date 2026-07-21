@@ -333,6 +333,13 @@ ul{list-style:none}
 .floating-cart span.label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;writing-mode:vertical-rl}
 
 
+
+/* Hero Slider Arrow Buttons */
+.hero-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:4;background:rgba(255,255,255,0.18);border:none;color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .2s,transform .2s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.hero-arrow:hover{background:rgba(252,163,17,0.7);transform:translateY(-50%) scale(1.08)}
+.hero-arrow.prev{left:12px}
+.hero-arrow.next{right:12px}
+@media(max-width:480px){.hero-arrow{width:32px;height:32px;font-size:13px}.hero-arrow.prev{left:6px}.hero-arrow.next{right:6px}}
 /* ============ HERO ============ */
 .hero{padding:18px 0}
 .hero-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
@@ -978,6 +985,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
         <i class="fas fa-fan hero-icon-deco i1"></i>
         <i class="fas fa-bolt hero-icon-deco i2"></i>
         <i class="fas fa-plug hero-icon-deco i3"></i>
+        <button type="button" class="hero-arrow prev" id="heroPrev" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
         <div class="hero-slides" id="heroSlides">
           <div class="hero-slide active" data-slide="0">
             <div class="hero-content">
@@ -997,6 +1005,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
           <!-- একটি করে ক্যাটাগরি স্লাইড এখানে JS দিয়ে যোগ হবে (দেখুন heroSlider স্ক্রিপ্ট) -->
         </div>
         <div class="hero-dots" id="heroDots"></div>
+        <button type="button" class="hero-arrow next" id="heroNext" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
       </div>
       <div class="hero-side" id="heroSideCards">
         <a class="hero-card amber fade-in" href="product-jy2570.html">
@@ -1299,6 +1308,29 @@ buildHeroSlider(categories);
   if(!heroMainEl) return;
   heroMainEl.addEventListener('mouseenter', function(){ if(heroAutoplayTimer) clearInterval(heroAutoplayTimer); });
   heroMainEl.addEventListener('mouseleave', restartHeroAutoplay);
+
+  // Arrow buttons
+  const prevBtn = document.getElementById('heroPrev');
+  const nextBtn = document.getElementById('heroNext');
+  if(prevBtn) prevBtn.addEventListener('click', function(){ showHeroSlide(heroSlideIndex - 1); restartHeroAutoplay(); });
+  if(nextBtn) nextBtn.addEventListener('click', function(){ showHeroSlide(heroSlideIndex + 1); restartHeroAutoplay(); });
+
+  // Touch/swipe support
+  let _tsX = null, _tsY = null;
+  heroMainEl.addEventListener('touchstart', function(e){
+    if(e.touches.length === 1){ _tsX = e.touches[0].clientX; _tsY = e.touches[0].clientY; }
+  }, {passive:true});
+  heroMainEl.addEventListener('touchend', function(e){
+    if(_tsX === null) return;
+    const dx = e.changedTouches[0].clientX - _tsX;
+    const dy = e.changedTouches[0].clientY - _tsY;
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){
+      if(dx < 0) showHeroSlide(heroSlideIndex + 1);
+      else showHeroSlide(heroSlideIndex - 1);
+      restartHeroAutoplay();
+    }
+    _tsX = null; _tsY = null;
+  }, {passive:true});
 })();
 
 // অ্যাডমিন প্যানেল থেকে ব্যাকএন্ডের আসল ডেটা এলে ক্যাটাগরি ও ফিচার্ড প্রোডাক্টের
@@ -1439,12 +1471,15 @@ function buildCatalogPool(){
   _catalogPool = list.map(toCardProduct);
 }
 function filterCatalogPool(filterValue){
-  if (!filterValue || filterValue === 'all') return _catalogPool;
+  // Only show products that have homeProduct placement approved by admin
+  const homeProd = _catalogPool.filter(p => p.placements && p.placements.homeProduct);
+  const pool = homeProd.length ? homeProd : _catalogPool;
+  if (!filterValue || filterValue === 'all') return pool;
   if (filterValue.startsWith('cat:')) {
     const slug = filterValue.slice(4);
-    return _catalogPool.filter(p => p.categorySlug === slug);
+    return pool.filter(p => p.categorySlug === slug);
   }
-  return _catalogPool.filter(p => p.placements && p.placements[filterValue]);
+  return pool.filter(p => p.placements && p.placements[filterValue]);
 }
 function applyFilterTab(filterValue){
   _activeFilterTab = filterValue;
@@ -1560,23 +1595,84 @@ function renderHomeSections(){
         }
       }
 
-      // Update hero-side promo cards from admin promoBanners
-      if (Array.isArray(c.promoBanners) && c.promoBanners.length) {
+      // ── Hero Slides (from admin hero slides settings) ──────────────────
+      if (Array.isArray(c.heroSlides) && c.heroSlides.length) {
+        const slidesWrap = document.getElementById('heroSlides');
+        const dotsWrap = document.getElementById('heroDots');
+        if (slidesWrap) {
+          // Remove old category slides, keep slide[0]
+          slidesWrap.querySelectorAll('.hero-slide[data-cat]').forEach(function(el){ el.remove(); });
+          // Replace slide0 with admin hero slides
+          const adminSlidesHtml = c.heroSlides.map(function(s, si) {
+            const imgHtml = s.img ? `<img loading="lazy" src="${s.img}" alt="${s.title||''}"/>` : `<div class="hero-img-fallback"><i class="fas fa-fan"></i></div>`;
+            return `<div class="hero-slide${si===0?' active':''}" data-cat="${s.catSlug||'custom-'+si}">
+              <div class="hero-content">
+                ${s.tag ? `<span class="tag">${s.tag}</span>` : ''}
+                <h1>${s.title||''}</h1>
+                ${s.text ? `<p>${s.text}</p>` : ''}
+                <a href="${s.btnLink||'shop.html'}" class="btn btn-accent">${s.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></a>
+              </div>
+              <div class="hero-img">${imgHtml}</div>
+            </div>`;
+          }).join('');
+          // Remove the first static slide and replace with admin slides
+          const staticSlide = slidesWrap.querySelector('.hero-slide[data-slide="0"]');
+          if (staticSlide) staticSlide.remove();
+          slidesWrap.innerHTML = adminSlidesHtml;
+          // Rebuild dots
+          const slides = slidesWrap.querySelectorAll('.hero-slide');
+          if (dotsWrap) {
+            dotsWrap.innerHTML = Array.from(slides).map(function(_, idx){
+              return `<button type="button" class="hero-dot${idx===0?' active':''}" data-i="${idx}" aria-label="Slide ${idx+1}"></button>`;
+            }).join('');
+            dotsWrap.querySelectorAll('.hero-dot').forEach(function(dot){
+              dot.addEventListener('click', function(){ goToHeroSlide(Number(this.dataset.i)); });
+            });
+          }
+          heroSlideIndex = 0;
+          restartHeroAutoplay();
+        }
+      }
+
+      // ── Hero Side Cards (from admin heroSideCards settings) ───────────
+      if (Array.isArray(c.heroSideCards) && c.heroSideCards.length) {
         const heroSide = document.getElementById('heroSideCards');
         if (heroSide) {
-          const styleMap = ['amber','dark'];
-          heroSide.innerHTML = c.promoBanners.slice(0,2).map((b, i) => {
-            const styleClass = b.style || styleMap[i % 2];
-            return `<a class="hero-card ${styleClass} fade-in" href="${b.btnLink||'shop.html'}">
+          heroSide.innerHTML = c.heroSideCards.slice(0,2).map(function(sc, si) {
+            const styleClass = sc.style || (si===0 ? 'amber' : 'dark');
+            const link = sc.btnLink || (sc.productId ? 'product-detail.html?id=' + sc.productId : 'shop.html');
+            return `<a class="hero-card ${styleClass} fade-in" href="${link}">
               <div class="hero-card-body">
-                ${b.discount||b.highlight ? `<span class="discount">${b.discount||b.highlight}</span>` : ''}
-                <h3>${b.title||''}</h3>
-                <span>${b.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></span>
+                ${sc.discount ? `<span class="discount">${sc.discount}</span>` : ''}
+                <h3>${sc.title||sc.productName||''}</h3>
+                ${sc.text ? `<p style="font-size:11px;opacity:.9;margin-bottom:6px">${sc.text}</p>` : ''}
+                ${sc.price ? `<p style="font-size:12px;font-weight:700;opacity:.95;margin-bottom:6px">${sc.price}</p>` : ''}
+                <span>${sc.btnText||'শপনাও'} <i class="fas fa-arrow-right"></i></span>
               </div>
-              ${b.img ? `<img class="hero-card-img" loading="lazy" src="${b.img}" alt="${b.title||''}"/>` : ''}
+              ${sc.img ? `<img class="hero-card-img" loading="lazy" src="${sc.img}" alt="${sc.title||sc.productName||''}"/>` : ''}
             </a>`;
           }).join('');
           observeFadeIns();
+        }
+      } else {
+        // Fallback: Update hero-side from promoBanners (old behavior)
+        if (Array.isArray(c.promoBanners) && c.promoBanners.length) {
+          const heroSide = document.getElementById('heroSideCards');
+          if (heroSide) {
+            const styleMap = ['amber','dark'];
+            heroSide.innerHTML = c.promoBanners.slice(0,2).map(function(b, i) {
+              const styleClass = b.style || styleMap[i % 2];
+              return `<a class="hero-card ${styleClass} fade-in" href="${b.btnLink||'shop.html'}">
+                <div class="hero-card-body">
+                  ${b.discount||b.highlight ? `<span class="discount">${b.discount||b.highlight}</span>` : ''}
+                  <h3>${b.title||''}</h3>
+                  <span>${b.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></span>
+                </div>
+                ${b.img ? `<img class="hero-card-img" loading="lazy" src="${b.img}" alt="${b.title||''}"/>` : ''}
+              </a>`;
+            }).join('');
+            observeFadeIns();
+          }
         }
       }
 
