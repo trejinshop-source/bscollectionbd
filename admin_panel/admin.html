@@ -982,6 +982,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           <label><input type="checkbox" id="pPlPop"> হোম — জনপ্রিয় পন্য</label>
           <label><input type="checkbox" id="pPlBest"> হোম — সেরা বিক্রিত</label>
           <label><input type="checkbox" id="pPlNew"> হোম — নতুন পন্য</label>
+          <label><input type="checkbox" id="pPlFeatured"> হোম — ফিচার্ড প্রোডাক্টস</label>
         </div>
       </div>
     </div>
@@ -1542,7 +1543,7 @@ function openProductModal(id){
     document.getElementById('pCatSlug').value='';
     document.getElementById('pImgPreview').classList.remove('show');
     document.getElementById('pImgFile').value='';
-    ['pPlShop','pPlPop','pPlBest','pPlNew'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
+    ['pPlShop','pPlPop','pPlBest','pPlNew','pPlFeatured'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
   } else {
     const p = allProducts.find(x=>x._id===id);
     if(p){
@@ -1559,6 +1560,7 @@ function openProductModal(id){
       const plPop=document.getElementById('pPlPop'); if(plPop) plPop.checked=!!placements.homePopular;
       const plBest=document.getElementById('pPlBest'); if(plBest) plBest.checked=!!placements.homeBestseller;
       const plNew=document.getElementById('pPlNew'); if(plNew) plNew.checked=!!placements.homeNew;
+      const plFeatured=document.getElementById('pPlFeatured'); if(plFeatured) plFeatured.checked=!!placements.homeFeatured;
       if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').classList.add('show'); }
       else document.getElementById('pImgPreview').classList.remove('show');
     }
@@ -1682,6 +1684,7 @@ document.getElementById('productModalSave').addEventListener('click', async ()=>
       homePopular:document.getElementById('pPlPop')?.checked||false,
       homeBestseller:document.getElementById('pPlBest')?.checked||false,
       homeNew:document.getElementById('pPlNew')?.checked||false,
+      homeFeatured:document.getElementById('pPlFeatured')?.checked||false,
     },
   };
   const editId = document.getElementById('pEditId').value;
@@ -2372,6 +2375,148 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       '<img data-prev="' + targetId + '" src="' + (curImg || '') + '" class="bs-drop-prev" style="' + (curImg ? '' : 'display:none') + '"/>';
   };
 
+  // ── হিরো স্লাইড ও Hero Side Cards — সাধারণ ডেটা ক্যাশ + রো টেমপ্লেট ──────────
+  const HERO_SLIDE_TEXT_LIMIT = 120;
+  const HERO_CARD_TEXT_LIMIT = 60;
+  let _bsHomeCategories = [];
+  let _bsHomeProducts = [];
+
+  function bsHeroSlideRowHTML(s, i){
+    s = s || {};
+    const textLen = (s.text||'').length;
+    return `
+    <div class="bs-ext-panel" style="margin-bottom:10px" data-hero-slide-row="${i}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:#14213D;font-size:13px">স্লাইড ${i+1}</b>
+        <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-hero-slide-row]').remove()"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="row">
+        <label>ক্যাটাগরি <select class="bs-hero-slide-cat" data-hs-category data-cur="${esc(s.category||'')}"><option value="">— ক্যাটাগরি লোড হচ্ছে —</option></select></label>
+        <label>ট্যাগ/লেবেল <input data-hs-tag value="${esc(s.tag||'')}" placeholder="ক্যাটাগরি"/></label>
+      </div>
+      <label>টাইটেল <input data-hs-title value="${esc(s.title||'')}"/></label>
+      <label>বিবরণ (আকর্ষণীয় টেক্সট)
+        <textarea data-hs-text rows="2" maxlength="${HERO_SLIDE_TEXT_LIMIT}" oninput="this.nextElementSibling.textContent=this.value.length+'/'+${HERO_SLIDE_TEXT_LIMIT}">${esc(s.text||'')}</textarea>
+        <small class="bs-char-count" style="color:#94a3b8;font-size:11px">${textLen}/${HERO_SLIDE_TEXT_LIMIT}</small>
+      </label>
+      <div class="row">
+        <label>বাটন টেক্সট <input data-hs-btntext value="${esc(s.btnText||'Shop Now')}"/></label>
+        <label>বাটন লিংক (খালি রাখলে ক্যাটাগরি অনুযায়ী অটো) <input data-hs-btnlink value="${esc(s.btnLink||'')}"/></label>
+      </div>
+      <label>ছবি (ম্যানুয়ালি আপলোড করুন) <input id="bsHSImg_${i}" data-hs-img value="${esc(s.img||'')}"/>${bsDzHtml('bsHSImg_'+i, s.img)}</label>
+    </div>`;
+  }
+
+  function bsHeroSideCardRowHTML(cd, i){
+    cd = cd || {};
+    const textLen = (cd.text||'').length;
+    return `
+    <div class="bs-ext-panel" style="margin-bottom:10px" data-hero-card-row="${i}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:#14213D;font-size:13px">কার্ড ${i+1}</b>
+        <button type="button" class="bs-ext-btn danger" onclick="this.closest('[data-hero-card-row]').remove()"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="row">
+        <label>ক্যাটাগরি (পণ্য ফিল্টার করতে) <select class="bs-hero-card-cat" data-hc-category data-cur="${esc(cd.categorySlug||'')}"><option value="">— সব ক্যাটাগরি —</option></select></label>
+        <label>পণ্য খুঁজুন ও সিলেক্ট করুন
+          <input type="text" class="bs-hero-card-search" data-hc-search placeholder="পণ্যের নাম লিখুন..." autocomplete="off"/>
+          <select class="bs-hero-card-product" data-hc-product data-cur-id="${esc(cd.productId||'')}" style="margin-top:4px"><option value="">— পণ্য লোড হচ্ছে —</option></select>
+        </label>
+      </div>
+      <div class="row">
+        <label>নাম (অটো-ফিল, প্রয়োজনে বদলান) <input data-hc-name value="${esc(cd.name||'')}"/></label>
+        <label>ডিসকাউন্ট/ব্যাজ (ঐচ্ছিক) <input data-hc-discount value="${esc(cd.discount||'')}" placeholder="যেমন: 25% OFF"/></label>
+      </div>
+      <div class="row">
+        <label>বর্তমান মূল্য (অটো-ফিল) <input data-hc-now value="${esc(cd.now||'')}"/></label>
+        <label>পুরনো মূল্য (অটো-ফিল) <input data-hc-old value="${esc(cd.old||'')}"/></label>
+      </div>
+      <label>কাস্টম টেক্সট (আকর্ষণ বাড়াতে)
+        <input data-hc-text value="${esc(cd.text||'')}" maxlength="${HERO_CARD_TEXT_LIMIT}" oninput="this.nextElementSibling.textContent=this.value.length+'/'+${HERO_CARD_TEXT_LIMIT}"/>
+        <small class="bs-char-count" style="color:#94a3b8;font-size:11px">${textLen}/${HERO_CARD_TEXT_LIMIT}</small>
+      </label>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+        <img data-hc-img-preview src="${esc(cd.img||'')}" style="width:56px;height:56px;object-fit:cover;border:1px solid #e2e8f0;${cd.img?'':'display:none'}"/>
+        <input type="hidden" data-hc-img value="${esc(cd.img||'')}"/>
+        <input type="hidden" data-hc-url value="${esc(cd.detailUrl||'')}"/>
+        <input type="hidden" data-hc-sku value="${esc(cd.sku||'')}"/>
+        <span style="font-size:11px;color:#64748b">পণ্য সিলেক্ট করলে ছবি, দাম ও পেজ লিংক এখানেই অটো-ফিল হবে</span>
+      </div>
+    </div>`;
+  }
+
+  // ক্যাটাগরি ড্রপডাউন পপুলেট করে (আগে থেকে সিলেক্ট করা থাকলে সেটাই দেখাবে)
+  function bsPopulateCategorySelect(sel, placeholderLabel){
+    if(!sel) return;
+    const cur = sel.dataset.cur || '';
+    sel.innerHTML = '<option value="">' + (placeholderLabel || '— সব ক্যাটাগরি —') + '</option>' +
+      _bsHomeCategories.map(c => `<option value="${esc(c.slug)}" ${c.slug===cur?'selected':''}>${esc(c.name)}</option>`).join('');
+  }
+
+  // Hero Side Card রো-এর প্রোডাক্ট ড্রপডাউন রিফ্রেশ করে (ক্যাটাগরি/সার্চ ফিল্টার সহ)
+  function bsRefreshHeroCardProductOptions(row, keepCurId){
+    const catSel = row.querySelector('.bs-hero-card-cat');
+    const searchInp = row.querySelector('.bs-hero-card-search');
+    const prodSel = row.querySelector('.bs-hero-card-product');
+    if(!prodSel) return;
+    const catSlug = catSel ? catSel.value : '';
+    const q = (searchInp ? searchInp.value : '').trim().toLowerCase();
+    const curId = keepCurId !== undefined ? keepCurId : prodSel.value;
+    let list = _bsHomeProducts;
+    if(catSlug) list = list.filter(p => p.categorySlug === catSlug);
+    if(q) list = list.filter(p => (p.name||'').toLowerCase().includes(q));
+    const limited = list.slice(0, 60); // পারফরম্যান্সের জন্য ড্রপডাউনে সর্বোচ্চ ৬০টা দেখানো হচ্ছে, সার্চ দিয়ে সংকুচিত করা যাবে
+    prodSel.innerHTML = '<option value="">— পণ্য বেছে নিন —</option>' +
+      limited.map(p => `<option value="${esc(p._id)}" ${String(p._id)===String(curId)?'selected':''}>${esc(p.name)} — ৳${p.now||0}</option>`).join('');
+    limited.forEach((p, idx) => { prodSel.options[idx+1].dataset.product = JSON.stringify(p); });
+  }
+
+  // Hero Side Card রো পুরোপুরি ওয়্যার করে: ক্যাটাগরি/সার্চ/প্রোডাক্ট সিলেক্ট + অটো-ফিল
+  function bsWireHeroCardRow(row){
+    if(!row || row.dataset.wired === '1') return;
+    row.dataset.wired = '1';
+    const catSel = row.querySelector('.bs-hero-card-cat');
+    const searchInp = row.querySelector('.bs-hero-card-search');
+    const prodSel = row.querySelector('.bs-hero-card-product');
+    if(catSel) bsPopulateCategorySelect(catSel);
+    const curId = prodSel ? prodSel.dataset.curId : '';
+    bsRefreshHeroCardProductOptions(row, curId);
+    if(catSel) catSel.addEventListener('change', () => bsRefreshHeroCardProductOptions(row));
+    if(searchInp) searchInp.addEventListener('input', () => bsRefreshHeroCardProductOptions(row));
+    if(prodSel) prodSel.addEventListener('change', function(){
+      const opt = this.options[this.selectedIndex];
+      if(!opt || !opt.dataset.product) return;
+      let p; try{ p = JSON.parse(opt.dataset.product); } catch(e){ return; }
+      const nameInp = row.querySelector('[data-hc-name]');
+      const nowInp = row.querySelector('[data-hc-now]');
+      const oldInp = row.querySelector('[data-hc-old]');
+      const imgHidden = row.querySelector('[data-hc-img]');
+      const imgPrev = row.querySelector('[data-hc-img-preview]');
+      const urlHidden = row.querySelector('[data-hc-url]');
+      const skuHidden = row.querySelector('[data-hc-sku]');
+      if(nameInp) nameInp.value = p.name || '';
+      if(nowInp) nowInp.value = p.now || '';
+      if(oldInp) oldInp.value = p.old || '';
+      if(imgHidden) imgHidden.value = p.img || '';
+      if(imgPrev){ if(p.img){ imgPrev.src = p.img; imgPrev.style.display=''; } else { imgPrev.style.display='none'; } }
+      if(urlHidden) urlHidden.value = p.detailPage || p.url || ('product-detail.html?id=' + (p.sku || p._id || ''));
+      if(skuHidden) skuHidden.value = p.sku || '';
+    });
+  }
+
+  // পেজ সেটিংস "Home" খোলা হলে ক্যাটাগরি ও প্রোডাক্ট ডেটা লোড করে সব রো ওয়্যার করে দেয়
+  function bsLoadHomeCatsAndProducts(){
+    fetchJSON('/categories').then(cats => {
+      _bsHomeCategories = Array.isArray(cats) ? cats : [];
+      document.querySelectorAll('.bs-hero-slide-cat').forEach(sel => bsPopulateCategorySelect(sel, '— ক্যাটাগরি বেছে নিন —'));
+      document.querySelectorAll('.bs-hero-card-cat').forEach(sel => bsPopulateCategorySelect(sel));
+    }).catch(() => {});
+    fetchJSON('/products?limit=1000').then(products => {
+      _bsHomeProducts = Array.isArray(products) ? products : (products.products || products.data || []);
+      document.querySelectorAll('#bsHomeHeroSideCards [data-hero-card-row]').forEach(row => bsWireHeroCardRow(row));
+    }).catch(() => {});
+  }
+
   function editPage(pageKey, current) {
     const c = current || {};
     const hero = c.hero || {};
@@ -2399,6 +2544,10 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       const revs = cnt.reviews || [];
       const news = cnt.newsletter || {};
       const hm = cnt.heroMain || {};
+      const heroSlidesData = cnt.heroSlides || [];
+      const heroSideCardsData = cnt.heroSideCards || [];
+      const heroSlideRowHTML = bsHeroSlideRowHTML;
+      const heroSideCardRowHTML = bsHeroSideCardRowHTML;
 
       const heroMainBlock = `
         <div style="background:#fff7ed;border:1px solid #fed7aa;padding:14px;margin:18px 0;border-radius:10px">
@@ -2466,6 +2615,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <div class="bs-home-tabs">
             <button type="button" data-home-tab-btn="general" onclick="bsSwitchHomeTab(this,'general')"><i class="fas fa-gear"></i> সাধারণ ও SEO</button>
             <button type="button" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
+            <button type="button" data-home-tab-btn="heroSlides" onclick="bsSwitchHomeTab(this,'heroSlides')"><i class="fas fa-images"></i> হিরো স্লাইড</button>
+            <button type="button" data-home-tab-btn="heroSideCards" onclick="bsSwitchHomeTab(this,'heroSideCards')"><i class="fas fa-tags"></i> Hero Side Cards</button>
             <button type="button" data-home-tab-btn="banners" onclick="bsSwitchHomeTab(this,'banners')"><i class="fas fa-images"></i> Promo Banners</button>
             <button type="button" data-home-tab-btn="deal" onclick="bsSwitchHomeTab(this,'deal')"><i class="fas fa-tag"></i> Deal of Month</button>
             <button type="button" data-home-tab-btn="why" onclick="bsSwitchHomeTab(this,'why')"><i class="fas fa-thumbs-up"></i> Why Choose Us</button>
@@ -2495,6 +2646,20 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
 
           <div class="bs-home-panel" data-home-tab="hero">
             ${heroMainBlock}
+          </div>
+
+          <div class="bs-home-panel" data-home-tab="heroSlides">
+            <h4 style="margin:0 0 4px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> হিরো স্লাইড (মূল ব্যানারের পাশে ঘুরতে থাকা স্লাইডসমূহ)</h4>
+            <p style="color:#64748b;font-size:12px;margin:0 0 12px">প্রতিটা স্লাইডের জন্য আলাদা ক্যাটাগরি বেছে নিন, নিজের ইমেজ আপলোড করুন এবং আকর্ষণ বাড়ানোর জন্য নিজের মতো টেক্সট লিখুন। কিছু যোগ না করলে অটোমেটিক ক্যাটাগরি স্লাইড দেখানো হবে।</p>
+            <div id="bsHomeHeroSlides">${heroSlidesData.map(heroSlideRowHTML).join('')}</div>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSlide()"><i class="fas fa-plus"></i> নতুন স্লাইড যোগ</button>
+          </div>
+
+          <div class="bs-home-panel" data-home-tab="heroSideCards">
+            <h4 style="margin:0 0 4px;color:#14213D;font-size:14px"><i class="fas fa-tags" style="color:#FCA311"></i> Hero Side Cards (মূল ব্যানারের পাশের ছোট কার্ড)</h4>
+            <p style="color:#64748b;font-size:12px;margin:0 0 12px">ক্যাটাগরি অনুযায়ী পণ্য খুঁজে সিলেক্ট করুন — দাম ও ছবি পণ্য থেকে অটো-ফিল হবে। কাস্টম টেক্সট লিখুন (সীমিত অক্ষরে)। কার্ডে ক্লিক করলে সরাসরি ওই পণ্যের বিস্তারিত পেজে যাবে।</p>
+            <div id="bsHomeHeroSideCards">${heroSideCardsData.map(heroSideCardRowHTML).join('')}</div>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddHeroSideCard()"><i class="fas fa-plus"></i> নতুন কার্ড যোগ</button>
           </div>
 
           <div class="bs-home-panel" data-home-tab="banners">
@@ -2668,6 +2833,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">কোনো ট্যাব নেই — "নতুন Tab" দিয়ে যোগ করুন</td></tr>';
         }).catch(() => { ftBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:16px">Filter Tabs লোড করা যায়নি</td></tr>'; });
       }
+      // হিরো স্লাইড ও Hero Side Cards ট্যাবের ক্যাটাগরি/প্রোডাক্ট ড্রপডাউন লোড ও ওয়্যার করা
+      bsLoadHomeCatsAndProducts();
     }
 
     document.getElementById('bsExtPageForm').onsubmit = async (e) => {
@@ -3936,7 +4103,7 @@ async function resetAllProductPlacementsToShopOnly(){
 
   function isShopOnly(p){
     const pl = p.placements||{};
-    return pl.shop===true && !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
+    return pl.shop===true && !pl.homePopular && !pl.homeBestseller && !pl.homeNew && !pl.homeFeatured;
   }
 
   const needCount = products.filter(function(p){ return !isShopOnly(p); }).length;
@@ -3954,7 +4121,7 @@ async function resetAllProductPlacementsToShopOnly(){
     done++;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপডেট হচ্ছে... ('+done+'/'+needCount+')';
     try{
-      const body = Object.assign({}, p, {placements:{shop:true, homePopular:false, homeBestseller:false, homeNew:false}});
+      const body = Object.assign({}, p, {placements:{shop:true, homePopular:false, homeBestseller:false, homeNew:false, homeFeatured:false}});
       delete body._id; delete body.__v;
       const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
       if(r && r.ok) ok++; else fail++;
@@ -3978,7 +4145,7 @@ async function disableAllHomePlacements(){
 
   function homeAlreadyOff(p){
     const pl = p.placements||{};
-    return !pl.homePopular && !pl.homeBestseller && !pl.homeNew;
+    return !pl.homePopular && !pl.homeBestseller && !pl.homeNew && !pl.homeFeatured;
   }
 
   const needCount = products.filter(function(p){ return !homeAlreadyOff(p); }).length;
@@ -4001,7 +4168,8 @@ async function disableAllHomePlacements(){
         shop: existingPl.shop===true,
         homePopular:false,
         homeBestseller:false,
-        homeNew:false
+        homeNew:false,
+        homeFeatured:false
       }});
       delete body._id; delete body.__v;
       const r = await apiFetch('/products/id/'+p._id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
