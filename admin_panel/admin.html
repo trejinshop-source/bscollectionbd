@@ -706,40 +706,43 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     </div>
     <div class="card">
       <div class="card-head">
-        <h2>All Orders</h2>
+        <div class="chip-group" id="ordersViewTabs">
+          <span class="chip active" data-view="all">All Orders</span>
+          <span class="chip" data-view="fake" style="color:#dc2626;"><i class="fas fa-triangle-exclamation" style="margin-right:4px"></i>ফেক অর্ডার (<span id="fakeOrderCount">0</span>)</span>
+        </div>
         <button class="pill-btn ghost" id="refreshOrdersBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
       </div>
-      <div class="filter-bar">
-        <div class="chip-group" id="orderChips">
-          <span class="chip active" data-status="">All</span>
-          <span class="chip" data-status="Pending">Pending</span>
-          <span class="chip" data-status="Processing">Processing</span>
-          <span class="chip" data-status="Shipped">Shipped</span>
-          <span class="chip" data-status="Completed">Completed</span>
-          <span class="chip" data-status="Cancelled">Cancelled</span>
+
+      <div id="ordersAllView">
+        <div class="filter-bar">
+          <div class="chip-group" id="orderChips">
+            <span class="chip active" data-status="">All</span>
+            <span class="chip" data-status="Pending">Pending</span>
+            <span class="chip" data-status="Processing">Processing</span>
+            <span class="chip" data-status="Shipped">Shipped</span>
+            <span class="chip" data-status="Completed">Completed</span>
+            <span class="chip" data-status="Cancelled">Cancelled</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="ordersTableBody"><tr><td colspan="8"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="ordersPagination" style="display:none;">
+          <span class="p-info" id="ordersInfo"></span>
+          <div class="p-btns" id="ordersPagBtns"></div>
         </div>
       </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="ordersTableBody"><tr><td colspan="8"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
-        </table>
-      </div>
-      <div class="pagination" id="ordersPagination" style="display:none;">
-        <span class="p-info" id="ordersInfo"></span>
-        <div class="p-btns" id="ordersPagBtns"></div>
-      </div>
-    </div>
 
-    <div class="card" id="fakeOrdersCard" style="margin-top:18px;">
-      <div class="card-head">
-        <h2><i class="fas fa-triangle-exclamation" style="color:#dc2626"></i> ফেক অর্ডার (<span id="fakeOrderCount">0</span>)</h2>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Order ID</th><th>Customer</th><th>ফেক স্কোর ও কারণ</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
-          <tbody id="fakeOrdersBody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
-        </table>
+      <div id="ordersFakeView" style="display:none;">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>ফেক স্কোর ও কারণ</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
+            <tbody id="fakeOrdersBody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -870,53 +873,36 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     </div>
     <div class="modal-body">
       <input type="hidden" id="pEditId">
-      <div class="form-row">
-        <div class="form-group2"><label>Product Name *</label><input type="text" id="pName" placeholder="যেমন: Rechargeable Fan RS-2218"></div>
-        <div class="form-group2"><label>SKU</label><input type="text" id="pSku" placeholder="JY-2218"></div>
+      <input type="hidden" id="pSku">
+      <input type="hidden" id="pCatSlug">
+      <div class="form-group2">
+        <label>পন্যের ছবি *</label>
+        <div class="bs-ext-dropzone" id="pImgDropzone">
+          <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
+          <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
+          <input type="file" id="pImgFile" accept="image/*" style="display:none">
+        </div>
+        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadBar"></div></div>
+        <span class="upload-hint">অথবা সরাসরি URL দিন:</span>
+        <input type="url" id="pImg" placeholder="https://..." style="margin-top:6px;">
+        <img id="pImgPreview" class="img-preview" alt="Preview">
       </div>
       <div class="form-row">
-        <div class="form-group2"><label>Category</label><select id="pCat"><option value="">— Select Category —</option></select></div>
-        <div class="form-group2"><label>Category Slug</label><input type="text" id="pCatSlug" placeholder="rechargeable-fans"></div>
+        <div class="form-group2"><label>পন্যের নাম *</label><input type="text" id="pName" placeholder="যেমন: Rechargeable Fan RS-2218"></div>
+        <div class="form-group2"><label>ক্যাটাগরি</label><select id="pCat"><option value="">— Select Category —</option></select></div>
       </div>
       <div class="form-row">
-        <div class="form-group2"><label>ব্র্যান্ড (Brand)</label><input type="text" id="pBrand" placeholder="bscollectionbd"></div>
-        <div class="form-group2"><label>Tags (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pTags" placeholder="rechargeable, LED, 12-inch, USB"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group2"><label>Current Price (৳) *</label><input type="number" id="pNow" placeholder="1200" min="0"></div>
-        <div class="form-group2"><label>Old Price (৳)</label><input type="number" id="pOld" placeholder="1500" min="0"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group2"><label>Stock Qty</label><input type="number" id="pStock" placeholder="50" min="0"></div>
-        <div class="form-group2"><label>Featured?</label><select id="pFeatured"><option value="false">No</option><option value="true">Yes</option></select></div>
-      </div>
-      <div class="form-group2"><label>Description</label><textarea id="pDesc" placeholder="পণ্যের বিবরণ..."></textarea></div>
-      <div class="form-group2"><label>সংক্ষিপ্ত বিবরণ (Short Description)</label><input type="text" id="pShortDesc" placeholder="Brief product summary"></div>
-      <div class="form-row">
-        <div class="form-group2"><label>রঙ (Color) — অপশনাল</label><input type="text" id="pColors" placeholder="Red, Blue, White"></div>
-        <div class="form-group2"><label>সাইজ (Size) — অপশনাল</label><input type="text" id="pSizes" placeholder="S, M, L, XL"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group2"><label>ওজন (Weight) — অপশনাল</label><input type="text" id="pWeight" placeholder="যেমন: 1.2kg"></div>
-        <div class="form-group2"><label>পণ্য বিস্তারিত পেজ</label>
-          <select id="pHasDetailPage"><option value="false">নেই</option><option value="true">আছে (product-jy2218.html টেমপ্লেট)</option></select>
+        <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="pRating" min="0" max="5" step="0.1" placeholder="৪.৫"></div>
+        <div class="form-group2"><label>কার্ডটি চালু আছে?</label>
+          <div class="bs-ext-placements" style="margin-top:6px">
+            <label style="cursor:pointer"><input type="checkbox" id="pActive" checked> চালু (Active) — বন্ধ করলে কার্ডটি ফ্রন্টএন্ডে দেখাবে না</label>
+          </div>
         </div>
       </div>
-      <div class="form-group2" id="pDetailPageNote" style="display:none;background:#fefce8;border:1px solid #fde68a;padding:10px;font-size:13px;color:#92400e">
-        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহার করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে। খালি রাখলে SKU থেকে স্বয়ংক্রিয়ভাবে ফাইলনেম তৈরি হবে।
-        <input type="text" id="pDetailPageFile" placeholder="product-jy2218.html" style="margin-top:8px;">
+      <div class="form-row">
+        <div class="form-group2"><label>মূল দাম (৳) — কাটা দাম</label><input type="number" id="pOld" placeholder="1500" min="0"></div>
+        <div class="form-group2"><label>অফার দাম (৳) *</label><input type="number" id="pNow" placeholder="1200" min="0"></div>
       </div>
-
-      <div class="form-group2" style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;border-radius:8px">
-        <label style="display:flex;align-items:center;justify-content:space-between;margin:0">
-          <span><i class="fas fa-search" style="color:#FCA311"></i> SEO সেটিংস</span>
-          <button type="button" class="bs-ext-btn ghost" id="pAutoSeoBtn"><i class="fas fa-magic"></i> Auto SEO</button>
-        </label>
-        <div class="form-group2" style="margin-top:10px"><label>SEO Title</label><input type="text" id="pSeoTitle"></div>
-        <div class="form-group2"><label>SEO Description</label><textarea id="pSeoDesc" rows="2"></textarea></div>
-        <div class="form-group2"><label>SEO Keywords (কমা দিয়ে আলাদা করুন)</label><input type="text" id="pSeoKeywords" placeholder="rechargeable fan, jy2218, fan bangladesh"></div>
-      </div>
-
       <div class="form-group2">
         <label>কোথায় দেখাবে (Placement)</label>
         <div class="bs-ext-placements">
@@ -925,26 +911,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
           <label><input type="checkbox" id="pPlBest"> হোম — সেরা বিক্রিত</label>
           <label><input type="checkbox" id="pPlNew"> হোম — নতুন পন্য</label>
         </div>
-      </div>
-
-      <div class="form-group2">
-        <label>Specs (label + value)</label>
-        <div id="pSpecsWrap"></div>
-        <button type="button" class="bs-ext-btn ghost" id="pAddSpecBtn"><i class="fas fa-plus"></i> নতুন স্পেক যোগ</button>
-      </div>
-
-      <div class="form-group2">
-        <label>Product Images (একাধিক ছবি যোগ করা যাবে)</label>
-        <div class="bs-ext-dropzone" id="pImgDropzone">
-          <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
-          <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
-          <input type="file" id="pImgFile" accept="image/*" multiple style="display:none">
-        </div>
-        <div class="upload-progress" id="uploadProgress"><div class="upload-progress-bar" id="uploadBar"></div></div>
-        <div class="bs-ext-thumbs" id="pImgThumbs"></div>
-        <span class="upload-hint">অথবা সরাসরি URL দিন (প্রধান ছবি):</span>
-        <input type="url" id="pImg" placeholder="https://..." style="margin-top:6px;">
-        <img id="pImgPreview" class="img-preview" alt="Preview">
       </div>
     </div>
     <div class="modal-footer">
@@ -1320,7 +1286,19 @@ document.querySelectorAll('#orderChips .chip').forEach(chip => {
     loadOrders(chip.dataset.status);
   });
 });
-document.getElementById('refreshOrdersBtn').addEventListener('click', ()=>{ loadStats(); loadOrders(); });
+document.getElementById('refreshOrdersBtn').addEventListener('click', ()=>{ loadStats(); loadOrders(); loadFakeOrdersInOrders(); });
+
+// All Orders / ফেক অর্ডার tab switch
+document.querySelectorAll('#ordersViewTabs .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#ordersViewTabs .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    const isFake = chip.dataset.view==='fake';
+    document.getElementById('ordersAllView').style.display = isFake ? 'none' : '';
+    document.getElementById('ordersFakeView').style.display = isFake ? '' : 'none';
+    if(isFake) loadFakeOrdersInOrders();
+  });
+});
 
 /* Order Modal */
 let currentOrderId = null;
@@ -1428,13 +1406,15 @@ function renderProductGrid(){
   grid.innerHTML = products.map(p => {
     const stockClass = p.stock > 5 ? 'in' : p.stock > 0 ? 'low' : 'out';
     const stockLabel = p.stock > 5 ? `In Stock · ${p.stock}` : p.stock > 0 ? `Low Stock · ${p.stock}` : 'Out of Stock';
-    const thumbContent = p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.parentNode.innerHTML='${icon}'">` : icon;
+    const isActive = p.active!==false && p.stock!==0;
+    const thumbContent = p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;${isActive?'':'filter:grayscale(1);opacity:.55;'}" onerror="this.parentNode.innerHTML='${icon}'">` : icon;
+    const ratingHtml = p.rating ? `<span style="color:#FCA311;font-size:12px;font-weight:600;"><i class="fas fa-star"></i> ${Number(p.rating).toFixed(1)}</span>` : '';
     return `<div class="card product-card" data-cat="${p.categorySlug||''}">
-      <div class="product-thumb">${thumbContent}</div>
-      <div class="product-cat">${esc(p.cat||p.categorySlug||'—')}</div>
+      <div class="product-thumb" style="position:relative;">${thumbContent}${isActive?'':'<span style="position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">বন্ধ</span>'}</div>
+      <div class="product-cat" style="display:flex;align-items:center;justify-content:space-between;">${esc(p.cat||p.categorySlug||'—')}${ratingHtml}</div>
       <div class="product-name">${esc(p.name)}</div>
       <div class="product-bottom">
-        <span class="product-price">৳${(p.now||0).toLocaleString()}</span>
+        <span class="product-price">৳${(p.now||0).toLocaleString()}${p.old?` <s style="color:#94a3b8;font-size:12px;">৳${(p.old||0).toLocaleString()}</s>`:''}</span>
         <span class="stock-dot ${stockClass}">${stockLabel}</span>
       </div>
       <div class="product-actions">
@@ -1468,18 +1448,14 @@ function openProductModal(id){
   document.getElementById('productModalTitle').textContent = isEdit ? 'Edit Product' : 'Add Product';
   document.getElementById('pEditId').value = id || '';
   if(!isEdit){
-    ['pName','pSku','pDesc','pImg','pColors','pSizes','pWeight','pBrand','pTags','pShortDesc','pSeoTitle','pSeoDesc','pSeoKeywords','pDetailPageFile'].forEach(f=>{ const e=document.getElementById(f); if(e) e.value=''; });
-    ['pNow','pOld','pStock'].forEach(f=>document.getElementById(f).value='');
-    document.getElementById('pFeatured').value='false';
-    document.getElementById('pHasDetailPage').value='false';
-    document.getElementById('pDetailPageNote').style.display='none';
+    ['pName','pSku','pImg','pRating'].forEach(f=>{ const e=document.getElementById(f); if(e) e.value=''; });
+    ['pNow','pOld'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('pActive').checked = true;
     document.getElementById('pCat').value='';
     document.getElementById('pCatSlug').value='';
     document.getElementById('pImgPreview').classList.remove('show');
     document.getElementById('pImgFile').value='';
-    document.getElementById('pImgThumbs').innerHTML='';
     ['pPlShop','pPlPop','pPlBest','pPlNew'].forEach(f=>{ const e=document.getElementById(f); if(e) e.checked=false; });
-    document.getElementById('pSpecsWrap').innerHTML='';
   } else {
     const p = allProducts.find(x=>x._id===id);
     if(p){
@@ -1487,39 +1463,15 @@ function openProductModal(id){
       document.getElementById('pSku').value = p.sku||'';
       document.getElementById('pNow').value = p.now||'';
       document.getElementById('pOld').value = p.old||'';
-      document.getElementById('pStock').value = p.stock||'';
-      document.getElementById('pDesc').value = p.description||'';
       document.getElementById('pImg').value = p.img||'';
-      document.getElementById('pFeatured').value = p.featured?'true':'false';
+      document.getElementById('pRating').value = p.rating||'';
+      document.getElementById('pActive').checked = p.active!==false && p.stock!==0;
       document.getElementById('pCatSlug').value = p.categorySlug||'';
-      const ce=document.getElementById('pColors'); if(ce) ce.value=(p.colors||[]).join(', ');
-      const se=document.getElementById('pSizes'); if(se) se.value=(p.sizes||[]).join(', ');
-      const we=document.getElementById('pWeight'); if(we) we.value=p.weight||'';
-      const hde=document.getElementById('pHasDetailPage'); if(hde) hde.value=p.hasDetailPage?'true':'false';
-      const dn=document.getElementById('pDetailPageNote'); if(dn) dn.style.display=p.hasDetailPage?'':'none';
-      const br=document.getElementById('pBrand'); if(br) br.value=p.brand||'';
-      const tg=document.getElementById('pTags'); if(tg) tg.value=(p.tags||[]).join(', ');
-      const sd=document.getElementById('pShortDesc'); if(sd) sd.value=p.shortDescription||'';
-      const st=document.getElementById('pSeoTitle'); if(st) st.value=p.seoTitle||'';
-      const sde=document.getElementById('pSeoDesc'); if(sde) sde.value=p.seoDescription||'';
-      const sk=document.getElementById('pSeoKeywords'); if(sk) sk.value=p.seoKeywords||'';
-      const dpf=document.getElementById('pDetailPageFile'); if(dpf) dpf.value=p.detailPage||'';
       const placements = p.placements||{};
       const plShop=document.getElementById('pPlShop'); if(plShop) plShop.checked=!!placements.shop;
       const plPop=document.getElementById('pPlPop'); if(plPop) plPop.checked=!!placements.homePopular;
       const plBest=document.getElementById('pPlBest'); if(plBest) plBest.checked=!!placements.homeBestseller;
       const plNew=document.getElementById('pPlNew'); if(plNew) plNew.checked=!!placements.homeNew;
-      const specsWrap=document.getElementById('pSpecsWrap');
-      if(specsWrap){
-        specsWrap.innerHTML='';
-        (p.specs||[]).forEach(s=>addSpecRow(s.label||'', s.value||''));
-      }
-      const thumbs=document.getElementById('pImgThumbs');
-      if(thumbs){
-        thumbs.innerHTML='';
-        const gallery = p.gallery && p.gallery.length ? p.gallery : (p.img ? [p.img] : []);
-        gallery.forEach(u=>addThumb(u));
-      }
       if(p.img){ document.getElementById('pImgPreview').src=p.img; document.getElementById('pImgPreview').classList.add('show'); }
       else document.getElementById('pImgPreview').classList.remove('show');
     }
@@ -1527,45 +1479,6 @@ function openProductModal(id){
   // Populate category select
   populateCatSelect();
   modal.classList.remove('hidden');
-}
-
-/* Specs (label/value pairs) */
-function addSpecRow(label, value){
-  const wrap = document.getElementById('pSpecsWrap');
-  if(!wrap) return;
-  const row = document.createElement('div');
-  row.className = 'form-row';
-  row.style.marginBottom = '8px';
-  row.innerHTML = `<div class="form-group2"><input type="text" placeholder="লেবেল (যেমন: Battery)" class="pSpecLabel" value="${(label||'').replace(/"/g,'&quot;')}"></div>
-    <div class="form-group2" style="display:flex;gap:8px;align-items:center;">
-      <input type="text" placeholder="ভ্যালু (যেমন: 6V/4.5Ah)" class="pSpecValue" value="${(value||'').replace(/"/g,'&quot;')}" style="flex:1;">
-      <button type="button" class="act-btn danger" style="flex:none;" onclick="this.closest('.form-row').remove()"><i class="fas fa-trash"></i></button>
-    </div>`;
-  wrap.appendChild(row);
-}
-document.getElementById('pAddSpecBtn').addEventListener('click', ()=>addSpecRow('',''));
-
-/* Auto SEO fill */
-document.getElementById('pAutoSeoBtn').addEventListener('click', ()=>{
-  const name = document.getElementById('pName').value.trim();
-  const cat = document.getElementById('pCat').options[document.getElementById('pCat').selectedIndex]?.text || '';
-  const sku = document.getElementById('pSku').value.trim();
-  const now = document.getElementById('pNow').value.trim();
-  const desc = document.getElementById('pDesc').value.trim();
-  document.getElementById('pSeoTitle').value = name + ' - Buy Online in Bangladesh | BS Collection BD';
-  document.getElementById('pSeoDesc').value = ('Buy ' + name + ' at Tk ' + now + ' in Bangladesh. ' + desc.substring(0,100)).substring(0,155);
-  document.getElementById('pSeoKeywords').value = [sku, name.toLowerCase(), cat.toLowerCase(), 'fan bangladesh', 'bscollectionbd'].filter(Boolean).join(', ');
-  showToast('SEO ফিল্ড স্বয়ংক্রিয়ভাবে পূরণ হয়েছে','success');
-});
-
-/* Multi-image gallery thumbs */
-function addThumb(url){
-  const thumbs = document.getElementById('pImgThumbs');
-  if(!thumbs || !url) return;
-  const d = document.createElement('div');
-  d.className = 'thumb'; d.dataset.url = url;
-  d.innerHTML = `<img src="${url}"><button type="button" onclick="this.parentElement.remove()">×</button>`;
-  thumbs.appendChild(d);
 }
 function openEditProduct(id){ openProductModal(id); }
 
@@ -1584,7 +1497,7 @@ async function populateCatSelect(){
 }
 
 // ── Reusable single-image drag-and-drop uploader ──────────────
-/* Product image dropzone — supports multiple images, adds thumbnails, keeps primary URL field in sync */
+/* Product image dropzone — single image */
 (function(){
   const dz = document.getElementById('pImgDropzone');
   const fileInput = document.getElementById('pImgFile');
@@ -1592,30 +1505,19 @@ async function populateCatSelect(){
   const preview = document.getElementById('pImgPreview');
   const progress = document.getElementById('uploadProgress');
   const bar = document.getElementById('uploadBar');
-  const thumbs = document.getElementById('pImgThumbs');
   if(!dz || !fileInput || !urlInput) return;
 
-  function syncPrimaryFromThumbs(){
-    const first = thumbs.querySelector('.thumb');
-    if(first && !urlInput.value){
-      urlInput.value = first.dataset.url;
-      preview.src = first.dataset.url; preview.classList.add('show');
-    }
-  }
-
-  async function uploadFiles(files){
-    if(!files || !files.length) return;
+  async function upload(file){
+    if(!file) return;
     progress.classList.add('show'); bar.style.width='30%';
     try{
-      for(const file of Array.from(files)){
-        const fd = new FormData(); fd.append('image', file);
-        const r = await apiFetch('/products/upload', { method:'POST', body:fd });
-        const d = await r.json();
-        if(!r.ok) throw new Error(d.error);
-        addThumb(d.url);
-      }
+      const fd = new FormData(); fd.append('image', file);
+      const r = await apiFetch('/products/upload', { method:'POST', body:fd });
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error);
       bar.style.width='100%';
-      syncPrimaryFromThumbs();
+      urlInput.value = d.url;
+      preview.src = d.url; preview.classList.add('show');
       showToast('ছবি আপলোড হয়েছে','success');
     } catch(e){ showToast('ছবি আপলোড ব্যর্থ: '+e.message,'error'); }
     finally{ setTimeout(()=>{ progress.classList.remove('show'); bar.style.width='0%'; },600); }
@@ -1624,8 +1526,8 @@ async function populateCatSelect(){
   dz.addEventListener('click', ()=> fileInput.click());
   dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.classList.add('dragover'); });
   dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
-  dz.addEventListener('drop', (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); uploadFiles(e.dataTransfer.files); });
-  fileInput.addEventListener('change', function(){ uploadFiles(this.files); });
+  dz.addEventListener('drop', (e)=>{ e.preventDefault(); dz.classList.remove('dragover'); upload(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function(){ upload(this.files[0]); });
 
   urlInput.addEventListener('input', function(){
     if(this.value){ preview.src=this.value; preview.classList.add('show'); }
@@ -1665,55 +1567,35 @@ async function populateCatSelect(){
   ui.addEventListener('input', function(){ if(pv){ if(this.value){ pv.src=this.value; pv.classList.add('show'); } else pv.classList.remove('show'); } });
 })();
 
-document.getElementById('pHasDetailPage')?.addEventListener('change', function(){
-  const note = document.getElementById('pDetailPageNote');
-  if(note) note.style.display = this.value==='true' ? '' : 'none';
-});
 document.getElementById('productModalClose').addEventListener('click', ()=>document.getElementById('productModal').classList.add('hidden'));
 document.getElementById('productModalCancel').addEventListener('click', ()=>document.getElementById('productModal').classList.add('hidden'));
 document.getElementById('productModalSave').addEventListener('click', async ()=>{
   const name = document.getElementById('pName').value.trim();
   const now = parseFloat(document.getElementById('pNow').value);
-  if(!name || !now){ showToast('নাম ও দাম দিন','error'); return; }
+  if(!name || !now){ showToast('নাম ও অফার দাম দিন','error'); return; }
   const btn = document.getElementById('productModalSave');
   btn.disabled=true; btn.textContent='সংরক্ষণ হচ্ছে...';
-  const gallery = Array.from(document.getElementById('pImgThumbs')?.querySelectorAll('.thumb')||[]).map(t=>t.dataset.url).filter(Boolean);
-  const specs = [];
-  document.querySelectorAll('#pSpecsWrap .form-row').forEach(row=>{
-    const label = row.querySelector('.pSpecLabel')?.value.trim();
-    const value = row.querySelector('.pSpecValue')?.value.trim();
-    if(label && value) specs.push({ label, value });
-  });
-  const hasDetailPage = document.getElementById('pHasDetailPage')?.value==='true';
-  const detailPageFile = document.getElementById('pDetailPageFile')?.value.trim();
+  const active = document.getElementById('pActive').checked;
+  // SKU is auto-generated internally (kept for backend compatibility, not shown in the form)
+  let sku = document.getElementById('pSku').value.trim();
+  if(!sku) sku = (name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'-'+Date.now().toString(36).slice(-5)).replace(/^-+|-+$/g,'');
+  document.getElementById('pSku').value = sku;
   const body = {
-    name, sku:document.getElementById('pSku').value.trim()||undefined,
+    name, sku,
     now, old:parseFloat(document.getElementById('pOld').value)||undefined,
-    stock:parseInt(document.getElementById('pStock').value)||0,
-    description:document.getElementById('pDesc').value.trim()||undefined,
-    shortDescription:document.getElementById('pShortDesc')?.value.trim()||undefined,
-    img:(gallery[0]||document.getElementById('pImg').value.trim())||undefined,
-    gallery,
-    featured:document.getElementById('pFeatured').value==='true',
+    // "চালু/বন্ধ" toggle controls availability: active keeps it in stock, off takes it out of stock
+    stock: active ? 999 : 0,
+    active,
+    img:document.getElementById('pImg').value.trim()||undefined,
+    rating:parseFloat(document.getElementById('pRating').value)||undefined,
     cat:document.getElementById('pCat').options[document.getElementById('pCat').selectedIndex]?.text || undefined,
     categorySlug:document.getElementById('pCatSlug').value.trim()||undefined,
-    brand:document.getElementById('pBrand')?.value.trim()||undefined,
-    tags:(document.getElementById('pTags')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
-    seoTitle:document.getElementById('pSeoTitle')?.value.trim()||undefined,
-    seoDescription:document.getElementById('pSeoDesc')?.value.trim()||undefined,
-    seoKeywords:document.getElementById('pSeoKeywords')?.value.trim()||undefined,
-    colors:(document.getElementById('pColors')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
-    sizes:(document.getElementById('pSizes')?.value||'').split(',').map(s=>s.trim()).filter(Boolean),
-    weight:document.getElementById('pWeight')?.value?.trim()||undefined,
-    specs,
     placements:{
       shop:document.getElementById('pPlShop')?.checked||false,
       homePopular:document.getElementById('pPlPop')?.checked||false,
       homeBestseller:document.getElementById('pPlBest')?.checked||false,
       homeNew:document.getElementById('pPlNew')?.checked||false,
     },
-    hasDetailPage,
-    detailPage:hasDetailPage?(detailPageFile||('product-'+(document.getElementById('pSku').value.trim().toLowerCase()||'template')+'.html')):undefined,
   };
   const editId = document.getElementById('pEditId').value;
   try{
@@ -3014,14 +2896,20 @@ window.bsRemovePromo = function(idx){
         </div>
         <div class="form-row">
           <div class="form-group2">
-            <label>পেজ যেই পণ্যের সাথে লিংক হবে <small style="color:#94a3b8;font-weight:400">(সেভ করলে স্বয়ংক্রিয়ভাবে সেই পণ্যের সাথে যুক্ত হবে)</small></label>
-            <select id="lpLinkedProduct">
-              <option value="">— পণ্য নির্বাচন করুন —</option>
-            </select>
+            <label>পেজ যেই পণ্যের সাথে লিংক হবে <small style="color:#94a3b8;font-weight:400">(নির্বাচন করলে দাম, নাম, ছবি, রেটিং, ক্যাটাগরি স্বয়ংক্রিয়ভাবে পূরণ হবে)</small></label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="lpLinkedProduct" style="flex:1;min-width:220px" onchange="lpAutofillFromProduct()">
+                <option value="">— পণ্য নির্বাচন করুন —</option>
+              </select>
+              <button type="button" class="bs-ext-btn orange" style="margin:0;white-space:nowrap" onclick="lpSuggestAll()"><i class="fas fa-wand-magic-sparkles"></i> AI দিয়ে সব ফিল্ড পূরণ করুন</button>
+            </div>
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/></div>
+          <div class="form-group2">
+            <label style="display:flex;align-items:center;justify-content:space-between;">Meta Description (SEO) <button type="button" class="bs-ext-btn ghost" style="padding:3px 8px;font-size:11px;margin:0" onclick="lpSuggest('meta')"><i class="fas fa-wand-magic-sparkles"></i> AI সাজেশন</button></label>
+            <input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/>
+          </div>
           <div class="form-group2"><label>ক্যাটাগরি লেবেল</label><input type="text" id="lpCategory" placeholder="Table Fan / সিলিং ফ্যান"/></div>
         </div>
         <div class="form-row">
@@ -3029,7 +2917,10 @@ window.bsRemovePromo = function(idx){
           <div class="form-group2"><label>মোট রিভিউ সংখ্যা</label><input type="number" id="lpRatingCount" min="0" placeholder="6"/></div>
           <div class="form-group2"><label>স্টক পরিমাণ</label><input type="number" id="lpStock" min="0" placeholder="10"/></div>
         </div>
-        <div class="form-group2"><label>পণ্যের বিবরণ (সংক্ষিপ্ত)</label><input type="text" id="lpDescription" placeholder="সংক্ষিপ্ত পণ্য বর্ণনা যা প্রোডাক্ট কার্ডে দেখাবে"/></div>
+        <div class="form-group2">
+          <label style="display:flex;align-items:center;justify-content:space-between;">পণ্যের বিবরণ (সংক্ষিপ্ত) <button type="button" class="bs-ext-btn ghost" style="padding:3px 8px;font-size:11px;margin:0" onclick="lpSuggest('desc')"><i class="fas fa-wand-magic-sparkles"></i> AI সাজেশন</button></label>
+          <input type="text" id="lpDescription" placeholder="সংক্ষিপ্ত পণ্য বর্ণনা যা প্রোডাক্ট কার্ডে দেখাবে"/>
+        </div>
         <div class="form-row">
           <div class="form-group2"><label>হাইলাইট বক্স — কালার তথ্য</label><input type="text" id="lpHighlightColor" placeholder="মাল্টিকালার (৩টি অপশন)"/></div>
           <div class="form-group2"><label>হাইলাইট বক্স — চার্জিং ব্যাকআপ</label><input type="text" id="lpHighlightCharge" placeholder="৬–৮ ঘণ্টা"/></div>
@@ -3040,8 +2931,8 @@ window.bsRemovePromo = function(idx){
       <!-- ② Hero Section -->
       <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
         <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-bolt" style="color:#FCA311"></i> প্রোডাক্ট হিরো / দাম</h4>
-        <div class="form-group2"><label>মূল হেডলাইন (পণ্যের নাম) *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
-        <div class="form-group2"><label>সাব-হেডলাইন / সংক্ষিপ্ত বিবরণ</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
+        <div class="form-group2"><label style="display:flex;align-items:center;justify-content:space-between;">মূল হেডলাইন (পণ্যের নাম) * <button type="button" class="bs-ext-btn ghost" style="padding:3px 8px;font-size:11px;margin:0" onclick="lpSuggest('headline')"><i class="fas fa-wand-magic-sparkles"></i> AI সাজেশন</button></label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
+        <div class="form-group2"><label style="display:flex;align-items:center;justify-content:space-between;">সাব-হেডলাইন / সংক্ষিপ্ত বিবরণ <button type="button" class="bs-ext-btn ghost" style="padding:3px 8px;font-size:11px;margin:0" onclick="lpSuggest('sub')"><i class="fas fa-wand-magic-sparkles"></i> AI সাজেশন</button></label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
         <div class="form-row">
           <div class="form-group2"><label>বর্তমান দাম (৳)</label><input type="number" id="lpHeroPriceNow" placeholder="2150"/></div>
           <div class="form-group2"><label>পুরনো দাম (৳)</label><input type="number" id="lpHeroPriceOld" placeholder="2550"/></div>
@@ -3159,6 +3050,62 @@ async function lpPopulateProductSelect(preselectId){
   sel.innerHTML='<option value="">— পণ্য নির্বাচন করুন —</option>'+
     (allProducts||[]).map(p=>`<option value="${esc(p._id)}">${esc(p.name)}${p.sku?' ('+esc(p.sku)+')':''}</option>`).join('');
   sel.value=current||'';
+}
+
+/* Auto-fill landing page fields from the selected product's card data */
+function lpAutofillFromProduct(){
+  const sel = document.getElementById('lpLinkedProduct');
+  if(!sel || !sel.value) return;
+  const p = (allProducts||[]).find(x=>x._id===sel.value);
+  if(!p) return;
+  if(!lpV('lpTitle')) lpSet('lpTitle', p.name + ' — বিশেষ অফার');
+  if(!lpV('lpSlug')) lpSet('lpSlug', ('product-'+(p.sku||p.name)).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
+  lpSet('lpCategory', p.cat || p.categorySlug || '');
+  lpSet('lpRating', p.rating || 5);
+  lpSet('lpStock', p.stock || 10);
+  lpSet('lpHeroHeadline', p.name);
+  lpSet('lpHeroPriceNow', p.now);
+  lpSet('lpHeroPriceOld', p.old);
+  lpSet('lpHeroImage', p.img || '');
+  const imgPrev = document.getElementById('lpHeroImgPreview');
+  if(p.img && imgPrev){ imgPrev.src = p.img; imgPrev.style.display = 'block'; }
+  const thumbsC = document.getElementById('lpThumbsContainer');
+  if(thumbsC && !thumbsC.children.length && p.img){ lpAddThumb(p.img, p.name); }
+  const colorsC = document.getElementById('lpColorsContainer');
+  if(colorsC && !colorsC.children.length){ lpAddColor('ডিফল্ট', '#14213D', 0); }
+  showToast('পণ্যের তথ্য থেকে ফিল্ড স্বয়ংক্রিয়ভাবে পূরণ হয়েছে','success');
+}
+
+/* AI-style SEO-friendly text suggestions, generated from the selected product's data */
+function lpProductContext(){
+  const sel = document.getElementById('lpLinkedProduct');
+  const p = (sel && sel.value) ? (allProducts||[]).find(x=>x._id===sel.value) : null;
+  return {
+    name: (p && p.name) || lpV('lpHeroHeadline') || lpV('lpTitle') || 'এই পণ্য',
+    cat: (p && (p.cat||p.categorySlug)) || lpV('lpCategory') || '',
+    now: (p && p.now) || Number(lpV('lpHeroPriceNow'))||0,
+    old: (p && p.old) || Number(lpV('lpHeroPriceOld'))||0,
+  };
+}
+function lpSuggest(kind){
+  const ctx = lpProductContext();
+  const { name, cat, now, old } = ctx;
+  let val = '';
+  if(kind==='headline'){
+    val = name + (cat ? ` — সেরা মানের ${cat}, বাংলাদেশে অনলাইনে অর্ডার করুন` : ' — বিশেষ অফারে এখনই কিনুন');
+  } else if(kind==='sub'){
+    val = `${cat || 'প্রিমিয়াম কোয়ালিটি'} · সারা বাংলাদেশে দ্রুত ডেলিভারি · ক্যাশ অন ডেলিভারি সুবিধা`;
+  } else if(kind==='meta'){
+    val = (`${name} কিনুন সেরা দামে${now?` ৳${now} টাকায়`:''}${cat?`, ${cat} ক্যাটাগরির`:''} বাংলাদেশের বিশ্বস্ত অনলাইন শপ থেকে। আজই অর্ডার করুন, দ্রুত হোম ডেলিভারি।`).slice(0,155);
+  } else if(kind==='desc'){
+    val = `${name} — উন্নত মানের ${cat||'পণ্য'}, টেকসই বিল্ড কোয়ালিটি এবং সাশ্রয়ী মূল্যে${old&&now&&old>now?` (মূল্য ৳${old} থেকে কমিয়ে ৳${now})`:''}। সারা বাংলাদেশে দ্রুত ডেলিভারি ও ক্যাশ অন ডেলিভারি সুবিধা সহ এখনই অর্ডার করুন।`;
+  }
+  const idMap = { headline:'lpHeroHeadline', sub:'lpHeroSub', meta:'lpMetaDesc', desc:'lpDescription' };
+  if(idMap[kind] && val) lpSet(idMap[kind], val);
+  showToast('AI সাজেশন যোগ করা হয়েছে — চাইলে সম্পাদনা করে নিন','success');
+}
+function lpSuggestAll(){
+  ['headline','sub','meta','desc'].forEach(k=>lpSuggest(k));
 }
 
 function openLandingPageModal(slug){
