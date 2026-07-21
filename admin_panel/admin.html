@@ -501,18 +501,21 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
 .bs-ext-placements label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f1f5f9;border-radius:20px;font-size:13px;cursor:pointer;font-weight:500;color:#334155}
 .bs-ext-placements input{margin:0}
 
-/* Home page settings — compact sub-tabs (হোম পেজের সাব-ট্যাব) */
+/* Home page settings — সেকশন মেনু (রেফারেন্স ইমেজের মতো সাদা কার্ড-বাটন স্টাইল) */
 .bs-home-tabs-wrap{margin-top:6px}
-.bs-home-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;padding:6px;background:#f1f5f9;border:1px solid #e2e8f0}
-.bs-home-tabs button{padding:7px 12px;border:1px solid transparent;background:transparent;border-radius:6px;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:#475569;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:.15s}
-.bs-home-tabs button:hover{background:#e2e8f0}
+.bs-home-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;padding:0}
+.bs-home-tabs button{padding:10px 16px;border:1px solid #e2e8f0;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06);cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#14213D;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+.bs-home-tabs button i{color:#FCA311;font-size:13px}
+.bs-home-tabs button:hover{border-color:#FCA311;background:#fff7ed}
 .bs-home-tabs button.active{background:#14213D;color:#fff;border-color:#14213D}
-.bs-home-panel{display:none;background:#f8fafc;border:1px solid #e2e8f0;padding:14px;max-height:420px;overflow-y:auto}
+.bs-home-tabs button.active i{color:#FCA311}
+.bs-home-panel{display:none;background:#f8fafc;border:1px solid #e2e8f0;padding:16px;max-height:440px;overflow-y:auto}
 .bs-home-panel.active{display:block}
+.bs-home-placeholder{color:#94a3b8;text-align:center;padding:34px 14px;background:#f8fafc;border:1px dashed #e2e8f0;font-size:13px}
 @media(max-width:700px){
-  .bs-home-tabs{gap:4px}
-  .bs-home-tabs button{font-size:11.5px;padding:6px 9px}
-  .bs-home-panel{max-height:360px}
+  .bs-home-tabs{gap:8px}
+  .bs-home-tabs button{font-size:12px;padding:9px 13px}
+  .bs-home-panel{max-height:380px}
 }
 
 /* তৈরিকৃত ল্যান্ডিং পেজসমূহ — কমপ্যাক্ট, স্ক্রলযোগ্য দুই-লাইনের লিস্ট */
@@ -2314,29 +2317,24 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
-  // ── TAB: Page Settings (compact dropdown) ─────────────────────
+  // ── TAB: Page Settings (dropdown-style pill menu) ─────────────────────
   async function loadSettings() {
     try {
       const pages = await fetchJSON('/page-settings');
       const html = `
         <div class="bs-ext-panel">
-          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px">
-            <label style="font-size:13px;font-weight:700;color:#14213D;white-space:nowrap">পেজ নির্বাচন করুন</label>
-            <select id="bsExtPageSelect" style="flex:1;min-width:180px;max-width:300px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:13.5px;background:#fff">
-              <option value="">— একটি পেজ বাছাই করুন —</option>
-              ${pages.map(p => `<option value="${p.page}">${esc(p.label || p.page)}</option>`).join('')}
-            </select>
+          <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-file-alt" style="color:#FCA311"></i> পেজ নির্বাচন করুন</h4>
+          <div class="bs-home-tabs" id="bsExtPagePills">
+            ${pages.map(p => `<button type="button" data-page-key="${esc(p.page)}" onclick="bsSelectSettingsPage('${esc(p.page)}')"><i class="fas fa-file-lines"></i> ${esc(p.label || p.page)}</button>`).join('')}
           </div>
-          <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
+          <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের মেনু থেকে একটি পেজ ক্লিক করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
         </div>`;
       document.getElementById('bsExtBody').innerHTML = html;
-      document.getElementById('bsExtPageSelect').addEventListener('change', function(){
-        if(!this.value){
-          document.getElementById('bsExtPageEditor').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করুন।</p>';
-          return;
-        }
-        editPage(this.value, pages.find(x => x.page === this.value));
-      });
+      window.bsSelectSettingsPage = function(pageKey){
+        const wrap = document.getElementById('bsExtPagePills');
+        if(wrap) wrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pageKey === pageKey));
+        editPage(pageKey, pages.find(x => x.page === pageKey));
+      };
     } catch (e) { toast(e.message, 'err'); }
   }
 
@@ -2466,7 +2464,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       return `
         <div class="bs-home-tabs-wrap">
           <div class="bs-home-tabs">
-            <button type="button" class="active" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
+            <button type="button" data-home-tab-btn="general" onclick="bsSwitchHomeTab(this,'general')"><i class="fas fa-gear"></i> সাধারণ ও SEO</button>
+            <button type="button" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
             <button type="button" data-home-tab-btn="banners" onclick="bsSwitchHomeTab(this,'banners')"><i class="fas fa-images"></i> Promo Banners</button>
             <button type="button" data-home-tab-btn="deal" onclick="bsSwitchHomeTab(this,'deal')"><i class="fas fa-tag"></i> Deal of Month</button>
             <button type="button" data-home-tab-btn="why" onclick="bsSwitchHomeTab(this,'why')"><i class="fas fa-thumbs-up"></i> Why Choose Us</button>
@@ -2475,7 +2474,26 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             <button type="button" data-home-tab-btn="filters" onclick="bsSwitchHomeTab(this,'filters')"><i class="fas fa-filter"></i> Filter Tabs</button>
           </div>
 
-          <div class="bs-home-panel active" data-home-tab="hero">
+          <p class="bs-home-placeholder" id="bsHomePlaceholder">উপরের মেনু থেকে একটি বিভাগ ক্লিক করুন — সেটির বিস্তারিত সেটিংস এখানে খুলবে।</p>
+
+          <div class="bs-home-panel" data-home-tab="general">
+            <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-gear" style="color:#FCA311"></i> সাধারণ ও SEO তথ্য</h4>
+            <label>Page Title <input name="title" value="${esc(c.title || '')}"/></label>
+            <label>Meta Description <textarea name="metaDescription" rows="2">${esc(c.metaDescription || '')}</textarea></label>
+            <h4 style="color:#14213D;margin:16px 0 10px;font-size:14px">Hero Section (জেনেরিক)</h4>
+            <label>Hero Headline <input name="hero_headline" value="${esc(hero.headline || '')}"/></label>
+            <label>Hero Subheadline <input name="hero_subheadline" value="${esc(hero.subheadline || '')}"/></label>
+            <label>Hero Image URL <input name="hero_image" value="${esc(hero.image || '')}"/></label>
+            <div class="row">
+              <label>CTA Label <input name="hero_ctaLabel" value="${esc(hero.ctaLabel || '')}"/></label>
+              <label>CTA Link <input name="hero_ctaHref" value="${esc(hero.ctaHref || '')}"/></label>
+            </div>
+            <label>Extra Content (JSON):
+              <textarea name="content" rows="4" style="font-family:monospace;font-size:12px">${esc(JSON.stringify(c.content || {}, null, 2))}</textarea>
+            </label>
+          </div>
+
+          <div class="bs-home-panel" data-home-tab="hero">
             ${heroMainBlock}
           </div>
 
@@ -2553,6 +2571,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       if(!wrap) return;
       wrap.querySelectorAll('.bs-home-tabs button').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const ph = wrap.querySelector('.bs-home-placeholder');
+      if(ph) ph.style.display = 'none';
       wrap.querySelectorAll('.bs-home-panel').forEach(p => p.classList.remove('active'));
       const target = wrap.querySelector('.bs-home-panel[data-home-tab="' + key + '"]');
       if(target) target.classList.add('active');
@@ -2610,12 +2630,10 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </label>`;
       wrap.appendChild(div);
     };
-    document.getElementById('bsExtPageEditor').innerHTML = `
-      <form class="bs-ext-form" id="bsExtPageForm">
-        <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-file-alt"></i> ${esc(c.label || pageKey)} — পেজ সেটিংস</h3>
+    const commonFieldsHTML = pageKey === 'home' ? '' : `
         <label>Page Title <input name="title" value="${esc(c.title || '')}"/></label>
         <label>Meta Description <textarea name="metaDescription" rows="2">${esc(c.metaDescription || '')}</textarea></label>
-        ${contactFields}${aboutFields}${homeFields}
+        ${contactFields}${aboutFields}
         <h4 style="color:#14213D;margin:16px 0 10px;font-size:14px">Hero Section</h4>
         <label>Hero Headline <input name="hero_headline" value="${esc(hero.headline || '')}"/></label>
         <label>Hero Subheadline <input name="hero_subheadline" value="${esc(hero.subheadline || '')}"/></label>
@@ -2626,7 +2644,12 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </div>
         <label>Extra Content (JSON):
           <textarea name="content" rows="4" style="font-family:monospace;font-size:12px">${esc(JSON.stringify(c.content || {}, null, 2))}</textarea>
-        </label>
+        </label>`;
+    document.getElementById('bsExtPageEditor').innerHTML = `
+      <form class="bs-ext-form" id="bsExtPageForm">
+        <h3 style="margin:0 0 16px;color:#14213D"><i class="fas fa-file-alt"></i> ${esc(c.label || pageKey)} — পেজ সেটিংস</h3>
+        ${commonFieldsHTML}
+        ${homeFields}
         <button type="submit" class="bs-ext-btn primary"><i class="fas fa-save"></i> এই পেজ সেভ করুন</button>
       </form>
     `;
