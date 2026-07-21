@@ -338,7 +338,8 @@ body[data-theme="dark"] .cancel-btn{background:var(--card);}
 @media(max-width:1280px){.mid-row{grid-template-columns:1.6fr 1fr;}.product-grid{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:1080px){.sidebar{position:fixed;top:0;left:0;bottom:0;z-index:50;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.15);}.sidebar.open{transform:translateX(0);}.hamburger{display:flex;}.main{margin-left:0;padding:0 18px 50px;}.topbar{padding:16px 0;}.stats-row{grid-template-columns:repeat(2,1fr);}.mid-row{grid-template-columns:1fr;}.bottom-row{grid-template-columns:1fr;}.product-grid{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:860px){.conv-cols{grid-template-columns:repeat(3,1fr);row-gap:20px;}.search{width:220px;}.product-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:620px){.main{margin-left:0;padding:0 14px 50px;}.topbar{gap:10px;padding:12px 0;}.topbar h1{font-size:20px;}.topbar-right .profile-btn span{display:none;}.search{width:auto;flex:1;padding:8px 12px;}.search input{font-size:12.5px;}.stats-row{grid-template-columns:1fr 1fr;gap:10px;}.card{padding:16px;}.stat-value{font-size:22px;}.conv-cols{grid-template-columns:repeat(2,1fr);row-gap:18px;}.card-head h2{font-size:15px;}.pill-btn,.conv-select{font-size:11.5px;padding:6px 10px;}.gauge-wrap svg{width:180px;}.chart-wrap svg{height:210px;}.product-grid{grid-template-columns:1fr 1fr;}.filter-bar{flex-direction:column;align-items:stretch;}.search{width:100%;}.form-row{grid-template-columns:1fr;}}
+@media(max-width:620px){.main{margin-left:0;padding:0 14px 50px;}.topbar{gap:10px;padding:12px 0;}.topbar h1{font-size:20px;}.topbar-right .profile-btn span{display:none;}.search{width:auto;flex:1;padding:8px 12px;}.search input{font-size:12.5px;}.stats-row{grid-template-columns:1fr 1fr;gap:10px;}.card{padding:16px;}.stat-value{font-size:22px;}.conv-cols{grid-template-columns:repeat(2,1fr);row-gap:18px;}.card-head h2{font-size:15px;}.pill-btn,.conv-select{font-size:11.5px;padding:6px 10px;}.gauge-wrap svg{width:180px;}.chart-wrap svg{height:210px;}.product-grid{grid-template-columns:1fr 1fr;}.filter-bar{flex-direction:column;align-items:stretch;}.search{width:100%;}.form-row{grid-template-columns:1fr;}.modal{border-radius:16px 16px 0 0!important;max-height:95vh!important;}.modal-overlay{align-items:flex-end!important;padding:0!important;}}
+@media(max-width:420px){.topbar h1{font-size:16px!important;}.topbar-right{gap:5px!important;}.icon-btn{width:30px!important;height:30px!important;font-size:13px!important;}.profile-btn{padding:4px 8px!important;gap:5px!important;border-radius:8px!important;}.stats-row{grid-template-columns:1fr!important;}.product-grid{grid-template-columns:1fr!important;}.bs-ext-tabs button{font-size:11px!important;padding:5px 7px!important;}.data-table{font-size:11.5px!important;}.table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.icon-btn.danger{font-size:11px!important;}.modal{width:100%!important;max-width:100%!important;border-radius:14px 14px 0 0!important;}.sidebar .nav a{font-size:13px!important;padding:8px 10px!important;}}
 @media(max-width:380px){.conv-cols{grid-template-columns:1fr 1fr;}.stat-icon{width:30px;height:30px;}.product-grid{grid-template-columns:1fr;}}
 
 /* ============================================================
@@ -3130,6 +3131,7 @@ const LP_RM='<button type="button" onclick="this.closest(\'[data-lp-row]\').remo
 function lpAddThumb(url,alt){
   const c=document.getElementById('lpThumbsContainer');
   const row=document.createElement('div');
+  row.className='lp-thumb-row';
   row.setAttribute('data-lp-row','');
   row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
   row.innerHTML='<input type="url" class="lp-thumb-url" placeholder="ছবির URL" style="flex:2;min-width:200px;'+LP_INP+'" value="'+(url||'')+'">'+
@@ -3141,6 +3143,7 @@ function lpAddThumb(url,alt){
 function lpAddColor(name,hex,thumb){
   const c=document.getElementById('lpColorsContainer');
   const row=document.createElement('div');
+  row.className='lp-color-row';
   row.setAttribute('data-lp-row','');
   row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
   row.innerHTML='<input type="text" class="lp-color-name" placeholder="রং এর নাম (যেমন: সাদা)" style="flex:2;min-width:100px;'+LP_INP+'" value="'+(name||'')+'">'+
@@ -3217,6 +3220,66 @@ function lpAddSidebarRel(name,price,oldPrice,image,link,rating,ratingCount){
   c.appendChild(row);
 }
 
+
+/* ── Landing Page Image Dropzones ── */
+function lpWireDropzones(){
+  var API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
+  var tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
+  var notify=window.toast||function(m,k){};
+
+  function uploadImgToAPI(file,cb){
+    var fd=new FormData();fd.append('image',file);
+    fetch(API+'/upload',{method:'POST',headers:{'Authorization':'Bearer '+tk},body:fd})
+      .then(function(r){return r.json();})
+      .then(function(d){var url=d.url||d.imageUrl||d.src||'';if(url)cb(url);else cb(URL.createObjectURL(file));})
+      .catch(function(){cb(URL.createObjectURL(file));});
+  }
+
+  /* Hero dropzone */
+  var heroDz=document.getElementById('lpHeroDropzone');
+  var heroFile=document.getElementById('lpHeroFile');
+  if(heroDz&&heroFile){
+    heroDz.onclick=function(){heroFile.click();};
+    heroDz.ondragover=function(e){e.preventDefault();heroDz.classList.add('dragover');};
+    heroDz.ondragleave=function(){heroDz.classList.remove('dragover');};
+    heroDz.ondrop=function(e){e.preventDefault();heroDz.classList.remove('dragover');if(e.dataTransfer.files[0])doHeroUpload(e.dataTransfer.files[0]);};
+    heroFile.onchange=function(){if(heroFile.files[0])doHeroUpload(heroFile.files[0]);};
+  }
+  function doHeroUpload(file){
+    notify('আপলোড হচ্ছে...','');
+    uploadImgToAPI(file,function(url){
+      var inp=document.getElementById('lpHeroImage');
+      if(inp){inp.value=url;inp.dispatchEvent(new Event('input'));}
+      notify('হিরো ছবি সেট হয়েছে','ok');
+    });
+  }
+
+  /* Multi-thumb dropzone */
+  var thumbDz=document.getElementById('lpThumbDropzone');
+  var thumbFiles=document.getElementById('lpThumbFiles');
+  if(thumbDz&&thumbFiles){
+    thumbDz.onclick=function(){thumbFiles.click();};
+    thumbDz.ondragover=function(e){e.preventDefault();thumbDz.classList.add('dragover');};
+    thumbDz.ondragleave=function(){thumbDz.classList.remove('dragover');};
+    thumbDz.ondrop=function(e){e.preventDefault();thumbDz.classList.remove('dragover');Array.from(e.dataTransfer.files).forEach(function(f){doThumbUpload(f);});};
+    thumbFiles.onchange=function(){Array.from(thumbFiles.files).forEach(function(f){doThumbUpload(f);});thumbFiles.value='';};
+  }
+  function doThumbUpload(file){
+    uploadImgToAPI(file,function(url){
+      lpAddThumb(url,file.name.replace(/\.[^.]+$/,''));
+      notify('থাম্ব যোগ হয়েছে','ok');
+    });
+  }
+}
+
+/* Hook into modal open */
+(function(){
+  var orig=window.openLandingPageModal;
+  if(typeof orig==='function'){
+    window.openLandingPageModal=function(slug){orig.call(this,slug);setTimeout(lpWireDropzones,100);};
+  }
+})();
+
 function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,ratingCount){
   const c=document.getElementById('lpRelatedGridContainer');
   const row=document.createElement('div');
@@ -3291,8 +3354,13 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
           <div class="form-group2"><label>CTA লিংক</label><input type="text" id="lpHeroCtaLink" placeholder="#order-form"/></div>
         </div>
         <div class="form-group2">
-          <label>মূল পণ্য ছবি (Hero Image URL)</label>
+          <label>মূল পণ্য ছবি (Hero Image URL) — URL দিন অথবা নিচে ড্রাগ/ক্লিক করুন</label>
           <input type="url" id="lpHeroImage" placeholder="https://..." oninput="var p=document.getElementById('lpHeroImgPreview');p.src=this.value;p.style.display=this.value?'block':'none'"/>
+        </div>
+        <div class="bs-ext-dropzone" id="lpHeroDropzone" style="padding:16px;margin-top:8px;font-size:13px;cursor:pointer">
+          <i class="fas fa-cloud-upload-alt" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
+          হিরো ছবি এখানে ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
+          <input type="file" id="lpHeroFile" accept="image/*" style="display:none">
         </div>
         <img id="lpHeroImgPreview" style="display:none;max-height:160px;margin-top:8px;object-fit:contain;border:1px solid #e2e8f0;padding:4px;background:#fff" alt="Hero preview"/>
       </div>
@@ -3300,9 +3368,14 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
       <!-- ③ Thumbnail Images -->
       <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
         <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-images" style="color:#FCA311"></i> থাম্বনেইল ছবিসমূহ (গ্যালারি)</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি থাম্বনেইল ছবির URL ও Alt টেক্সট দিন। প্রথম ছবিটি মূল ছবি হিসেবে দেখাবে।</p>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি থাম্বনেইল ছবির URL ও Alt টেক্সট দিন। একাধিক ছবি একসাথে আপলোড করতে নিচে ড্রাগ করুন।</p>
+        <div class="bs-ext-dropzone" id="lpThumbDropzone" style="padding:16px;margin-bottom:12px;font-size:13px;cursor:pointer">
+          <i class="fas fa-images" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
+          একাধিক ছবি ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
+          <input type="file" id="lpThumbFiles" accept="image/*" multiple style="display:none">
+        </div>
         <div id="lpThumbsContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddThumb()"><i class="fas fa-plus"></i> থাম্বনেইল যোগ করুন</button>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddThumb()"><i class="fas fa-plus"></i> ম্যানুয়ালি URL দিয়ে যোগ করুন</button>
       </div>
 
       <!-- ④ Color Swatches -->

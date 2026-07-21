@@ -746,6 +746,9 @@ function renderPage(p) {
   PRODUCT_NAME = p.title || hero.headline || p.slug;
   PRODUCT_PRICE = hero.priceNow || 0;
   PRODUCT_IMG = hero.image || '';
+  window.PRODUCT_NAME = PRODUCT_NAME;
+  window.PRODUCT_PRICE = Number(PRODUCT_PRICE)||0;
+  window.PRODUCT_IMG = PRODUCT_IMG;
 
   var priceNow = hero.priceNow || 0;
   var priceOld = hero.priceOld || 0;
@@ -919,7 +922,7 @@ function renderPage(p) {
     '</div>' +
     '<div class="pd-extra-actions">' +
     '<a href="#"><i class="fas fa-arrows-left-right"></i> তুলনায় যোগ করুন</a>' +
-    '<a href="#"><i class="fas fa-share-nodes"></i> শেয়ার করুন</a>' +
+    '<a href="#" onclick="bsShareProduct(event)"><i class="fas fa-share-nodes"></i> শেয়ার করুন</a>' +
     '<a href="#"><i class="fas fa-money-bill-wave"></i> ক্যাশ অন ডেলিভারি</a>' +
     '</div></div>' +
 
@@ -1032,6 +1035,59 @@ function bindInteractions(thumbImages, colors) {
   if(buyBtn) buyBtn.addEventListener('click', function(){
     addCart();
     if(window.openOrderForm) openOrderForm();
+  });
+
+  /* Order modal close */
+  var orderCloseBtn = document.getElementById('orderModalClose');
+  if(orderCloseBtn) orderCloseBtn.addEventListener('click', function(){
+    var ov = document.getElementById('orderModalOverlay');
+    if(ov) ov.classList.remove('show');
+  });
+  var orderOvEl = document.getElementById('orderModalOverlay');
+  if(orderOvEl) orderOvEl.addEventListener('click', function(e){
+    if(e.target===orderOvEl) orderOvEl.classList.remove('show');
+  });
+
+  /* Order form submit */
+  var orderFormEl = document.getElementById('orderForm');
+  if(orderFormEl) orderFormEl.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn = document.getElementById('ofConfirmBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...';}
+    var qty = parseInt((document.getElementById('qInput')||{}).value||'1')||1;
+    var delivery = parseInt((document.querySelector('input[name="ofDelivery"]:checked')||{}).value||'70')||70;
+    var total = (window.PRODUCT_PRICE||0)*qty + delivery;
+    var API = (window.BSAdmin&&window.BSAdmin.API_BASE)||'https://bscollectionbd.onrender.com/api';
+    var payload = {
+      customerName: (document.getElementById('ofName')||{}).value||'',
+      phone: (document.getElementById('ofPhone')||{}).value||'',
+      address: {
+        division: (document.getElementById('ofDivision')||{}).value||'',
+        district: (document.getElementById('ofDistrict')||{}).value||'',
+        upazila: (document.getElementById('ofUpazila')||{}).value||'',
+        detail: (document.getElementById('ofArea')||{}).value||''
+      },
+      deliveryCharge: delivery,
+      items: [{name:window.PRODUCT_NAME||'পণ্য', qty:qty, price:window.PRODUCT_PRICE||0, img:window.PRODUCT_IMG||''}],
+      totalAmount: total,
+      source: 'landing_page'
+    };
+    fetch(API+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .catch(function(){})
+      .finally(function(){
+        var ov = document.getElementById('orderModalOverlay');
+        if(ov) ov.classList.remove('show');
+        var succ = document.getElementById('successModalOverlay');
+        if(succ) succ.classList.add('show');
+        if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Confirm Order';}
+      });
+  });
+
+  /* Success modal close */
+  var succBtn = document.getElementById('successCloseBtn');
+  if(succBtn) succBtn.addEventListener('click', function(){
+    var ov = document.getElementById('successModalOverlay');
+    if(ov) ov.classList.remove('show');
   });
 
   /* Thumbnails */
@@ -1200,10 +1256,54 @@ var yearEl = document.getElementById('year'); if(yearEl) yearEl.textContent = ne
   });
 })();
 
-/* Cart sidebar & order form (product-extras.js compatibility) */
-window.openCartSidebar = function(){};
-window.closeCartSidebar = function(){};
-window.openOrderForm = function(){};
+/* Cart sidebar & order form */
+window.openCartSidebar = function(){
+  var sb = document.getElementById('cartSidebar');
+  if(sb){sb.classList.add('open');}
+};
+window.closeCartSidebar = function(){
+  var sb = document.getElementById('cartSidebar');
+  if(sb){sb.classList.remove('open');}
+};
+window.openOrderForm = function(){
+  var overlay = document.getElementById('orderModalOverlay');
+  if(!overlay) return;
+  /* populate order summary */
+  var summaryEl = document.getElementById('orderSummaryMini');
+  if(summaryEl){
+    var qty = parseInt((document.getElementById('qInput')||{}).value||'1')||1;
+    var price = window.PRODUCT_PRICE||0;
+    var total = price * qty;
+    summaryEl.innerHTML =
+      '<div style="display:flex;gap:12px;align-items:center;background:#f8fafc;padding:12px;margin-bottom:12px;border:1px solid #e2e8f0;border-radius:8px">' +
+      (window.PRODUCT_IMG ? '<img src="'+window.PRODUCT_IMG+'" style="width:56px;height:56px;object-fit:contain;border:1px solid #e2e8f0" onerror="this.style.display='none'" alt="">' : '') +
+      '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:#14213D">'+(window.PRODUCT_NAME||'পণ্য')+'</div>' +
+      '<div style="font-size:13px;color:#64748b;margin:2px 0">পরিমাণ: '+qty+'</div>' +
+      '<div style="font-size:18px;font-weight:800;color:#FCA311">৳'+total.toLocaleString('en-IN')+'</div>' +
+      '</div></div>';
+    /* update totals */
+    var delivVal = parseInt((document.querySelector('input[name="ofDelivery"]:checked')||{}).value||'70')||70;
+    var subEl = document.getElementById('ofSubtotal');
+    var delivEl = document.getElementById('ofDeliveryAmt');
+    var grandEl = document.getElementById('ofGrandTotal');
+    if(subEl) subEl.textContent = '৳'+total.toLocaleString('en-IN');
+    if(delivEl) delivEl.textContent = '৳'+delivVal;
+    if(grandEl) grandEl.textContent = '৳'+(total+delivVal).toLocaleString('en-IN');
+  }
+  /* delivery radio change updates totals */
+  document.querySelectorAll('input[name="ofDelivery"]').forEach(function(r){
+    r.onchange = function(){
+      var qty2 = parseInt((document.getElementById('qInput')||{}).value||'1')||1;
+      var sub2 = (window.PRODUCT_PRICE||0)*qty2;
+      var del2 = parseInt(r.value)||0;
+      var dEl = document.getElementById('ofDeliveryAmt');
+      var gEl = document.getElementById('ofGrandTotal');
+      if(dEl) dEl.textContent='৳'+del2;
+      if(gEl) gEl.textContent='৳'+(sub2+del2).toLocaleString('en-IN');
+    };
+  });
+  overlay.classList.add('show');
+};
 
 /* To top */
 var toTop = document.getElementById('toTop');
@@ -1211,6 +1311,121 @@ window.addEventListener('scroll', function(){
   if(toTop) toTop.classList.toggle('show', window.scrollY > 400);
 }, {passive:true});
 if(toTop) toTop.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+
+/* ── Share product ── */
+function bsShareProduct(e){
+  if(e){e.preventDefault();}
+  var url = window.location.href;
+  var title = window.PRODUCT_NAME || document.title;
+  if(navigator.share){
+    navigator.share({title:title, text:title+' — bscollectionbd', url:url}).catch(function(){});
+  } else {
+    try{
+      navigator.clipboard.writeText(url).then(function(){ bsToast('লিংক কপি হয়েছে!','ok'); });
+    } catch(err){
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); bsToast('লিংক কপি হয়েছে!','ok'); } catch(e2){}
+      document.body.removeChild(ta);
+    }
+  }
+}
+
+/* ── Bangladesh address cascading dropdowns ── */
+(function(){
+  var BD = {
+    'ঢাকা':{'ঢাকা':['মিরপুর','উত্তরা','মতিঝিল','গুলশান','ধানমন্ডি','পুরান ঢাকা','কেরানীগঞ্জ','সাভার','আশুলিয়া','মোহাম্মদপুর','বাড্ডা','খিলক্ষেত'],
+      'গাজীপুর':['গাজীপুর সদর','কালীগঞ্জ','কাপাসিয়া','শ্রীপুর','টঙ্গী'],
+      'নারায়ণগঞ্জ':['নারায়ণগঞ্জ সদর','রূপগঞ্জ','সোনারগাঁও','আড়াইহাজার','বন্দর'],
+      'মুন্সিগঞ্জ':['মুন্সিগঞ্জ সদর','লৌহজং','শ্রীনগর','টঙ্গীবাড়ী'],
+      'নরসিংদী':['নরসিংদী সদর','পলাশ','শিবপুর','বেলাব','রায়পুরা'],
+      'কিশোরগঞ্জ':['কিশোরগঞ্জ সদর','হোসেনপুর','কটিয়াদী','ভৈরব'],
+      'ফরিদপুর':['ফরিদপুর সদর','আলফাডাঙ্গা','মধুখালী','সদরপুর','নগরকান্দা'],
+      'মাদারীপুর':['মাদারীপুর সদর','কালকিনি','শিবচর','রাজৈর'],
+      'গোপালগঞ্জ':['গোপালগঞ্জ সদর','কাশিয়ানী','কোটালিপাড়া','মুকসুদপুর','টুঙ্গিপাড়া'],
+      'টাঙ্গাইল':['টাঙ্গাইল সদর','মির্জাপুর','সখিপুর','বাসাইল','ঘাটাইল'],
+      'মানিকগঞ্জ':['মানিকগঞ্জ সদর','শিবালয়','সিঙ্গাইর','ঘিওর'],
+      'রাজবাড়ী':['রাজবাড়ী সদর','গোয়ালন্দ','পাংশা','বালিয়াকান্দি'],
+      'শরীয়তপুর':['শরীয়তপুর সদর','নড়িয়া','ডামুড্যা','ভেদরগঞ্জ']},
+    'চট্টগ্রাম':{'চট্টগ্রাম':['চট্টগ্রাম সদর','আনোয়ারা','বাঁশখালী','বোয়ালখালী','চন্দনাইশ','ফটিকছড়ি','হাটহাজারী','কর্ণফুলী','লোহাগাড়া','মিরসরাই','পটিয়া','রাঙ্গুনিয়া','রাউজান','সাতকানিয়া','সীতাকুণ্ড'],
+      'কক্সবাজার':['কক্সবাজার সদর','চকরিয়া','কুতুবদিয়া','মহেশখালী','পেকুয়া','রামু','টেকনাফ','উখিয়া'],
+      'কুমিল্লা':['কুমিল্লা সদর','বরুড়া','ব্রাহ্মণপাড়া','বুড়িচং','চান্দিনা','চৌদ্দগ্রাম','দাউদকান্দি','দেবিদ্বার','হোমনা','লাকসাম','মুরাদনগর','নাঙ্গলকোট'],
+      'নোয়াখালী':['নোয়াখালী সদর','বেগমগঞ্জ','হাতিয়া','কোম্পানিগঞ্জ','সেনবাগ','সোনাইমুড়ি'],
+      'ফেনী':['ফেনী সদর','ছাগলনাইয়া','দাগনভূঞা','পরশুরাম','সোনাগাজী'],
+      'লক্ষ্মীপুর':['লক্ষ্মীপুর সদর','কমলনগর','রামগঞ্জ','রামগতি','রায়পুর'],
+      'চাঁদপুর':['চাঁদপুর সদর','ফরিদগঞ্জ','হাজীগঞ্জ','কচুয়া','মতলব','শাহরাস্তি'],
+      'ব্রাহ্মণবাড়িয়া':['ব্রাহ্মণবাড়িয়া সদর','আখাউড়া','বাঞ্ছারামপুর','কসবা','নাসিরনগর','নবীনগর'],
+      'খাগড়াছড়ি':['খাগড়াছড়ি সদর','দিঘীনালা','গুইমারা','লক্ষ্মীছড়ি','মহালছড়ি','মানিকছড়ি','মাটিরাঙ্গা','রামগড়'],
+      'রাঙ্গামাটি':['রাঙ্গামাটি সদর','বাঘাইছড়ি','বরকল','কাউখালী','কাপ্তাই','লংগদু','নানিয়ারচর'],
+      'বান্দরবান':['বান্দরবান সদর','আলীকদম','লামা','নাইক্ষ্যংছড়ি','রোয়াংছড়ি','রুমা','থানচি']},
+    'রাজশাহী':{'রাজশাহী':['বোয়ালিয়া','রাজপাড়া','শাহমখদুম','পবা','দুর্গাপুর','মোহনপুর','চারঘাট','পুঠিয়া','বাঘা','গোদাগাড়ী','তানোর'],
+      'বগুড়া':['বগুড়া সদর','আদমদিঘি','ধুনট','দুপচাঁচিয়া','গাবতলী','কাহালু','নন্দীগ্রাম','সারিয়াকান্দি','শাজাহানপুর','শেরপুর','শিবগঞ্জ','সোনাতলা'],
+      'নাটোর':['নাটোর সদর','বাগাতিপাড়া','বড়াইগ্রাম','গুরুদাসপুর','লালপুর','সিংড়া'],
+      'পাবনা':['পাবনা সদর','আটঘরিয়া','বেড়া','ভাঙ্গুড়া','চাটমোহর','ঈশ্বরদী','সাঁথিয়া','সুজানগর'],
+      'সিরাজগঞ্জ':['সিরাজগঞ্জ সদর','বেলকুচি','চৌহালি','কামারখন্দ','কাজিপুর','রায়গঞ্জ','শাহজাদপুর','তাড়াশ','উল্লাপাড়া'],
+      'নওগাঁ':['নওগাঁ সদর','আত্রাই','বদলগাছী','ধামইরহাট','মান্দা','মহাদেবপুর','নিয়ামতপুর','পত্নীতলা','পোরশা','রাণীনগর','সাপাহার'],
+      'চাঁপাইনবাবগঞ্জ':['চাঁপাইনবাবগঞ্জ সদর','ভোলাহাট','গোমস্তাপুর','নাচোল','শিবগঞ্জ'],
+      'জয়পুরহাট':['জয়পুরহাট সদর','আক্কেলপুর','কালাই','ক্ষেতলাল','পাঁচবিবি']},
+    'খুলনা':{'খুলনা':['খুলনা সদর','বটিয়াঘাটা','দাকোপ','ডুমুরিয়া','দিঘলিয়া','কয়রা','পাইকগাছা','ফুলতলা','রূপসা','তেরখাদা'],
+      'যশোর':['যশোর সদর','অভয়নগর','বাঘারপাড়া','চৌগাছা','ঝিকরগাছা','কেশবপুর','মণিরামপুর','শার্শা'],
+      'সাতক্ষীরা':['সাতক্ষীরা সদর','আশাশুনি','দেবহাটা','কালীগঞ্জ','কলারোয়া','শ্যামনগর','তালা'],
+      'নড়াইল':['নড়াইল সদর','কালিয়া','লোহাগড়া'],
+      'কুষ্টিয়া':['কুষ্টিয়া সদর','ভেড়ামারা','দৌলতপুর','খোকসা','কুমারখালী','মিরপুর'],
+      'বাগেরহাট':['বাগেরহাট সদর','চিতলমারী','ফকিরহাট','কচুয়া','মংলা','মোড়েলগঞ্জ','রামপাল'],
+      'মেহেরপুর':['মেহেরপুর সদর','গাংনী','মুজিবনগর'],
+      'ঝিনাইদহ':['ঝিনাইদহ সদর','হরিণাকুন্ডু','কালীগঞ্জ','কোটচাঁদপুর','মহেশপুর','শৈলকুপা'],
+      'মাগুরা':['মাগুরা সদর','মহম্মদপুর','শালিখা','শ্রীপুর'],
+      'চুয়াডাঙ্গা':['চুয়াডাঙ্গা সদর','আলমডাঙ্গা','দামুড়হুদা','জীবননগর']},
+    'বরিশাল':{'বরিশাল':['বরিশাল সদর','আগৈলঝাড়া','বাকেরগঞ্জ','বামনা','বানারীপাড়া','গৌরনদী','হিজলা','মেহেন্দিগঞ্জ','মুলাদী','উজিরপুর'],
+      'পটুয়াখালী':['পটুয়াখালী সদর','বাউফল','দশমিনা','দুমকি','গলাচিপা','কলাপাড়া','মির্জাগঞ্জ'],
+      'ভোলা':['ভোলা সদর','বোরহানউদ্দিন','চরফ্যাশন','দৌলতখান','লালমোহন','মনপুরা','তজুমদ্দিন'],
+      'বরগুনা':['বরগুনা সদর','আমতলী','বামনা','বেতাগী','পাথরঘাটা','তালতলী'],
+      'ঝালকাঠি':['ঝালকাঠি সদর','কাঠালিয়া','নলছিটি','রাজাপুর'],
+      'পিরোজপুর':['পিরোজপুর সদর','ভান্ডারিয়া','কাউখালী','মঠবাড়িয়া','নাজিরপুর','নেছারাবাদ']},
+    'সিলেট':{'সিলেট':['সিলেট সদর','বালাগঞ্জ','বিয়ানীবাজার','বিশ্বনাথ','কোম্পানিগঞ্জ','ফেঞ্চুগঞ্জ','গোলাপগঞ্জ','গোয়াইনঘাট','জকিগঞ্জ','কানাইঘাট','ওসমানীনগর'],
+      'মৌলভীবাজার':['মৌলভীবাজার সদর','বড়লেখা','জুড়ী','কমলগঞ্জ','কুলাউড়া','রাজনগর','শ্রীমঙ্গল'],
+      'হবিগঞ্জ':['হবিগঞ্জ সদর','আজমিরীগঞ্জ','বানিয়াচং','চুনারুঘাট','লাখাই','মাধবপুর','নবীগঞ্জ'],
+      'সুনামগঞ্জ':['সুনামগঞ্জ সদর','ছাতক','দিরাই','দোয়ারাবাজার','জগন্নাথপুর','জামালগঞ্জ','ধর্মপাশা','তাহিরপুর']},
+    'রংপুর':{'রংপুর':['রংপুর সদর','বদরগঞ্জ','গঙ্গাচড়া','কাউনিয়া','মিঠাপুকুর','পীরগাছা','পীরগঞ্জ','তারাগঞ্জ'],
+      'দিনাজপুর':['দিনাজপুর সদর','বিরামপুর','বিরল','বোচাগঞ্জ','চিরিরবন্দর','ফুলবাড়ী','ঘোড়াঘাট','হাকিমপুর','কাহারোল','খানসামা','নবাবগঞ্জ','পার্বতীপুর'],
+      'গাইবান্ধা':['গাইবান্ধা সদর','ফুলছড়ি','গোবিন্দগঞ্জ','পলাশবাড়ী','সাদুল্যাপুর','সাঘাটা','সুন্দরগঞ্জ'],
+      'কুড়িগ্রাম':['কুড়িগ্রাম সদর','ভুরুঙ্গামারী','চিলমারী','ফুলবাড়ী','নাগেশ্বরী','রাজারহাট','রৌমারী','উলিপুর'],
+      'লালমনিরহাট':['লালমনিরহাট সদর','আদিতমারী','হাতীবান্ধা','কালীগঞ্জ','পাটগ্রাম'],
+      'নীলফামারী':['নীলফামারী সদর','ডিমলা','ডোমার','জলঢাকা','কিশোরগঞ্জ','সৈয়দপুর'],
+      'পঞ্চগড়':['পঞ্চগড় সদর','আটোয়ারী','বোদা','দেবীগঞ্জ','তেতুলিয়া'],
+      'ঠাকুরগাঁও':['ঠাকুরগাঁও সদর','বালিয়াডাঙ্গী','হরিপুর','পীরগঞ্জ','রাণীশংকৈল']},
+    'ময়মনসিংহ':{'ময়মনসিংহ':['ময়মনসিংহ সদর','ভালুকা','ধোবাউড়া','ফুলবাড়িয়া','গফরগাঁও','গৌরীপুর','হালুয়াঘাট','ঈশ্বরগঞ্জ','মুক্তাগাছা','নান্দাইল','ফুলপুর','তারাকান্দা','ত্রিশাল'],
+      'জামালপুর':['জামালপুর সদর','বকশীগঞ্জ','দেওয়ানগঞ্জ','ইসলামপুর','মাদারগঞ্জ','মেলান্দহ','সরিষাবাড়ী'],
+      'শেরপুর':['শেরপুর সদর','ঝিনাইগাতী','নকলা','নালিতাবাড়ী','শ্রীবরদী'],
+      'নেত্রকোণা':['নেত্রকোণা সদর','আটপাড়া','বারহাট্টা','দুর্গাপুর','খালিয়াজুড়ী','কলমাকান্দা','কেন্দুয়া','মদন','মোহনগঞ্জ','পূর্বধলা']}
+  };
+  var divSel = document.getElementById('ofDivision');
+  var distSel = document.getElementById('ofDistrict');
+  var upaSel = document.getElementById('ofUpazila');
+  if(!divSel||!distSel||!upaSel) return;
+  Object.keys(BD).forEach(function(div){
+    var o=document.createElement('option');o.value=div;o.textContent=div;divSel.appendChild(o);
+  });
+  divSel.addEventListener('change', function(){
+    distSel.innerHTML='<option value="">জেলা নির্বাচন করুন</option>';
+    distSel.disabled=!divSel.value;
+    upaSel.innerHTML='<option value="">প্রথমে জেলা নির্বাচন করুন</option>';
+    upaSel.disabled=true;
+    if(!divSel.value) return;
+    var dists=BD[divSel.value]||{};
+    Object.keys(dists).forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;distSel.appendChild(o);});
+  });
+  distSel.addEventListener('change', function(){
+    upaSel.innerHTML='<option value="">থানা/উপজেলা নির্বাচন করুন</option>';
+    upaSel.disabled=!distSel.value;
+    if(!divSel.value||!distSel.value) return;
+    var upas=(BD[divSel.value]||{})[distSel.value]||[];
+    upas.forEach(function(u){var o=document.createElement('option');o.value=u;o.textContent=u;upaSel.appendChild(o);});
+  });
+})();
 
 /* Start */
 init();
