@@ -117,7 +117,7 @@ body[data-theme="dark"] .product-thumb{background:#241B12;}
 
 /* Main */
 .main{margin-left:var(--sidebar-w);padding:0 28px 60px;min-width:0;}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:8px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;min-height:56px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:8px 0;margin-bottom:18px;transition:box-shadow .2s,background .2s;min-height:56px;}
 .topbar.scrolled{box-shadow:0 4px 14px rgba(20,20,30,.06);border-bottom:1px solid var(--border);}
 .topbar h1{font-size:24px;font-weight:800;}
 .topbar-left{display:flex;align-items:center;gap:12px;}
@@ -142,9 +142,23 @@ body[data-theme="dark"] .profile-btn{background:var(--card);}
 .dropdown-menu hr{border:none;border-top:1px solid var(--border);margin:6px 2px;}
 .notif-item .cell-sub{font-size:11px;margin-top:1px;}
 .notif-item .cell-main{font-size:12.5px;}
-.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 14px;width:280px;color:var(--text-soft);font-size:13px;}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 14px;width:280px;color:var(--text-soft);font-size:13px;position:relative;}
+body[data-theme="dark"] .search{background:var(--card);}
 .search svg{width:16px;height:16px;flex-shrink:0;color:var(--text-soft);}
 .search input{border:none;outline:none;font-size:13px;width:100%;background:transparent;font-family:inherit;}
+.global-search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 30px rgba(20,20,30,.12);max-height:360px;overflow-y:auto;z-index:70;display:none;padding:6px;}
+.global-search-results.open{display:block;}
+.gsr-section-label{font-size:10.5px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px 4px;}
+.gsr-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;}
+.gsr-item:hover{background:var(--bg);}
+.gsr-thumb{width:30px;height:30px;border-radius:8px;background:var(--orange-bg);color:var(--orange);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.gsr-thumb img{width:100%;height:100%;object-fit:cover;}
+.gsr-thumb svg{width:15px;height:15px;}
+.gsr-name{font-size:12.5px;font-weight:600;color:var(--text);}
+.gsr-meta{font-size:11px;color:var(--text-soft);margin-top:1px;}
+.gsr-empty{padding:16px;text-align:center;font-size:12.5px;color:var(--text-soft);}
+.gsr-more{padding:8px 10px;text-align:center;font-size:11.5px;font-weight:600;color:var(--orange);cursor:pointer;}
+.gsr-more:hover{text-decoration:underline;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px;}
 .stats-row.cols-3{grid-template-columns:repeat(3,1fr);}
@@ -566,9 +580,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       <h1 id="pageTitle">Dashboard</h1>
     </div>
     <div class="topbar-right">
-      <div class="search">
+      <div class="search" id="globalSearchWrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="globalSearch" placeholder="Search…">
+        <input type="text" id="globalSearch" placeholder="পণ্য বা ক্যাটাগরি সার্চ করুন…" autocomplete="off">
+        <div class="global-search-results" id="globalSearchResults"></div>
       </div>
       <button class="icon-btn" id="themeToggle" title="Toggle dark mode">
         <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
@@ -773,7 +788,14 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="pill-btn ghost" id="refreshProductsBtn">Refresh <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v5h-5"/></svg></button>
           <button class="pill-btn" id="addProductBtn">Add Product <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
-          <button class="pill-btn" id="addLandingPageBtn2">ল্যান্ডিং পেজ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg></button>
+          <div class="dropdown" id="lpMenuDropdown">
+            <button class="pill-btn" id="addLandingPageBtn2">ল্যান্ডিং পেজ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="dropdown-menu" id="lpMenuDropdownMenu" style="min-width:230px;">
+              <div class="dd-item" id="lpMenuCreateNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> নতুন পেজ তৈরি করুন</div>
+              <div class="dd-item" id="lpMenuViewList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg> তৈরিকৃত পেজসমূহ দেখুন</div>
+            </div>
+          </div>
+          <button class="pill-btn ghost" id="openBulkImageBtn"><i class="fas fa-image"></i> সব পণ্যে ছবি বসান</button>
         </div>
       </div>
       <div class="filter-bar">
@@ -1409,7 +1431,7 @@ function renderProductGrid(){
     const isActive = p.active!==false && p.stock!==0;
     const thumbContent = p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;${isActive?'':'filter:grayscale(1);opacity:.55;'}" onerror="this.parentNode.innerHTML='${icon}'">` : icon;
     const ratingHtml = p.rating ? `<span style="color:#FCA311;font-size:12px;font-weight:600;"><i class="fas fa-star"></i> ${Number(p.rating).toFixed(1)}</span>` : '';
-    return `<div class="card product-card" data-cat="${p.categorySlug||''}">
+    return `<div class="card product-card" data-cat="${p.categorySlug||''}" data-pid="${esc(p._id)}">
       <div class="product-thumb" style="position:relative;">${thumbContent}${isActive?'':'<span style="position:absolute;top:8px;right:8px;background:#dc2626;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">বন্ধ</span>'}</div>
       <div class="product-cat" style="display:flex;align-items:center;justify-content:space-between;">${esc(p.cat||p.categorySlug||'—')}${ratingHtml}</div>
       <div class="product-name">${esc(p.name)}</div>
@@ -1440,7 +1462,20 @@ document.querySelectorAll('#productSortMenu .dd-item').forEach(item=>{
 let allCatsForModal = [];
 
 document.getElementById('addProductBtn').addEventListener('click', ()=>openProductModal());
-document.getElementById('addLandingPageBtn2').addEventListener('click', ()=> openLandingPageModal());
+
+/* ল্যান্ডিং পেজ ড্রপডাউন: নতুন পেজ তৈরি করুন / তৈরিকৃত পেজসমূহ দেখুন */
+setupDropdown('addLandingPageBtn2','lpMenuDropdownMenu');
+document.getElementById('lpMenuCreateNew').addEventListener('click', ()=>{
+  document.getElementById('lpMenuDropdownMenu').classList.remove('open');
+  openLandingPageModal();
+});
+document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
+  document.getElementById('lpMenuDropdownMenu').classList.remove('open');
+  openLandingPagesListModal();
+});
+
+/* সব পণ্যে ছবি বসানোর টুল */
+document.getElementById('openBulkImageBtn').addEventListener('click', ()=> openBulkImageModal());
 
 function openProductModal(id){
   const modal = document.getElementById('productModal');
@@ -1856,14 +1891,94 @@ setupDropdown('convPeriodBtn','convPeriodMenu');
 document.querySelectorAll('#convPeriodMenu .dd-item').forEach(item=>{item.addEventListener('click',()=>{document.querySelector('#convPeriodBtn .btn-label').textContent=item.textContent;renderConvPeriod(item.dataset.value);document.getElementById('convPeriodMenu').classList.remove('open');});});
 
 /* ============================================================
-   GLOBAL SEARCH
+   GLOBAL SEARCH — পণ্য ও ক্যাটাগরি ইনস্ট্যান্ট সার্চ (যেকোনো পেজ থেকে)
    ============================================================ */
+const gsrIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>`;
+const gsrCatIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+
+function switchToPage(pageKey){
+  const navLink = document.querySelector('.nav a[data-page="'+pageKey+'"]');
+  if(navLink) navLink.click();
+}
+
+function renderGlobalSearchResults(term){
+  const panel = document.getElementById('globalSearchResults');
+  if(!panel) return;
+  if(!term){ panel.classList.remove('open'); panel.innerHTML=''; return; }
+  const t = term.toLowerCase();
+  const matchedCats = (typeof allCategories!=='undefined' ? allCategories : []).filter(c=>(c.name||'').toLowerCase().includes(t)).slice(0,4);
+  const matchedProducts = (typeof allProducts!=='undefined' ? allProducts : []).filter(p=>
+    (p.name||'').toLowerCase().includes(t) || (p.cat||'').toLowerCase().includes(t) || (p.categorySlug||'').toLowerCase().includes(t)
+  ).slice(0,6);
+  let html = '';
+  if(matchedCats.length){
+    html += '<div class="gsr-section-label">ক্যাটাগরি</div>';
+    matchedCats.forEach(c=>{
+      html += '<div class="gsr-item" data-cat-slug="'+esc(c.slug||'')+'"><div class="gsr-thumb">'+(c.img?('<img src="'+c.img+'" onerror="this.parentNode.innerHTML=\''+gsrCatIcon.replace(/'/g,"\\'")+'\'">'):gsrCatIcon)+'</div><div><div class="gsr-name">'+esc(c.name)+'</div><div class="gsr-meta">ক্যাটাগরি দেখুন</div></div></div>';
+    });
+  }
+  if(matchedProducts.length){
+    html += '<div class="gsr-section-label">পণ্য</div>';
+    matchedProducts.forEach(p=>{
+      html += '<div class="gsr-item" data-prod-id="'+esc(p._id)+'"><div class="gsr-thumb">'+(p.img?('<img src="'+p.img+'" onerror="this.parentNode.innerHTML=\''+gsrIcon.replace(/'/g,"\\'")+'\'">'):gsrIcon)+'</div><div><div class="gsr-name">'+esc(p.name)+'</div><div class="gsr-meta">'+esc(p.cat||p.categorySlug||'—')+' · ৳'+(p.now||0).toLocaleString()+'</div></div></div>';
+    });
+  }
+  if(!html){ html = '<div class="gsr-empty">কোনো ফলাফল পাওয়া যায়নি</div>'; }
+  panel.innerHTML = html;
+  panel.classList.add('open');
+  panel.querySelectorAll('[data-prod-id]').forEach(el=>{ el.addEventListener('click', ()=> goToProductResult(el.getAttribute('data-prod-id'))); });
+  panel.querySelectorAll('[data-cat-slug]').forEach(el=>{ el.addEventListener('click', ()=> goToCategoryResult(el.getAttribute('data-cat-slug'))); });
+}
+
+function goToProductResult(id){
+  document.getElementById('globalSearchResults').classList.remove('open');
+  document.getElementById('globalSearch').value='';
+  switchToPage('products');
+  productCurrentCat = '';
+  document.querySelectorAll('#productCatChips .chip').forEach(c=>c.classList.toggle('active', !c.dataset.cat));
+  renderProductGrid();
+  setTimeout(()=>{
+    const card = document.querySelector('.product-card[data-pid="'+id+'"]');
+    if(card){
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      card.style.outline='2px solid var(--orange)';
+      card.style.outlineOffset='2px';
+      setTimeout(()=>{ card.style.outline=''; card.style.outlineOffset=''; }, 2200);
+    }
+  }, 150);
+}
+
+function goToCategoryResult(slug){
+  document.getElementById('globalSearchResults').classList.remove('open');
+  document.getElementById('globalSearch').value='';
+  switchToPage('products');
+  setTimeout(()=>{
+    const chip = document.querySelector('#productCatChips .chip[data-cat="'+slug+'"]');
+    if(chip) chip.click();
+  }, 150);
+}
+
 document.getElementById('globalSearch').addEventListener('input', function(){
   const term=this.value.trim().toLowerCase();
   const activePage=document.querySelector('.page.active');
-  if(!activePage) return;
-  activePage.querySelectorAll('table.data-table tbody tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(term)?'':'none';});
-  activePage.querySelectorAll('.product-grid .product-card').forEach(pc=>{pc.style.display=pc.textContent.toLowerCase().includes(term)?'':'none';});
+  if(activePage){
+    activePage.querySelectorAll('table.data-table tbody tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(term)?'':'none';});
+    activePage.querySelectorAll('.product-grid .product-card').forEach(pc=>{pc.style.display=pc.textContent.toLowerCase().includes(term)?'':'none';});
+  }
+  renderGlobalSearchResults(term);
+});
+document.getElementById('globalSearch').addEventListener('focus', function(){
+  if(this.value.trim()) renderGlobalSearchResults(this.value.trim());
+});
+document.getElementById('globalSearch').addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ this.value=''; document.getElementById('globalSearchResults').classList.remove('open'); this.blur(); }
+});
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('globalSearchWrap');
+  if(wrap && !wrap.contains(e.target)){
+    const panel = document.getElementById('globalSearchResults');
+    if(panel) panel.classList.remove('open');
+  }
 });
 
 /* ============================================================
@@ -1886,25 +2001,79 @@ function setupDropdown(btnId,menuId){
 setupDropdown('notifBtn','notifMenu');
 setupDropdown('profileBtn','profileMenu');
 document.addEventListener('click',()=>document.querySelectorAll('.dropdown-menu.open').forEach(m=>m.classList.remove('open')));
+
+/* নোটিফিকেশন পার্সিসট্যান্স — একবার দেখানো/ক্লিক করা নোটিফিকেশন আর ফিরে আসবে না */
+function getDismissedNotifIds(){
+  try{ return JSON.parse(localStorage.getItem('bs_dismissed_notifs')||'[]'); }catch(_){ return []; }
+}
+function addDismissedNotifId(id){
+  const list = getDismissedNotifIds();
+  if(!list.includes(id)){ list.push(id); localStorage.setItem('bs_dismissed_notifs', JSON.stringify(list)); }
+}
+let notifCache = {}; // id -> {type, data}
+
 document.getElementById('markAllRead').addEventListener('click',e=>{
   e.preventDefault();
+  Object.keys(notifCache).forEach(id=>addDismissedNotifId(id));
+  notifCache = {};
+  const el = document.getElementById('notifList');
+  if(el) el.innerHTML = '<div class="dd-item notif-item"><div><div class="cell-main" style="color:#94a3b8">কোনো নতুন নোটিফিকেশন নেই</div></div></div>';
   document.querySelector('#notifBtn .dot')?.remove();
   document.getElementById('notifMenu').classList.remove('open');
   showToast('সব নোটিফিকেশন পড়া হয়েছে');
 });
+
+function handleNotifClick(id){
+  const entry = notifCache[id];
+  addDismissedNotifId(id);
+  const rowEl = document.querySelector('.notif-item[data-notif-id="'+id+'"]');
+  if(rowEl) rowEl.remove();
+  const remaining = document.querySelectorAll('#notifList .notif-item[data-notif-id]').length;
+  const dot = document.querySelector('#notifBtn .dot');
+  if(dot) dot.style.display = remaining>0 ? '' : 'none';
+  if(remaining===0){
+    const el = document.getElementById('notifList');
+    if(el) el.innerHTML = '<div class="dd-item notif-item"><div><div class="cell-main" style="color:#94a3b8">কোনো নতুন নোটিফিকেশন নেই</div></div></div>';
+  }
+  document.getElementById('notifMenu').classList.remove('open');
+  if(!entry) return;
+  if(entry.type==='order'){
+    if(typeof allOrders!=='undefined'){
+      const idx = allOrders.findIndex(o=>o._id===id);
+      if(idx===-1) allOrders.push(entry.data);
+    }
+    if(typeof switchToPage==='function') switchToPage('orders');
+    setTimeout(()=>{ if(typeof openOrderModal==='function') openOrderModal(id); }, 60);
+  } else if(entry.type==='contact'){
+    if(typeof window.bsExtContactDetail==='function'){
+      window.bsExtContactDetail(id);
+    } else if(typeof switchToPage==='function'){
+      switchToPage('messages');
+    }
+  }
+}
+
 async function loadNotifications(){
   try{
+    const dismissed = getDismissedNotifIds();
     const [oRes, cRes] = await Promise.all([
-      apiFetch('/orders?status=Pending&limit=5'),
+      apiFetch('/orders?status=Pending&limit=8'),
       apiFetch('/contacts'),
     ]);
     const oData = await oRes.json().catch(()=>({orders:[]}));
     const cData = await cRes.json().catch(()=>[]);
-    const pendingOrders = (oData.orders||[]).slice(0,3);
-    const unreadMsgs = (Array.isArray(cData)?cData:[]).filter(c=>!c.read).slice(0,2);
+    const pendingOrders = (oData.orders||[]).filter(o=>!dismissed.includes(o._id)).slice(0,6);
+    const unreadMsgs = (Array.isArray(cData)?cData:[]).filter(c=>!c.read && !dismissed.includes(c._id)).slice(0,4);
+    notifCache = {};
     let items = '';
-    pendingOrders.forEach(o=>{ items += '<div class="dd-item notif-item"><div><div class="cell-main">নতুন অর্ডার: '+esc(o.customer?.name||'')+'</div><div class="cell-sub">'+esc(o.orderId||'')+' — Tk '+esc(String(o.total||0))+'</div></div></div>'; });
-    unreadMsgs.forEach(c=>{ items += '<div class="dd-item notif-item"><div><div class="cell-main">যোগাযোগ: '+esc(c.name)+'</div><div class="cell-sub">'+esc((c.message||'').substring(0,40))+'…</div></div></div>'; });
+    pendingOrders.forEach(o=>{
+      notifCache[o._id] = {type:'order', data:o};
+      items += '<div class="dd-item notif-item" data-notif-id="'+o._id+'" style="cursor:pointer" onclick="handleNotifClick(\''+o._id+'\')"><div><div class="cell-main">নতুন অর্ডার: '+esc(o.customer?.name||'')+'</div><div class="cell-sub">'+esc(o.orderId||'')+' — Tk '+esc(String(o.total||0))+'</div></div></div>';
+    });
+    unreadMsgs.forEach(c=>{
+      notifCache[c._id] = {type:'contact', data:c};
+      items += '<div class="dd-item notif-item" data-notif-id="'+c._id+'" style="cursor:pointer" onclick="handleNotifClick(\''+c._id+'\')"><div><div class="cell-main">যোগাযোগ: '+esc(c.name)+'</div><div class="cell-sub">'+esc((c.message||'').substring(0,40))+'…</div></div></div>';
+    });
     if(!items) items = '<div class="dd-item notif-item"><div><div class="cell-main" style="color:#94a3b8">কোনো নতুন নোটিফিকেশন নেই</div></div></div>';
     const el = document.getElementById('notifList'); if(el) el.innerHTML = items;
     const total = pendingOrders.length + unreadMsgs.length;
@@ -1913,6 +2082,10 @@ async function loadNotifications(){
   }catch(_){}
 }
 document.getElementById('notifBtn').addEventListener('click', ()=>{ if(isLoggedIn()) loadNotifications(); });
+// পেজ লোড হওয়ার সময় ব্যাকগ্রাউন্ডে একবার চেক করে রাখা হয় যাতে অপঠিত অর্ডার থাকলে ডট দেখা যায়
+setTimeout(()=>{ if(isLoggedIn()) loadNotifications(); }, 1400);
+// প্রতি ৬০ সেকেন্ডে নতুন অর্ডার/মেসেজ আছে কিনা চেক করা হয় (নোটিফিকেশন জমে থাকার জন্য)
+setInterval(()=>{ if(isLoggedIn()) loadNotifications(); }, 60000);
 
 /* ============================================================
    STICKY TOPBAR
@@ -3033,6 +3206,45 @@ window.bsRemovePromo = function(idx){
   </div>
 </div>
 
+<!-- ===================== LANDING PAGES — তৈরিকৃত পেজসমূহের লিস্ট ===================== -->
+<div class="modal-overlay hidden" id="landingPagesListModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3>তৈরিকৃত ল্যান্ডিং পেজসমূহ</h3>
+      <button class="modal-close" onclick="document.getElementById('landingPagesListModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="lpListBody"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></div>
+    </div>
+    <div class="modal-footer">
+      <div style="margin-right:auto;font-size:12px;color:var(--text-soft);" id="lpListCount"></div>
+      <button class="cancel-btn" onclick="document.getElementById('landingPagesListModal').classList.add('hidden')">বন্ধ করুন</button>
+      <button class="save-btn" onclick="document.getElementById('landingPagesListModal').classList.add('hidden');openLandingPageModal();"><i class="fas fa-plus"></i> নতুন পেজ তৈরি করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== প্রোডাক্টে বাল্ক ছবি বসানো ===================== -->
+<div class="modal-overlay hidden" id="bulkImageModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3>সকল পণ্যে ছবি বসান</h3>
+      <button class="modal-close" onclick="document.getElementById('bulkImageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--orange-bg);color:#8a5a06;border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;margin-bottom:14px;">
+        <b>যেভাবে কাজ করে:</b> যে পণ্যগুলোর নিজস্ব ছবি নেই, সেগুলোর ক্যাটাগরির ছবি থাকলে তা স্বয়ংক্রিয়ভাবে বসিয়ে দেওয়া হয়েছে (নিচে দেখুন)। যেগুলোর জন্য উপযুক্ত ছবি পাওয়া যায়নি, সেগুলোর পাশে <b>"SkyBuy-তে খুঁজুন"</b> বাটনে ক্লিক করুন — এটি নতুন ট্যাবে skybuybd.com খুলবে এবং পণ্যের নাম কপি করে রাখবে; সেখান থেকে মিলে যাওয়া ছবির লিংক কপি করে নিচের ঘরে বসিয়ে দিন, তারপর সব সেভ করুন।
+      </div>
+      <div id="bulkImageBody"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></div>
+    </div>
+    <div class="modal-footer">
+      <div style="margin-right:auto;font-size:12px;color:var(--text-soft);" id="bulkImageCount"></div>
+      <button class="cancel-btn" onclick="document.getElementById('bulkImageModal').classList.add('hidden')">বাতিল</button>
+      <button class="save-btn" id="bulkImageSaveBtn" onclick="saveBulkImages()"><i class="fas fa-save"></i> সব সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা (Products পেজ থেকে ব্যবহৃত)
@@ -3459,6 +3671,150 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
     '<input type="url" class="lp-rg-img" placeholder="ছবির URL" style="flex:2;min-width:140px;'+LP_INP+'" value="'+(image||'')+'">'+
     '<input type="text" class="lp-rg-link" placeholder="পণ্যের লিংক (HTML পেজ)" style="flex:1;min-width:120px;'+LP_INP+'" value="'+(link||'')+'"></div>';
   c.appendChild(row);
+}
+</script>
+
+<script>
+/* ============================================================
+   ল্যান্ডিং পেজ — তৈরিকৃত পেজসমূহের লিস্ট
+   ============================================================ */
+async function openLandingPagesListModal(){
+  const modal = document.getElementById('landingPagesListModal');
+  const body = document.getElementById('lpListBody');
+  modal.classList.remove('hidden');
+  body.innerHTML = '<div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div>';
+  try{
+    if(typeof allProducts==='undefined' || !allProducts.length){ try{ await loadProducts(); }catch(_){} }
+    const pages = await apiJSON('/landing-pages');
+    const list = Array.isArray(pages) ? pages : (pages && Array.isArray(pages.pages) ? pages.pages : []);
+    renderLandingPagesList(list);
+  }catch(e){
+    body.innerHTML = '<div class="lp-empty"><div class="lp-empty-icon"><i class="fas fa-triangle-exclamation"></i></div><strong>লিস্ট লোড করা যায়নি</strong><span>'+esc((e&&e.message)||'সার্ভারে সমস্যা হয়েছে')+'</span></div>';
+  }
+}
+
+function renderLandingPagesList(pages){
+  const body = document.getElementById('lpListBody');
+  const countEl = document.getElementById('lpListCount');
+  if(!pages || !pages.length){
+    body.innerHTML = '<div class="lp-empty"><div class="lp-empty-icon"><i class="fas fa-file-circle-plus"></i></div><strong>এখনো কোনো ল্যান্ডিং পেজ তৈরি হয়নি</strong><span>"নতুন পেজ তৈরি করুন" বাটনে ক্লিক করে প্রথম পেজটি তৈরি করুন।</span></div>';
+    if(countEl) countEl.textContent = '';
+    return;
+  }
+  if(countEl) countEl.textContent = pages.length + ' টি পেজ পাওয়া গেছে';
+  body.innerHTML = '<div class="table-wrap"><table class="data-table"><thead><tr><th>পেজ</th><th>ক্যাটাগরি</th><th>স্ট্যাটাস</th><th>লিংক / যুক্ততা</th><th>Actions</th></tr></thead><tbody>' +
+    pages.map(function(p){
+      const linked = (typeof allProducts!=='undefined'?allProducts:[]).find(function(x){ return x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+p.slug)!==-1; });
+      const heroImg = p.hero && p.hero.image;
+      const thumb = heroImg ? ('<img src="'+heroImg+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display=\'none\'">') : '<i class="fas fa-file-lines"></i>';
+      const active = p.active!==false;
+      const safeSlug = String(p.slug||'').replace(/'/g,"\\'");
+      const safeTitle = esc(p.title||p.slug||'').replace(/'/g,"\\'");
+      return '<tr>' +
+        '<td><div class="lp-row-title"><div class="lp-thumb">'+thumb+'</div><div><span class="lp-name">'+esc(p.title||p.slug)+'</span><br><span class="lp-slug">'+esc(p.slug)+'</span></div></div></td>' +
+        '<td>'+esc(p.category||'—')+'</td>' +
+        '<td><span class="stock-dot '+(active?'in':'out')+'">'+(active?'সক্রিয়':'নিষ্ক্রিয়')+'</span></td>' +
+        '<td>'+(linked?('<span class="lp-link-badge linked"><i class="fas fa-link"></i> '+esc(linked.name)+'</span>'):('<span class="lp-link-badge unlinked"><i class="fas fa-link-slash"></i> কোনো পণ্যে যুক্ত নয়</span>'))+
+          '<br><a class="lp-preview-link" href="../frontend/landing.html?slug='+encodeURIComponent(p.slug)+'" target="_blank"><i class="fas fa-arrow-up-right-from-square"></i> প্রিভিউ</a></td>' +
+        '<td><div style="display:flex;gap:6px;flex-wrap:wrap;">'+
+          '<button class="act-btn" onclick="document.getElementById(\'landingPagesListModal\').classList.add(\'hidden\');openLandingPageModal(\''+safeSlug+'\')"><i class="fas fa-pen"></i> সম্পাদনা</button>'+
+          '<button class="act-btn danger" onclick="deleteLandingPageFromList(\''+safeSlug+'\',\''+safeTitle+'\')"><i class="fas fa-trash"></i> মুছুন</button>'+
+        '</div></td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody></table></div>';
+}
+
+function deleteLandingPageFromList(slug, title){
+  if(!confirm('"'+title+'" ল্যান্ডিং পেজটি মুছে ফেলতে চান? এই কাজটি ফেরানো যাবে না।')) return;
+  apiFetch('/landing-pages/'+encodeURIComponent(slug), {method:'DELETE', headers:authHeaders()})
+    .then(function(r){
+      if(!r||!r.ok) throw new Error('মুছতে ব্যর্থ হয়েছে');
+      showToast('পেজ মুছে ফেলা হয়েছে','success');
+      openLandingPagesListModal();
+    })
+    .catch(function(e){ showToast('সমস্যা: '+e.message,'error'); });
+}
+
+/* ============================================================
+   সকল পণ্যে ছবি বসানোর টুল
+   ============================================================ */
+async function openBulkImageModal(){
+  const modal = document.getElementById('bulkImageModal');
+  const body = document.getElementById('bulkImageBody');
+  modal.classList.remove('hidden');
+  body.innerHTML = '<div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div>';
+  try{
+    if(typeof allProducts==='undefined' || !allProducts.length){ try{ await loadProducts(); }catch(_){} }
+    if(typeof allCategories==='undefined' || !allCategories.length){ try{ await loadCategories(); }catch(_){} }
+    const missing = (allProducts||[]).filter(function(p){ return !p.img; });
+    renderBulkImageRows(missing);
+  }catch(e){
+    body.innerHTML = '<div class="lp-empty"><div class="lp-empty-icon"><i class="fas fa-triangle-exclamation"></i></div><strong>লোড করা যায়নি</strong><span>'+esc((e&&e.message)||'')+'</span></div>';
+  }
+}
+
+function renderBulkImageRows(missing){
+  const body = document.getElementById('bulkImageBody');
+  const countEl = document.getElementById('bulkImageCount');
+  if(!missing || !missing.length){
+    body.innerHTML = '<div class="lp-empty"><div class="lp-empty-icon"><i class="fas fa-circle-check"></i></div><strong>সব পণ্যেই ছবি আছে</strong><span>নতুন কোনো পণ্য ছবি ছাড়া যোগ হলে এখানে দেখাবে।</span></div>';
+    if(countEl) countEl.textContent = '';
+    return;
+  }
+  if(countEl) countEl.textContent = missing.length + ' টি পণ্যে ছবি নেই';
+  body.innerHTML = missing.map(function(p){
+    const cat = (typeof allCategories!=='undefined'?allCategories:[]).find(function(c){ return c.slug===p.categorySlug; });
+    const suggested = (cat && cat.img) || '';
+    const safeName = esc(p.name||'').replace(/'/g,"\\'");
+    return '<div data-bulk-row data-pid="'+esc(p._id)+'" style="'+LP_ROW_STYLE+';display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'+
+      '<div class="product-thumb bulk-preview" style="width:52px;height:52px;flex-shrink:0;">'+(suggested?('<img src="'+suggested+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display=\'none\'">'):gsrIcon)+'</div>'+
+      '<div style="flex:1;min-width:160px;"><div style="font-weight:700;font-size:13px;">'+esc(p.name)+'</div><div style="font-size:11.5px;color:var(--text-soft);">'+esc(p.cat||p.categorySlug||'—')+(suggested?' · ক্যাটাগরির ছবি স্বয়ংক্রিয়ভাবে বসানো হয়েছে':' · উপযুক্ত ছবি খুঁজে পাওয়া যায়নি')+'</div></div>'+
+      '<input type="url" class="bulk-img-input" placeholder="ছবির URL পেস্ট করুন" style="flex:2;min-width:220px;'+LP_INP+'" value="'+esc(suggested)+'" oninput="bulkImgPreview(this)">'+
+      '<button type="button" class="act-btn" onclick="skybuySearchFor(\''+safeName+'\')"><i class="fas fa-magnifying-glass"></i> SkyBuy-তে খুঁজুন</button>'+
+    '</div>';
+  }).join('');
+}
+
+function bulkImgPreview(input){
+  const row = input.closest('[data-bulk-row]');
+  if(!row) return;
+  const thumb = row.querySelector('.bulk-preview');
+  const url = input.value.trim();
+  thumb.innerHTML = url ? ('<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.style.display=\'none\'">') : gsrIcon;
+}
+
+function skybuySearchFor(name){
+  try{ navigator.clipboard && navigator.clipboard.writeText(name); }catch(_){}
+  showToast('"'+name+'" ক্লিপবোর্ডে কপি হয়েছে — SkyBuy খুলছে, সার্চ বক্সে পেস্ট করুন','info');
+  window.open('https://skybuybd.com/', '_blank');
+}
+
+async function saveBulkImages(){
+  const rows = Array.from(document.querySelectorAll('#bulkImageBody [data-bulk-row]'));
+  const toSave = rows.map(function(row){
+    const id = row.getAttribute('data-pid');
+    const inp = row.querySelector('.bulk-img-input');
+    const url = inp ? inp.value.trim() : '';
+    return {id:id, url:url};
+  }).filter(function(r){ return r.url; });
+  if(!toSave.length){ showToast('অন্তত একটি পণ্যে ছবির URL দিন', 'error'); return; }
+  const btn = document.getElementById('bulkImageSaveBtn');
+  btn.disabled = true; btn.textContent = 'সেভ হচ্ছে... ('+toSave.length+' টি)';
+  let ok = 0, fail = 0;
+  for(const item of toSave){
+    try{
+      const product = (allProducts||[]).find(function(p){ return p._id===item.id; }) || {};
+      const body = Object.assign({}, product, {img:item.url});
+      delete body._id; delete body.__v;
+      const r = await apiFetch('/products/id/'+item.id, {method:'PUT', headers:authHeaders(), body:JSON.stringify(body)});
+      if(r && r.ok) ok++; else fail++;
+    }catch(_){ fail++; }
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> সব সেভ করুন';
+  showToast(ok+' টি পণ্যে ছবি সেভ হয়েছে'+(fail?(', '+fail+' টি ব্যর্থ হয়েছে'):''), fail?'error':'success');
+  try{ await loadProducts(); renderProductGrid(); }catch(_){}
+  openBulkImageModal();
 }
 </script>
 
