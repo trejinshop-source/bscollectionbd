@@ -2327,9 +2327,17 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের মেনু থেকে একটি পেজ ক্লিক করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
         </div>`;
       document.getElementById('bsExtBody').innerHTML = html;
-      window.bsSelectSettingsPage = function(pageKey){
+      window.bsSelectSettingsPage = async function(pageKey){
         const wrap = document.getElementById('bsExtPagePills');
         if(wrap) wrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.pageKey === pageKey));
+        if (pageKey === 'home') {
+          try {
+            if (typeof allCategories === 'undefined' || !allCategories.length) await loadCategories();
+          } catch(_) {}
+          try {
+            if (typeof allProducts === 'undefined' || !allProducts.length) await loadProducts();
+          } catch(_) {}
+        }
         editPage(pageKey, pages.find(x => x.page === pageKey));
       };
     } catch (e) { toast(e.message, 'err'); }
@@ -2395,29 +2403,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       const why = cnt.whyChooseUs || [];
       const revs = cnt.reviews || [];
       const news = cnt.newsletter || {};
-      const hm = cnt.heroMain || {};
-
-      const heroMainBlock = `
-        <div style="background:#fff7ed;border:1px solid #fed7aa;padding:14px;margin:18px 0;border-radius:10px">
-          <h4 style="margin:0 0 4px;color:#14213D;font-size:15px"><i class="fas fa-star" style="color:#FCA311"></i> হিরো ব্যানার (মূল ব্যানার)</h4>
-          <p style="color:#64748b;font-size:12px;margin:0 0 12px">হোমপেজের একদম উপরের বড় ব্যানারের টেক্সট, মূল্য, ছাড় ও ছবি এখান থেকে পরিবর্তন করুন।</p>
-          <div class="row">
-            <label>ট্যাগ/লেবেল <input id="bsHeroTag" value="${esc(hm.tag||'')}" placeholder="নতুন সংযোজন"/></label>
-            <label>হাইলাইট শব্দ (রঙিন) <input id="bsHeroHighlight" value="${esc(hm.highlight||'')}" placeholder="BLDC"/></label>
-          </div>
-          <label>টাইটেল <input id="bsHeroTitle" value="${esc(hm.title||'')}" placeholder="প্রিমিয়াম সিলিং ফ্যান"/></label>
-          <label>বিবরণ <textarea id="bsHeroText" rows="2" placeholder="নিঃশব্দ মোটর, রিমোট কন্ট্রোল...">${esc(hm.text||'')}</textarea></label>
-          <div class="row">
-            <label>বর্তমান মূল্য <input id="bsHeroPriceNow" value="${esc(hm.priceNow||'')}" placeholder="৳ 12,500"/></label>
-            <label>পুরনো মূল্য (ছাড়) <input id="bsHeroPriceOld" value="${esc(hm.priceOld||'')}" placeholder="৳ 19,900"/></label>
-          </div>
-          <div class="row">
-            <label>বাটন টেক্সট <input id="bsHeroBtnText" value="${esc(hm.btnText||'Shop Now')}"/></label>
-            <label>বাটন লিংক <input id="bsHeroBtnLink" value="${esc(hm.btnLink||'shop.html')}"/></label>
-          </div>
-          <label>ব্যানার ছবি URL <input id="bsHeroImg" value="${esc(hm.img||'')}"/></label>
-          ${bsDzHtml('bsHeroImg', hm.img)}
-        </div>`;
 
       const bannerRows = banners.map((b,i) => `
         <div class="bs-ext-panel" style="margin-bottom:10px" data-banner-row="${i}">
@@ -2462,7 +2447,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <div class="bs-home-tabs-wrap">
           <div class="bs-home-tabs">
             <button type="button" data-home-tab-btn="general" onclick="bsSwitchHomeTab(this,'general')"><i class="fas fa-gear"></i> সাধারণ ও SEO</button>
-            <button type="button" data-home-tab-btn="hero" onclick="bsSwitchHomeTab(this,'hero')"><i class="fas fa-star"></i> হিরো ব্যানার</button>
             <button type="button" data-home-tab-btn="heroslides" onclick="bsSwitchHomeTab(this,'heroslides')"><i class="fas fa-layer-group"></i> হিরো স্লাইড</button>
             <button type="button" data-home-tab-btn="heroside" onclick="bsSwitchHomeTab(this,'heroside')"><i class="fas fa-th-large"></i> হিরো সাইড কার্ড</button>
             <button type="button" data-home-tab-btn="banners" onclick="bsSwitchHomeTab(this,'banners')"><i class="fas fa-images"></i> Promo Banners</button>
@@ -2490,10 +2474,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             <label>Extra Content (JSON):
               <textarea name="content" rows="4" style="font-family:monospace;font-size:12px">${esc(JSON.stringify(c.content || {}, null, 2))}</textarea>
             </label>
-          </div>
-
-          <div class="bs-home-panel" data-home-tab="hero">
-            ${heroMainBlock}
           </div>
 
 
@@ -2738,24 +2718,12 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           placeholder: document.getElementById('bsNewsPlaceholder')?.value || 'Enter your email address',
           btnText: document.getElementById('bsNewsBtnText')?.value || 'Subscribe',
         };
-        content.heroMain = {
-          tag: document.getElementById('bsHeroTag')?.value || '',
-          title: document.getElementById('bsHeroTitle')?.value || '',
-          highlight: document.getElementById('bsHeroHighlight')?.value || '',
-          text: document.getElementById('bsHeroText')?.value || '',
-          priceNow: document.getElementById('bsHeroPriceNow')?.value || '',
-          priceOld: document.getElementById('bsHeroPriceOld')?.value || '',
-          btnText: document.getElementById('bsHeroBtnText')?.value || 'Shop Now',
-          btnLink: document.getElementById('bsHeroBtnLink')?.value || 'shop.html',
-          img: document.getElementById('bsHeroImg')?.value || '',
-        };
         // Save heroSlides
         content.heroSlides = Array.from(document.querySelectorAll('#bsHeroSlidesList [data-slide-row]')).map(row => ({
           catSlug: row.querySelector('[data-hs-cat]')?.value || '',
           catName: row.querySelector('[data-hs-catname]')?.value || '',
           tag: row.querySelector('[data-hs-tag]')?.value || '',
           title: row.querySelector('[data-hs-title]')?.value || '',
-          text: row.querySelector('[data-hs-text]')?.value || '',
           img: row.querySelector('[data-hs-img]')?.value || '',
           btnText: row.querySelector('[data-hs-btntext]')?.value || 'Shop Now',
           btnLink: row.querySelector('[data-hs-btnlink]')?.value || '',
@@ -2806,9 +2774,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
   
 // ── Hero Slides Manager ──────────────────────────────────────────────
 function bsGetAllCategories(){
-  // Get categories from BSAdmin (already loaded in page)
-  if(window.BSAdmin && typeof BSAdmin.getCategories === 'function') return BSAdmin.getCategories() || [];
-  return [];
+  // Categories are loaded globally into allCategories (see loadCategories())
+  return (typeof allCategories !== 'undefined' && Array.isArray(allCategories)) ? allCategories : [];
 }
 
 function bsRenderHeroSlides(slides){
@@ -2848,9 +2815,6 @@ window.bsAddHeroSlide = function(data, idx){
     </div>
     <label>স্লাইড শিরোনাম (সর্বোচ্চ ৫০ অক্ষর)
       <input data-hs-title value="${esc(s.title||'')}" maxlength="50" placeholder="যেমন: প্রিমিয়াম সিলিং ফ্যান কালেকশন" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px"/>
-    </label>
-    <label>সংক্ষিপ্ত বিবরণ (সর্বোচ্চ ১২০ অক্ষর)
-      <textarea data-hs-text maxlength="120" rows="2" placeholder="পণ্যের বিবরণ বা আকর্ষণীয় তথ্য দিন..." style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:8px 10px;font-size:13px;border-radius:6px;resize:vertical">${esc(s.text||'')}</textarea>
     </label>
     <div class="row">
       <label style="flex:1">বাটন টেক্সট
@@ -2910,8 +2874,8 @@ window.bsAddHeroSideCard = function(data){
   if(wrap.querySelectorAll('[data-hsc-row]').length >= 2){ toast('সর্বোচ্চ ২টি সাইড কার্ড যোগ করা যাবে', 'err'); return; }
   const i = wrap.querySelectorAll('[data-hsc-row]').length;
   const sc = data || {};
-  // Get all products for dropdown
-  const products = (window.BSAdmin && typeof BSAdmin.getProducts==='function') ? BSAdmin.getProducts() : [];
+  // Get all products for dropdown (loaded globally into allProducts, see loadProducts())
+  const products = (typeof allProducts !== 'undefined' && Array.isArray(allProducts)) ? allProducts : [];
   // Group by category
   const catMap = {};
   products.forEach(function(p){
