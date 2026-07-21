@@ -126,7 +126,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:var(--shadow
 .nav-menu>li>a{font-weight:500;padding:8px 0;transition:.25s;display:flex;align-items:center;gap:6px;font-size:14px;color:var(--primary);text-decoration:none}
 .nav-menu>li>a:hover,.nav-menu>li>a.active{color:var(--accent)}
 .nav-menu li{position:relative}
-.dropdown{position:absolute;top:calc(100%+6px);left:0;background:#fff;min-width:210px;box-shadow:0 16px 40px rgba(20,33,61,.14);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s;z-index:50;list-style:none}
+.dropdown{position:absolute;top:calc(100% + 6px);left:0;background:#fff;min-width:210px;box-shadow:0 16px 40px rgba(20,33,61,.14);padding:8px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s;z-index:50;list-style:none}
 .nav-menu li:hover>.dropdown{opacity:1;visibility:visible;transform:translateY(0)}
 .dropdown li a{display:block;padding:10px 20px;transition:.2s;font-size:14px;text-decoration:none;color:inherit}
 .dropdown li a:hover{background:#F5F7FA;color:var(--accent);padding-left:26px}
@@ -164,7 +164,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:var(--shadow
   .search-toggle{display:inline-flex}
   .mobile-cart-icon{display:inline-flex}
   .hamburger{display:flex;order:3;margin-left:4px}
-  .nav-menu{display:none;position:absolute;top:calc(100%+10px);left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 18px;gap:4px;z-index:110;max-height:80vh;overflow-y:auto;border-radius:14px;box-shadow:0 16px 40px rgba(20,33,61,.14);border:1px solid #eef1f5;order:6}
+  .nav-menu{display:none;position:absolute;top:calc(100% + 10px);left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 18px;gap:4px;z-index:110;max-height:80vh;overflow-y:auto;border-radius:14px;box-shadow:0 16px 40px rgba(20,33,61,.14);border:1px solid #eef1f5;order:6}
   .nav-menu.open{display:flex}
   .nav-menu>li{width:100%;border-bottom:1px solid #f1f5f9}
   .nav-menu>li:last-child{border-bottom:none}
@@ -598,7 +598,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:var(--shadow
           <div class="of-group"><label>বিভাগ <span class="req">*</span></label><select id="ofDivision" required><option value="">বিভাগ নির্বাচন করুন</option></select></div>
           <div class="of-group"><label>জেলা <span class="req">*</span></label><select id="ofDistrict" required disabled><option value="">প্রথমে বিভাগ নির্বাচন করুন</option></select></div>
           <div class="of-group"><label>থানা/উপজেলা <span class="req">*</span></label><select id="ofUpazila" required disabled><option value="">প্রথমে জেলা নির্বাচন করুন</option></select></div>
-          <div class="of-group"><label>ইউনিয়ন</label><select id="ofUnion" disabled><option value="">প্রথমে থানা/উপজেলা নির্বাচন করুন</option></select></div>
+          <div class="of-group"><label>ইউনিয়ন</label><input type="text" id="ofUnion" placeholder="ইউনিয়নের নাম লিখুন (ঐচ্ছিক)"/></div>
         </div>
         <div class="of-group"><label>বিস্তারিত এলাকা (রোড, বাসা/হোল্ডিং নং)</label><textarea id="ofArea" placeholder="বিস্তারিত ঠিকানা লিখুন"></textarea></div>
         <div class="of-group">
@@ -1082,6 +1082,7 @@ function bindInteractions(thumbImages, colors) {
         division: (document.getElementById('ofDivision')||{}).value||'',
         district: (document.getElementById('ofDistrict')||{}).value||'',
         upazila: (document.getElementById('ofUpazila')||{}).value||'',
+        union: (document.getElementById('ofUnion')||{}).value||'',
         detail: (document.getElementById('ofArea')||{}).value||''
       },
       deliveryCharge: delivery,
@@ -1286,12 +1287,27 @@ var yearEl = document.getElementById('year'); if(yearEl) yearEl.textContent = ne
 /* Cart sidebar & order form */
 window.openCartSidebar = function(){
   var sb = document.getElementById('cartSidebar');
+  var ov = document.getElementById('cartSidebarOverlay');
   if(sb){sb.classList.add('open');}
+  if(ov){ov.classList.add('show');}
 };
 window.closeCartSidebar = function(){
   var sb = document.getElementById('cartSidebar');
+  var ov = document.getElementById('cartSidebarOverlay');
   if(sb){sb.classList.remove('open');}
+  if(ov){ov.classList.remove('show');}
 };
+(function(){
+  var cartIconHeader = document.getElementById('cartIconHeader');
+  var cartIconMobile = document.getElementById('cartIconMobile');
+  var cartSidebarClose = document.getElementById('cartSidebarClose');
+  var cartSidebarOverlay = document.getElementById('cartSidebarOverlay');
+  [cartIconHeader, cartIconMobile].forEach(function(el){
+    if(el) el.addEventListener('click', function(e){ e.preventDefault(); openCartSidebar(); });
+  });
+  if(cartSidebarClose) cartSidebarClose.addEventListener('click', function(){ closeCartSidebar(); });
+  if(cartSidebarOverlay) cartSidebarOverlay.addEventListener('click', function(){ closeCartSidebar(); });
+})();
 window.openOrderForm = function(){
   var overlay = document.getElementById('orderModalOverlay');
   if(!overlay) return;
