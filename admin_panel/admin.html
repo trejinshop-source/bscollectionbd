@@ -310,11 +310,24 @@ body[data-theme="dark"] .lp-step-body code{background:#20232B;}
 .page{display:none;}
 .page.active{display:block;}
 
+/* ==================== REUSABLE IMAGE DRAG-DROP UPLOADER ==================== */
+.bs-dropzone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;text-align:center;font-size:12.5px;color:#64748b;cursor:pointer;background:#f8fafc;transition:.15s;margin-top:6px;}
+.bs-dropzone.drag,.bs-dropzone:hover{border-color:var(--orange);background:#fff7ed;color:#b45309;}
+.bs-dropzone i{display:block;font-size:20px;margin-bottom:4px;color:var(--orange);}
+.bs-drop-prev{margin-top:8px;max-height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--border);}
+
 /* ==================== MODAL ==================== */
 .modal-overlay{position:fixed;inset:0;background:rgba(15,15,20,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
 .modal-overlay.hidden{display:none;}
 .modal{background:var(--card);border-radius:20px;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);}
 .modal.wide{width:720px;}
+/* ল্যান্ডিং পেজ তৈরি/সম্পাদনা — সম্পূর্ণ পেজ জুড়ে দেখানোর জন্য */
+.modal-overlay.lp-fullpage{padding:0;align-items:stretch;justify-content:stretch;background:var(--bg);}
+.modal-overlay.lp-fullpage .modal{width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:0;display:flex;flex-direction:column;}
+.modal-overlay.lp-fullpage .modal-head{position:sticky;top:0;z-index:2;background:var(--card);padding:18px 32px;}
+.modal-overlay.lp-fullpage .modal-head h3{font-size:20px;}
+.modal-overlay.lp-fullpage .modal-body{flex:1;overflow-y:auto;padding:24px 32px;max-width:1100px;width:100%;margin:0 auto;}
+.modal-overlay.lp-fullpage .modal-footer{position:sticky;bottom:0;z-index:2;background:var(--card);padding:16px 32px;}
 .modal-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 16px;border-bottom:1px solid var(--border);}
 .modal-head h3{font-size:17px;font-weight:700;}
 .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text-soft);}
@@ -882,7 +895,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
       <div class="form-group2" id="pDetailPageNote" style="display:none;background:#fefce8;border:1px solid #fde68a;padding:10px;font-size:13px;color:#92400e">
-        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহার করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে।
+        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহ��র করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে।
       </div>
       <div class="form-group2">
         <label>Product Image</label>
@@ -1951,11 +1964,8 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <button data-tab="fake"><i class="fas fa-exclamation-triangle"></i> ফেক অর্ডার (<span data-count="fake">0</span>)</button>
         <button data-tab="products"><i class="fas fa-box"></i> এডভান্সড পন্য</button>
         <button data-tab="contacts"><i class="fas fa-envelope"></i> যোগাযোগ (<span data-count="contacts">0</span>)</button>
-        <button data-tab="about"><i class="fas fa-info-circle"></i> About পেজ</button>
-        <button data-tab="filtertabs"><i class="fas fa-filter"></i> Filter Tabs</button>
         <button data-tab="settings"><i class="fas fa-sliders-h"></i> পেজ সেটিংস</button>
         <button data-tab="users"><i class="fas fa-users"></i> গ্রাহক</button>
-        <button data-tab="seed"><i class="fas fa-seedling"></i> ডেটা সিড</button>
       </div>
       <div id="bsExtBody"></div>
       <div class="bs-ext-modal" id="bsExtModal"><div class="box" id="bsExtModalBody"></div></div>
@@ -2296,6 +2306,41 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     } catch (e) { toast(e.message, 'err'); }
   }
 
+  // ── Reusable image drag-drop uploader (সব জায়গায় ব্যবহারযোগ্য) ──────────────
+  window.bsUploadImageFile = async function (file, targetId) {
+    if (!file) return;
+    const fd = new FormData(); fd.append('image', file);
+    toast('ছবি আপলোড হচ্ছে...');
+    try {
+      const res = await fetch(API + '/products/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token() }, body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.error || 'আপলোড ব্যর্থ হয়েছে');
+      const inp = document.getElementById(targetId);
+      if (inp) inp.value = data.url;
+      const prev = document.querySelector('[data-prev="' + targetId + '"]');
+      if (prev) { prev.src = data.url; prev.style.display = 'block'; }
+      toast('ছবি আপলোড সফল', 'ok');
+    } catch (e) { toast(e.message, 'err'); }
+  };
+  window.bsDropHandler = function (ev, targetId) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('drag');
+    const f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+    if (f) window.bsUploadImageFile(f, targetId);
+  };
+  // targetId = যে input-এর id-তে URL বসবে; curImg = বর্তমান ছবি (থাকলে)
+  window.bsDzHtml = function (targetId, curImg) {
+    return '<div class="bs-dropzone" ' +
+      'ondragover="event.preventDefault();this.classList.add(\'drag\')" ' +
+      'ondragleave="this.classList.remove(\'drag\')" ' +
+      'ondrop="bsDropHandler(event,\'' + targetId + '\')" ' +
+      'onclick="this.querySelector(\'input\').click()">' +
+      '<i class="fas fa-cloud-upload-alt"></i> ছবি টেনে এনে ছাড়ুন বা ক্লিক করে নির্বাচন করুন' +
+      '<input type="file" accept="image/*" style="display:none" onclick="event.stopPropagation()" onchange="bsUploadImageFile(this.files[0],\'' + targetId + '\')">' +
+      '</div>' +
+      '<img data-prev="' + targetId + '" src="' + (curImg || '') + '" class="bs-drop-prev" style="' + (curImg ? '' : 'display:none') + '"/>';
+  };
+
   function editPage(pageKey, current) {
     const c = current || {};
     const hero = c.hero || {};
@@ -2325,6 +2370,29 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       const why = cnt.whyChooseUs || [];
       const revs = cnt.reviews || [];
       const news = cnt.newsletter || {};
+      const hm = cnt.heroMain || {};
+
+      const heroMainBlock = `
+        <div style="background:#fff7ed;border:1px solid #fed7aa;padding:14px;margin:18px 0;border-radius:10px">
+          <h4 style="margin:0 0 4px;color:#14213D;font-size:15px"><i class="fas fa-star" style="color:#FCA311"></i> হিরো ব্যানার (মূল ব্যানার)</h4>
+          <p style="color:#64748b;font-size:12px;margin:0 0 12px">হোমপেজের একদম উপরের বড় ব্যানারের টেক্সট, মূল্য, ছাড় ও ছবি এখান থেকে পরিবর্তন করুন।</p>
+          <div class="row">
+            <label>ট্যাগ/লেবেল <input id="bsHeroTag" value="${esc(hm.tag||'')}" placeholder="নতুন সংযোজন"/></label>
+            <label>হাইলাইট শব্দ (রঙিন) <input id="bsHeroHighlight" value="${esc(hm.highlight||'')}" placeholder="BLDC"/></label>
+          </div>
+          <label>টাইটেল <input id="bsHeroTitle" value="${esc(hm.title||'')}" placeholder="প্রিমিয়াম সিলিং ফ্যান"/></label>
+          <label>বিবরণ <textarea id="bsHeroText" rows="2" placeholder="নিঃশব্দ মোটর, রিমোট কন্ট্রোল...">${esc(hm.text||'')}</textarea></label>
+          <div class="row">
+            <label>বর্তমান মূল্য <input id="bsHeroPriceNow" value="${esc(hm.priceNow||'')}" placeholder="৳ 12,500"/></label>
+            <label>পুরনো মূল্য (ছাড়) <input id="bsHeroPriceOld" value="${esc(hm.priceOld||'')}" placeholder="৳ 19,900"/></label>
+          </div>
+          <div class="row">
+            <label>বাটন টেক্সট <input id="bsHeroBtnText" value="${esc(hm.btnText||'Shop Now')}"/></label>
+            <label>বাটন লিংক <input id="bsHeroBtnLink" value="${esc(hm.btnLink||'shop.html')}"/></label>
+          </div>
+          <label>ব্যানার ছবি URL <input id="bsHeroImg" value="${esc(hm.img||'')}"/></label>
+          ${bsDzHtml('bsHeroImg', hm.img)}
+        </div>`;
 
       const bannerRows = banners.map((b,i) => `
         <div class="bs-ext-panel" style="margin-bottom:10px" data-banner-row="${i}">
@@ -2342,7 +2410,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             <label>বাটন টেক্সট <input data-b-btntext value="${esc(b.btnText||'Shop Now')}"/></label>
             <label>বাটন লিংক <input data-b-btnlink value="${esc(b.btnLink||'shop.html')}"/></label>
           </div>
-          <label>ছবি URL <input data-b-img value="${esc(b.img||'')}"/></label>
+          <label>ছবি URL <input id="bsBImg_${i}" data-b-img value="${esc(b.img||'')}"/>${bsDzHtml('bsBImg_'+i, b.img)}</label>
         </div>`).join('');
 
       const whyRows = why.map((w,i) => `
@@ -2366,6 +2434,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         </div>`).join('');
 
       return `
+        ${heroMainBlock}
         <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
           <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> Promo Banners</h4>
           <div id="bsHomeBanners">${bannerRows}</div>
@@ -2381,11 +2450,11 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <label>টাইটেল <input id="bsDealTitle" value="${esc(deal.title||'')}"/></label>
           <label>বিবরণ <textarea id="bsDealText" rows="2">${esc(deal.text||'')}</textarea></label>
           <div class="row">
-            <label>বাটন টেক্সট <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
+            <label>বাটন টেক্স��� <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
             <label>বাটন লিংক <input id="bsDealBtnLink" value="${esc(deal.btnLink||'shop.html')}"/></label>
           </div>
           <div class="row">
-            <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/></label>
+            <label>ছবি URL <input id="bsDealImg" value="${esc(deal.img||'')}"/>${bsDzHtml('bsDealImg', deal.img)}</label>
             <label>কতদিনের কাউন্টডাউন <input type="number" id="bsDealDays" value="${deal.days||8}"/></label>
             <label style="margin-top:10px">অফার শেষের নির্দিষ্ট তারিখ ও সময় (সেট করলে অগ্রাধিকার পাবে)
               <input type="datetime-local" id="bsDealDeadline" value="${deal.deadline ? new Date(deal.deadline).toISOString().slice(0,16) : ''}" style="margin-top:4px"/>
@@ -2418,12 +2487,25 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
             <label>বাটন টেক্সট <input id="bsNewsBtnText" value="${esc(news.btnText||'Subscribe')}"/></label>
           </div>
         </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin:18px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h4 style="margin:0;color:#14213D;font-size:14px"><i class="fas fa-filter" style="color:#FCA311"></i> Filter Tabs (জনপ্রিয় পণ্য সেকশন)</h4>
+            <button type="button" class="bs-ext-btn ghost" onclick="bsAddFilterTab()"><i class="fas fa-plus"></i> নতুন Tab</button>
+          </div>
+          <p style="color:#64748b;font-size:12px;margin:0 0 10px">Filter field: <code>all</code>, <code>homePopular</code>, <code>homeBestseller</code>, <code>homeNew</code>, বা <code>cat:slug</code> (যেমন: <code>cat:table-fans</code>)। এই ট্যাবগুলো হোমপেজের "জনপ্রিয় পণ্যসমূহ" সেকশনের উপরে দেখায়।</p>
+          <table class="bs-ext-table" id="filterTabsTable">
+            <thead><tr><th>লেবেল</th><th>ফিল্টার</th><th>ক্রম</th><th>দৃশ্যমান</th><th></th></tr></thead>
+            <tbody id="bsHomeFilterTabsBody"><tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">লোড হচ্ছে...</td></tr></tbody>
+          </table>
+        </div>
       `;
     })() : '';
 
     window.bsAddPromoBanner = () => {
       const wrap = document.getElementById('bsHomeBanners'); if(!wrap) return;
       const i = wrap.querySelectorAll('[data-banner-row]').length;
+      const uid = Date.now().toString(36) + Math.floor(Math.random()*1e4);
       const div = document.createElement('div');
       div.className = 'bs-ext-panel'; div.style.marginBottom = '10px'; div.dataset.bannerRow = i;
       div.innerHTML = `
@@ -2441,7 +2523,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <label>বাটন টেক্সট <input data-b-btntext value="Shop Now"/></label>
           <label>বাটন লিংক <input data-b-btnlink value="shop.html"/></label>
         </div>
-        <label>ছবি URL <input data-b-img/></label>`;
+        <label>ছবি URL <input id="bsBImg_new_${uid}" data-b-img/>${bsDzHtml('bsBImg_new_'+uid,'')}</label>`;
       wrap.appendChild(div);
     };
     window.bsAddWhyCard = () => {
@@ -2492,6 +2574,24 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <button type="submit" class="bs-ext-btn primary"><i class="fas fa-save"></i> এই পেজ সেভ করুন</button>
       </form>
     `;
+
+    // Home পেজে Filter Tabs টেবিল লোড (এখন পেজ সেটিংস → Home এর ভেতরে)
+    if (pageKey === 'home') {
+      const ftBody = document.getElementById('bsHomeFilterTabsBody');
+      if (ftBody) {
+        fetchJSON('/filter-tabs').then(tabs => {
+          ftBody.innerHTML = (tabs && tabs.length ? tabs : []).map((t, i) => `
+            <tr data-idx="${i}">
+              <td><input class="ft-label" value="${esc(t.label||'')}" style="width:130px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+              <td><input class="ft-filter" value="${esc(t.filter||'')}" style="width:160px;padding:6px;border:1px solid #e2e8f0;font-size:13px" placeholder="all / homePopular / cat:slug"/></td>
+              <td><input class="ft-order" type="number" value="${t.order||0}" style="width:60px;padding:6px;border:1px solid #e2e8f0;font-size:13px"/></td>
+              <td><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" class="ft-visible" ${t.visible?'checked':''}/> দৃশ্যমান</label></td>
+              <td><button type="button" class="bs-ext-btn danger" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td>
+            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:16px">কোনো ট্যাব নেই — "নতুন Tab" দিয়ে যোগ করুন</td></tr>';
+        }).catch(() => { ftBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:16px">Filter Tabs লোড করা যায়নি</td></tr>'; });
+      }
+    }
+
     document.getElementById('bsExtPageForm').onsubmit = async (e) => {
       e.preventDefault(); const fd = new FormData(e.target);
       let content = {}; try { content = JSON.parse(fd.get('content') || '{}'); } catch { return toast('JSON invalid', 'err'); }
@@ -2543,6 +2643,31 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           placeholder: document.getElementById('bsNewsPlaceholder')?.value || 'Enter your email address',
           btnText: document.getElementById('bsNewsBtnText')?.value || 'Subscribe',
         };
+        content.heroMain = {
+          tag: document.getElementById('bsHeroTag')?.value || '',
+          title: document.getElementById('bsHeroTitle')?.value || '',
+          highlight: document.getElementById('bsHeroHighlight')?.value || '',
+          text: document.getElementById('bsHeroText')?.value || '',
+          priceNow: document.getElementById('bsHeroPriceNow')?.value || '',
+          priceOld: document.getElementById('bsHeroPriceOld')?.value || '',
+          btnText: document.getElementById('bsHeroBtnText')?.value || 'Shop Now',
+          btnLink: document.getElementById('bsHeroBtnLink')?.value || 'shop.html',
+          img: document.getElementById('bsHeroImg')?.value || '',
+        };
+
+        // Filter Tabs আলাদা এন্ডপয়েন্টে সেভ (হোম সেটিংসের ভেতর থেকেই)
+        const ftRows = document.querySelectorAll('#filterTabsTable tbody tr[data-idx]');
+        if (ftRows.length || document.getElementById('filterTabsTable')) {
+          const tabs = Array.from(ftRows).map((tr, i) => ({
+            id: 'tab_' + i,
+            label: tr.querySelector('.ft-label')?.value || '',
+            filter: tr.querySelector('.ft-filter')?.value || 'all',
+            order: parseInt(tr.querySelector('.ft-order')?.value || i),
+            visible: tr.querySelector('.ft-visible')?.checked !== false,
+          }));
+          try { await fetchJSON('/filter-tabs', { method: 'PUT', body: JSON.stringify(tabs) }); }
+          catch (err) { toast('Filter Tabs সেভ ব্যর্থ: ' + err.message, 'err'); }
+        }
       }
 
       const body = {
@@ -2572,7 +2697,7 @@ function bsRenderPromos(banners){
         '<button type="button" onclick="bsRemovePromo('+i+')" style="background:none;border:none;cursor:pointer;color:#ef4444"><i class="fas fa-trash"></i></button>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-        '<label style="font-size:12px;font-weight:600;color:#14213D">শিরোনাম<input type="text" class="promo-field" data-field="title" value="'+esc(b.title||'')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">শ���রোনাম<input type="text" class="promo-field" data-field="title" value="'+esc(b.title||'')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">স্টাইল<select class="promo-field" data-field="style" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"><option value="amber"'+(b.style==='amber'?' selected':'')+'>Amber (হলুদ)</option><option value="dark"'+(b.style==='dark'?' selected':'')+'>Dark (নীল)</option></select></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">ডিসকাউন্ট / ব্যাজ<input type="text" class="promo-field" data-field="discount" value="'+esc(b.discount||b.highlight||'')+'" placeholder="যেমন: 25% OFF" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">বাটন টেক্সট<input type="text" class="promo-field" data-field="btnText" value="'+esc(b.btnText||'Shop Now')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
@@ -3477,8 +3602,8 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
 
 
 <!-- ==================== LANDING PAGE MODAL ==================== -->
-<div class="modal-overlay hidden" id="landingPageModal">
-  <div class="modal wide" style="max-width:900px">
+<div class="modal-overlay hidden lp-fullpage" id="landingPageModal">
+  <div class="modal wide">
     <div class="modal-head">
       <h3 id="lpModalTitle">নতুন ল্যান্ডিং পেজ তৈরি করুন</h3>
       <button class="modal-close" onclick="document.getElementById('landingPageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
@@ -3559,7 +3684,7 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
 
       <!-- ④ Color Swatches -->
       <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-palette" style="color:#FCA311"></i> কালার সোয়াচ</h4>
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-palette" style="color:#FCA311"></i> কালার সোয���াচ</h4>
         <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি কালারের নাম, hex কোড এবং সংশ্লিষ্ট থাম্বনেইল ইন্ডেক্স (০ থেকে শুরু) দিন।</p>
         <div id="lpColorsContainer"></div>
         <button type="button" class="bs-ext-btn ghost" onclick="lpAddColor()"><i class="fas fa-plus"></i> কালার যোগ করুন</button>
