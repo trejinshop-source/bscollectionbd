@@ -356,6 +356,18 @@ ul{list-style:none}
 .hero-img{position:absolute;right:24px;top:50%;transform:translateY(-50%);width:170px;height:170px;z-index:1;animation:float 4s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-56%)}}
 .hero-img img{width:100%;height:100%;object-fit:cover;box-shadow:var(--shadow-lg)}
+.hero-img-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(252,163,17,.15);border:2px dashed rgba(252,163,17,.4);box-shadow:var(--shadow-lg)}
+.hero-img-fallback i{font-size:56px;color:var(--accent)}
+
+/* ---- Hero Slider ---- */
+.hero-slides{position:relative;width:100%}
+.hero-slide{display:none;align-items:center;position:relative;animation:heroFade .6s ease}
+.hero-slide.active{display:flex}
+@keyframes heroFade{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.hero-dots{position:absolute;left:32px;bottom:16px;display:flex;gap:7px;z-index:3}
+.hero-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:.3s;padding:0;border:none}
+.hero-dot:hover{background:rgba(255,255,255,.6)}
+.hero-dot.active{background:var(--accent);width:22px;border-radius:5px}
 
 .hero-side{display:flex;flex-direction:column;gap:16px}
 .hero-card{flex:1;color:#fff;position:relative;overflow:hidden;min-height:220px;display:flex;align-items:center;cursor:pointer}
@@ -966,19 +978,25 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
         <i class="fas fa-fan hero-icon-deco i1"></i>
         <i class="fas fa-bolt hero-icon-deco i2"></i>
         <i class="fas fa-plug hero-icon-deco i3"></i>
-        <div class="hero-content">
-          <span class="tag">নতুন সংযোজন</span>
-          <h1>প্রিমিয়াম <span>BLDC</span> সিলিং ফ্যান</h1>
-          <p>নিঃশব্দ মোটর, রিমোট কন্ট্রোল সুবিধা এবং 65% পর্যন্ত বিদ্যুৎ সাশ্রয়।</p>
-          <div class="hero-price">
-            <span class="now">৳ 12,500</span>
-            <span class="old">৳ 19,900</span>
+        <div class="hero-slides" id="heroSlides">
+          <div class="hero-slide active" data-slide="0">
+            <div class="hero-content">
+              <span class="tag">নতুন সংযোজন</span>
+              <h1>প্রিমিয়াম <span>BLDC</span> সিলিং ফ্যান</h1>
+              <p>নিঃশব্দ মোটর, রিমোট কন্ট্রোল সুবিধা এবং 65% পর্যন্ত বিদ্যুৎ সাশ্রয়।</p>
+              <div class="hero-price">
+                <span class="now">৳ 12,500</span>
+                <span class="old">৳ 19,900</span>
+              </div>
+              <a href="shop.html" class="btn btn-accent">Shop Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="hero-img">
+              <img loading="lazy" src="https://bn.smartdeal.com.bd/public/uploads/all/Rh6pC0FDQpSUWtDBB7ddd7zplYvfy0vlcJmGGLfQ.jpg" alt="Luxury BLDC Ceiling Fan"/>
+            </div>
           </div>
-          <a href="shop.html" class="btn btn-accent">Shop Now <i class="fas fa-arrow-right"></i></a>
+          <!-- একটি করে ক্যাটাগরি স্লাইড এখানে JS দিয়ে যোগ হবে (দেখুন heroSlider স্ক্রিপ্ট) -->
         </div>
-        <div class="hero-img">
-          <img loading="lazy" src="https://bn.smartdeal.com.bd/public/uploads/all/Rh6pC0FDQpSUWtDBB7ddd7zplYvfy0vlcJmGGLfQ.jpg" alt="Luxury BLDC Ceiling Fan"/>
-        </div>
+        <div class="hero-dots" id="heroDots"></div>
       </div>
       <div class="hero-side" id="heroSideCards">
         <a class="hero-card amber fade-in" href="product-jy2570.html">
@@ -1202,6 +1220,87 @@ if (Array.isArray(categories) && categories.length) {
   }).join('');
 }
 
+/* ================= HERO SLIDER (প্রতিটা ক্যাটাগরির জন্য একটি স্লাইড) ================= */
+let heroSlideIndex = 0;
+let heroAutoplayTimer = null;
+
+function heroCategorySlideMarkup(c){
+  const imgHtml = c.img
+    ? `<img loading="lazy" src="${c.img}" alt="${c.name}"/>`
+    : `<div class="hero-img-fallback"><i class="fas fa-fan"></i></div>`;
+  const desc = c.count > 0 ? `আমাদের কালেকশনে ${c.count}+ পণ্য দেখুন` : 'আমাদের সেরা কালেকশন এখনই দেখুন';
+  return `
+    <div class="hero-slide" data-cat="${c.slug}">
+      <div class="hero-content">
+        <span class="tag">ক্যাটাগরি</span>
+        <h1>${c.name}</h1>
+        <p>${desc}</p>
+        <a href="shop.html?category=${c.slug}" class="btn btn-accent">Shop Now <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="hero-img">${imgHtml}</div>
+    </div>`;
+}
+
+function buildHeroSlider(cats){
+  const slidesWrap = document.getElementById('heroSlides');
+  const dotsWrap = document.getElementById('heroDots');
+  if(!slidesWrap || !dotsWrap) return;
+
+  // আগে JS দিয়ে যোগ করা ক্যাটাগরি স্লাইড থাকলে সরিয়ে ফেলা হচ্ছে (প্রথম প্রোমো স্লাইডটি অক্ষত থাকবে)
+  slidesWrap.querySelectorAll('.hero-slide[data-cat]').forEach(function(el){ el.remove(); });
+
+  if (Array.isArray(cats) && cats.length) {
+    slidesWrap.insertAdjacentHTML('beforeend', cats.map(heroCategorySlideMarkup).join(''));
+  }
+
+  const slides = slidesWrap.querySelectorAll('.hero-slide');
+  dotsWrap.innerHTML = Array.from(slides).map(function(_, i){
+    return `<button type="button" class="hero-dot${i===0?' active':''}" data-i="${i}" aria-label="Slide ${i+1}"></button>`;
+  }).join('');
+  dotsWrap.querySelectorAll('.hero-dot').forEach(function(dot){
+    dot.addEventListener('click', function(){ goToHeroSlide(Number(this.dataset.i)); });
+  });
+
+  showHeroSlide(0);
+  restartHeroAutoplay();
+}
+
+function showHeroSlide(i){
+  const slidesWrap = document.getElementById('heroSlides');
+  const dotsWrap = document.getElementById('heroDots');
+  if(!slidesWrap) return;
+  const slides = slidesWrap.querySelectorAll('.hero-slide');
+  if(!slides.length) return;
+  const total = slides.length;
+  const idx = ((i % total) + total) % total;
+  slides.forEach(function(s, sIdx){ s.classList.toggle('active', sIdx===idx); });
+  if(dotsWrap){
+    dotsWrap.querySelectorAll('.hero-dot').forEach(function(d, dIdx){ d.classList.toggle('active', dIdx===idx); });
+  }
+  heroSlideIndex = idx;
+}
+
+function goToHeroSlide(i){
+  showHeroSlide(i);
+  restartHeroAutoplay();
+}
+
+function nextHeroSlide(){ showHeroSlide(heroSlideIndex + 1); }
+
+function restartHeroAutoplay(){
+  if(heroAutoplayTimer) clearInterval(heroAutoplayTimer);
+  heroAutoplayTimer = setInterval(nextHeroSlide, 5000);
+}
+
+buildHeroSlider(categories);
+
+(function(){
+  const heroMainEl = document.querySelector('.hero-main');
+  if(!heroMainEl) return;
+  heroMainEl.addEventListener('mouseenter', function(){ if(heroAutoplayTimer) clearInterval(heroAutoplayTimer); });
+  heroMainEl.addEventListener('mouseleave', restartHeroAutoplay);
+})();
+
 // অ্যাডমিন প্যানেল থেকে ব্যাকএন্ডের আসল ডেটা এলে ক্যাটাগরি ও ফিচার্ড প্রোডাক্টের
 // নাম/দাম/ছবি লাইভ আপডেট হয়ে যাবে (jy2570 = id 101, jy2218 = id 102)
 document.addEventListener('bsdata:ready', function(){
@@ -1215,6 +1314,7 @@ document.addEventListener('bsdata:ready', function(){
         <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
       </a>`;
     }).join('');
+    buildHeroSlider(liveCats);
   }
 
   const skuByFeaturedId = {101:'jy2570', 102:'jy2218'};
