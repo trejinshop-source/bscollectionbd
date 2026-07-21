@@ -106,23 +106,23 @@ body[data-theme="dark"] .product-thumb{background:#241B12;}
 .sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);padding:0 16px 24px;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:45;transition:background .2s,border-color .2s;}
 .sidebar::-webkit-scrollbar{width:6px;}
 .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
-.logo{display:flex;align-items:center;justify-content:center;background:var(--navy);margin:0 -16px 20px;padding:16px 18px;position:sticky;top:0;z-index:2;}
+.logo{display:flex;align-items:center;justify-content:center;background:var(--navy);margin:0 -16px 14px;padding:12px 18px;position:sticky;top:0;z-index:2;}
 .logo img{width:100%;max-width:188px;height:auto;display:block;}
 .nav{list-style:none;display:flex;flex-direction:column;gap:2px;}
 .nav-section-gap{height:20px;}
-.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--text-mid);text-decoration:none;font-size:14px;font-weight:500;transition:background .15s,color .15s;cursor:pointer;}
+.nav a{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;color:var(--text-mid);text-decoration:none;font-size:13.5px;font-weight:500;transition:background .15s,color .15s;cursor:pointer;}
 .nav a svg{width:18px;height:18px;flex-shrink:0;}
 .nav a:hover{background:#F5F5F6;}
 .nav a.active{background:var(--orange);color:#fff;}
 
 /* Main */
 .main{margin-left:var(--sidebar-w);padding:0 28px 60px;min-width:0;}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:12px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:8px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;min-height:56px;}
 .topbar.scrolled{box-shadow:0 4px 14px rgba(20,20,30,.06);border-bottom:1px solid var(--border);}
 .topbar h1{font-size:24px;font-weight:800;}
 .topbar-left{display:flex;align-items:center;gap:12px;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
-.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:background .15s;}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:background .15s;}
 body[data-theme="dark"] .icon-btn{background:var(--card);}
 .icon-btn:hover{background:#F5F5F6;}
 body[data-theme="dark"] .icon-btn:hover{background:#20232B;}
@@ -308,7 +308,7 @@ body[data-theme="dark"] .lp-link-badge.unlinked{color:var(--orange-light);}
 body[data-theme="dark"] .lp-step-body code{background:#20232B;}
 @media(max-width:620px){
   .topbar{
-    padding:10px 0;
+    padding:8px 0;
   }
 
   .topbar h1{
@@ -345,13 +345,22 @@ body[data-theme="dark"] .lp-step-body code{background:#20232B;}
 .modal-overlay.hidden{display:none;}
 .modal{background:var(--card);border-radius:20px;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);}
 .modal.wide{width:720px;}
-/* ল্যান্ডিং পেজ তৈরি/সম্পাদনা — সম্পূর্ণ পেজ জুড়ে দেখানোর জন্য */
-.modal-overlay.lp-fullpage{padding:0;align-items:stretch;justify-content:stretch;background:var(--bg);}
-.modal-overlay.lp-fullpage .modal{width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:0;display:flex;flex-direction:column;}
-.modal-overlay.lp-fullpage .modal-head{position:sticky;top:0;z-index:2;background:var(--card);padding:18px 32px;}
-.modal-overlay.lp-fullpage .modal-head h3{font-size:20px;}
-.modal-overlay.lp-fullpage .modal-body{flex:1;overflow-y:auto;padding:24px 32px;max-width:1100px;width:100%;margin:0 auto;}
-.modal-overlay.lp-fullpage .modal-footer{position:sticky;bottom:0;z-index:2;background:var(--card);padding:16px 32px;}
+/* ল্যান্ডিং পেজ তৈরি/সম্পাদনা — সাইডবার/নেভবার বাদে খালি জায়গায় দেখানোর জন্য */
+.modal-overlay.lp-panel{
+  position:fixed;
+  top:0; left:var(--sidebar-w); right:0; bottom:0;
+  padding:0;
+  align-items:stretch;
+  justify-content:stretch;
+  background:var(--bg);
+  z-index:500;
+}
+.modal-overlay.lp-panel .modal{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;display:flex;flex-direction:column;}
+.modal-overlay.lp-panel .modal-head{position:sticky;top:0;z-index:2;background:var(--card);padding:16px 24px;border-bottom:1px solid var(--border);}
+.modal-overlay.lp-panel .modal-head h3{font-size:18px;}
+.modal-overlay.lp-panel .modal-body{flex:1;overflow-y:auto;padding:20px 24px;max-width:1000px;width:100%;margin:0 auto;}
+.modal-overlay.lp-panel .modal-footer{position:sticky;bottom:0;z-index:2;background:var(--card);padding:14px 24px;border-top:1px solid var(--border);}
+@media(max-width:1080px){ .modal-overlay.lp-panel{left:0;} }
 .modal-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 16px;border-bottom:1px solid var(--border);}
 .modal-head h3{font-size:17px;font-weight:700;}
 .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text-soft);}
@@ -442,7 +451,7 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
 .bs-ext-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;padding:0 20px}
 .bs-ext-tabs button{padding:8px 14px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#334155}
 .bs-ext-tabs button.active{background:#14213D;color:#fff;border-color:#14213D}
-.bs-ext-panel{padding:20px;background:#fff;border-radius:14px;margin:0 20px 20px;border:1px solid #e2e8f0}
+.bs-ext-panel{padding:20px;background:#fff;border-radius:14px;margin:0 20px 20px;border:1px solid #e2e8f0;max-width:900px}
 .bs-ext-table{width:100%;border-collapse:collapse;font-size:13.5px}
 .bs-ext-table th{background:#f8fafc;padding:10px 12px;text-align:left;color:#64748b;font-weight:700;font-size:12px;text-transform:uppercase;border-bottom:1px solid #e2e8f0}
 .bs-ext-table td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
@@ -461,6 +470,9 @@ input:focus,select:focus,textarea:focus{border-color:#FCA311!important;outline:n
 .bs-ext-form input,.bs-ext-form textarea,.bs-ext-form select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:14px;margin-top:6px;outline:none}
 .bs-ext-form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .bs-ext-form .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:700px){
+  .bs-ext-form .row, .bs-ext-form .row-3{grid-template-columns:1fr!important;}
+}
 .bs-ext-dropzone{border:2px dashed #e2e8f0;padding:24px;border-radius:12px;text-align:center;background:#f8fafc;cursor:pointer;transition:.2s}
 .bs-ext-dropzone.dragover{background:#fff7ed;border-color:#FCA311}
 .bs-ext-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -541,7 +553,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     <li><a data-page="categories" data-title="Categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Categories</a></li>
     <li><a data-page="customers" data-title="Customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Customers</a></li>
     <li><a data-page="reports" data-title="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>Reports</a></li>
-    <li><a data-page="landingpages" data-title="ল্যান্ডিং পেজ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>ল্যান্ডিং পেজ</a></li>
     <li><a data-page="advanced" data-title="Advanced Options"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Advanced Options</a></li>
     <li class="nav-section-gap"></li>
     <li><a id="sidebarLogoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Log Out</a></li>
@@ -549,7 +560,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 </aside>
 
 <main class="main" id="mainContent">
-  <div class="topbar" id="topbar" style="padding: 10px 16px !important;">
+  <div class="topbar" id="topbar" style="padding: 8px 16px !important;">
     <div class="topbar-left">
       <button class="hamburger" id="hamburgerBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
       <h1 id="pageTitle">Dashboard</h1>
@@ -671,27 +682,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head">
-        <h2>ফেক অর্ডার (8)</h2>
-      </div>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            <tr><td>#8001</td><td><div class="cell-main">রহিম আহমেদ</div><div class="cell-sub">+88017XXXXXXXX</div></td><td>3 টি</td><td>2024-01-15</td><td>৳ 4,500</td><td>বিকাশ</td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8002</td><td><div class="cell-main">ফাতিমা খান</div><div class="cell-sub">+88018XXXXXXXX</div></td><td>2 টি</td><td>2024-01-14</td><td>৳ 3,200</td><td>নগদ</td><td><span class="badge orange">প্রসেসিং</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8003</td><td><div class="cell-main">করিম মিয়া</div><div class="cell-sub">+88019XXXXXXXX</div></td><td>1 টি</td><td>2024-01-13</td><td>৳ 2,800</td><td>রকেট</td><td><span class="badge blue">প্রেরণ করা</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8004</td><td><div class="cell-main">আয়েশা সুলতানা</div><div class="cell-sub">+88016XXXXXXXX</div></td><td>4 টি</td><td>2024-01-12</td><td>৳ 5,600</td><td>বিকাশ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8005</td><td><div class="cell-main">সালিম হোসেন</div><div class="cell-sub">+88017XXXXXXXX</div></td><td>2 টি</td><td>2024-01-11</td><td>৳ 3,800</td><td>বিকাশ</div></td><td><span class="badge red">বাতিল</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8006</td><td><div class="cell-main">নাজমা বেগম</div><div class="cell-sub">+88018XXXXXXXX</div></td><td>3 টি</td><td>2024-01-10</td><td>৳ 4,200</td><td>নগদ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8007</td><td><div class="cell-main">আব্বাস আলী</div><div class="cell-sub">+88019XXXXXXXX</div></td><td>2 টি</td><td>2024-01-09</td><td>৳ 3,500</td><td>রকেট</div></td><td><span class="badge blue">প্রেরণ করা</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-            <tr><td>#8008</td><td><div class="cell-main">সামিয়া আক্তার</div><div class="cell-sub">+88016XXXXXXXX</div></td><td>5 টি</td><td>2024-01-08</td><td>৳ 6,100</td><td>বিকাশ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    
   </section>
 
   <!-- ===================== ORDERS PAGE ===================== -->
@@ -741,97 +731,17 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       </div>
     </div>
 
-      <div class="card" style="margin-top:18px;">
-        <div class="card-head">
-          <h2>ফেক অর্ডার (8)</h2>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <tbody>
-              <tr>
-                <td>#8001</td>
-                <td>রহিম আহমেদ</td>
-                <td>3</td>
-                <td>২০২৬-০৭-১৫</td>
-                <td>3,450 ৳</td>
-                <td>বিকাশ</td>
-                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8002</td>
-                <td>ফাতিমা খাতুন</td>
-                <td>2</td>
-                <td>২০২৬-০৭-১৪</td>
-                <td>2,100 ৳</td>
-                <td>নগদ</td>
-                <td><span class="badge" style="background:#f97316;color:white;">প্রক্রিয়াধীন</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8003</td>
-                <td>করিম মিয়া</td>
-                <td>5</td>
-                <td>২০२६-०७-१३</td>
-                <td>5,890 ৳</td>
-                <td>রকেট</td>
-                <td><span class="badge" style="background:#3b82f6;color:white;">প্রেরণ করা</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8004</td>
-                <td>নাজমা বেগম</td>
-                <td>1</td>
-                <td>२०२६-०७-१२</td>
-                <td>1,250 ৳</td>
-                <td>বিকাশ</td>
-                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8005</td>
-                <td>শাকিল হোসেন</td>
-                <td>4</td>
-                <td>२०२६-०७-११</td>
-                <td>4,320 ৳</td>
-                <td>নগদ</td>
-                <td><span class="badge" style="background:#6366f1;color:white;">বাতিল</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8006</td>
-                <td>সালমা আক্তার</td>
-                <td>2</td>
-                <td>२०२६-०७-१०</td>
-                <td>2,750 ৳</td>
-                <td>রকেট</td>
-                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8007</td>
-                <td>জাহিদ ইউসুফ</td>
-                <td>3</td>
-                <td>२०२६-०७-०९</td>
-                <td>3,680 ৳</td>
-                <td>বিকাশ</td>
-                <td><span class="badge" style="background:#3b82f6;color:white;">প্রেরণ করা</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-              <tr>
-                <td>#8008</td>
-                <td>মেহজাবিন সুলতানা</td>
-                <td>6</td>
-                <td>२०२६-०७-०८</td>
-                <td>6,450 ৳</td>
-                <td>নগদ</td>
-                <td><span class="badge" style="background:#10b981;color:white;">সম্পন্ন</span></td>
-                <td><button class="icon-btn" title="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="card" id="fakeOrdersCard" style="margin-top:18px;">
+      <div class="card-head">
+        <h2><i class="fas fa-triangle-exclamation" style="color:#dc2626"></i> ফেক অর্ডার (<span id="fakeOrderCount">0</span>)</h2>
       </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>ফেক স্কোর ও কারণ</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
+          <tbody id="fakeOrdersBody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
   <!-- ===================== PRODUCTS PAGE ===================== -->
@@ -948,156 +858,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     </div>
   </section>
 
-
-  <!-- ===================== LANDING PAGES PAGE ===================== -->
-  <section class="page" id="page-landingpages">
-    <div class="stats-row cols-3">
-      <div class="card stat-card highlight">
-        <div class="stat-top"><span class="stat-label">মোট ল্যান্ডিং পেজ</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span></div>
-        <div class="stat-bottom"><span class="stat-value" id="lpTotalVal">—</span></div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><span class="stat-label">সক্রিয় পেজ</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-        <div class="stat-bottom"><span class="stat-value" id="lpActiveVal">—</span></div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-top"><span class="stat-label">পণ্যের সাথে লিংকড</span><span class="stat-icon gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1"/></svg></span></div>
-        <div class="stat-bottom"><span class="stat-value" id="lpLinkedVal">—</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <h2><i class="fas fa-file-alt" style="color:#FCA311"></i> ল্যান্ডিং পেজ ব্যবস্থাপনা</h2>
-        <button class="pill-btn" id="addLandingPageBtn" onclick="openLandingPageModal()">
-          নতুন পেজ তৈরি করুন <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-      </div>
-      <p style="color:var(--text-soft);font-size:13px;margin-bottom:18px">প্রতিটি পণ্যের জন্য একটি কাস্টম ল্যান্ডিং পেজ তৈরি করুন। পণ্য কার্ডে ক্লিক করলে সেই পেজে নিয়ে যাবে।</p>
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>পেজের নাম / Slug</th>
-              <th>হেডলাইন</th>
-              <th>পেজ URL</th>
-              <th>স্ট্যাটাস</th>
-              <th>তৈরির তারিখ</th>
-              <th>অ্যাকশন</th>
-            </tr>
-          </thead>
-          <tbody id="landingPagesTableBody">
-            <tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
   <!-- ===================== ADVANCED OPTIONS PAGE ===================== -->
-  <section class="page" id="page-advanced">
-    <div style="display:grid;grid-template-columns:1fr;gap:18px;">
-      <!-- Page Settings Card - Full Width -->
-      <div class="card">
-        <div class="card-head"><h2>পেজ সেটিংস</h2></div>
-        <div style="padding:12px 0;">
-          <details style="border-bottom:1px solid var(--border);padding:12px 0;" open>
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
-              <span style="font-size:16px;">▼</span> সাইট তথ্য
-            </summary>
-            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
-              <div class="form-group2" style="margin-bottom:10px;">
-                <label>স্টোর নাম</label>
-                <input type="text" value="BS Collection BD" style="font-size:12px;padding:8px;">
-              </div>
-              <div class="form-group2">
-                <label>স্টোর ডেসক্রিপশন</label>
-                <textarea style="font-size:12px;padding:8px;min-height:60px;">আমাদের অনলাইন স্টোর</textarea>
-              </div>
-            </div>
-          </details>
-          
-          <details style="border-bottom:1px solid var(--border);padding:12px 0;">
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
-              <span style="font-size:16px;">▶</span> ডিজাইন সেটিংস
-            </summary>
-            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
-              <div class="form-group2" style="margin-bottom:10px;">
-                <label>থিম রঙ</label>
-                <select style="font-size:12px;padding:8px;width:100%;">
-                  <option>নেভি + অরেঞ্জ (ডিফল্ট)</option>
-                  <option>নীল + সাদা</option>
-                  <option>সবুজ + কালো</option>
-                </select>
-              </div>
-              <div class="form-group2">
-                <label>ফন্ট স্টাইল</label>
-                <select style="font-size:12px;padding:8px;width:100%;">
-                  <option>Noto Sans Bengali</option>
-                  <option>Poppins</option>
-                  <option>Hind Siliguri</option>
-                </select>
-              </div>
-            </div>
-          </details>
-          
-          <details style="border-bottom:1px solid var(--border);padding:12px 0;">
-            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;display:flex;align-items:center;gap:8px;">
-              <span style="font-size:16px;">▶</span> বিজ্ঞপ্তি সেটিংস
-            </summary>
-            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
-              <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                <input type="checkbox" checked> নতুন অর্ডারের জন্য সতর্কতা
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                <input type="checkbox" checked> নিম্ন স্টক সতর্কতা
-              </label>
-              <label style="display:flex;align-items:center;gap:8px;">
-                <input type="checkbox"> সাপ্তাহিক রিপোর্ট ইমেইল
-              </label>
-            </div>
-          </details>
-        </div>
-      </div>
-
-      <!-- Other sections in grid -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-        <!-- Customers -->
-        <div class="card">
-          <div class="card-head"><h2>গ্রাহক</h2></div>
-          <div style="padding:12px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-              <div>
-                <div style="font-size:24px;font-weight:800;color:var(--orange);">—</div>
-                <div style="font-size:11px;color:var(--text-soft);">মোট গ্রাহক</div>
-              </div>
-              <div>
-                <div style="font-size:24px;font-weight:800;color:var(--green);">—</div>
-                <div style="font-size:11px;color:var(--text-soft);">এই মাসে নতুন</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reviews -->
-        <div class="card">
-          <div class="card-head"><h2>রিভিউ (0)</h2></div>
-          <div style="padding:12px;color:var(--text-soft);font-size:12px;">কোন রিভিউ পাওয়া যায়নি</div>
-        </div>
-
-        <!-- Contacts -->
-        <div class="card" style="grid-column:1/-1;">
-          <div class="card-head"><h2>যোগাযোগ (1)</h2></div>
-          <div style="padding:12px;">
-            <div style="border:1px solid var(--border);padding:10px;border-radius:6px;font-size:12px;">
-              <div style="font-weight:600;margin-bottom:4px;">নতুন বার্তা</div>
-              <div style="color:var(--text-soft);font-size:11px;">আজ ১২:৩০ এ পাওয়া</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  </section>
+  <section class="page" id="page-advanced"></section>
 </main>
 
 <!-- ==================== PRODUCT MODAL ==================== -->
@@ -1137,7 +899,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
       <div class="form-group2" id="pDetailPageNote" style="display:none;background:#fefce8;border:1px solid #fde68a;padding:10px;font-size:13px;color:#92400e">
-        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহ��র করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে।
+        <i class="fas fa-info-circle"></i> পণ্য সেভ হলে <code>product-{sku}.html</code> টেমপ্লেট ব্যবহার করে ফ্রন্টএন্ড থেকে বিস্তারিত পেজ দেখাবে।
       </div>
       <div class="form-group2">
         <label>Product Image</label>
@@ -1364,7 +1126,6 @@ navLinks.forEach(link => {
     if(target === 'customers') loadCustomers();
     if(target === 'reports') loadStats();
     if(target === 'advanced' && window.bsExtInit) window.bsExtInit();
-    if(target === 'landingpages') loadLandingPages();
   });
 });
 // Restore page from URL hash on refresh
@@ -1440,6 +1201,27 @@ async function loadOrders(filter){
   if(filter !== undefined) currentOrderFilter = filter;
   ordersPage = 1;
   await fetchOrders();
+  loadFakeOrdersInOrders();
+}
+
+async function loadFakeOrdersInOrders(){
+  const tbody = document.getElementById('fakeOrdersBody');
+  if(!tbody) return;
+  try{
+    const d = await apiJSON('/orders?fake=true&limit=100');
+    const orders = (d && d.orders) || [];
+    document.getElementById('fakeOrderCount').textContent = orders.length;
+    if(!orders.length){ tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-soft)">কোনো ফেক অর্ডার নেই</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o=>`
+      <tr style="background:#fef2f2">
+        <td class="cell-main">${o.orderId||o._id?.slice(-6)}</td>
+        <td>${esc(o.customer?.name)}<div class="cell-sub">${esc(o.customer?.phone)}</div></td>
+        <td><b style="color:#dc2626">${o.fakeScore||0}%</b><div class="cell-sub">${(o.fakeReasons||[]).map(esc).join(', ')}</div></td>
+        <td><span class="badge orange">${esc(o.status)}</span></td>
+        <td>৳${(o.total||0).toLocaleString()}</td>
+        <td><button class="act-btn" onclick="openOrderModal('${o._id}')">বিস্তারিত</button></td>
+      </tr>`).join('');
+  }catch(e){ tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red);padding:20px;">লোড করতে সমস্যা হয়েছে</td></tr>'; }
 }
 
 async function fetchOrders(){
@@ -1645,6 +1427,11 @@ document.querySelectorAll('#productSortMenu .dd-item').forEach(item=>{
 let allCatsForModal = [];
 
 document.getElementById('addProductBtn').addEventListener('click', ()=>openProductModal());
+document.getElementById('addAdvancedProductBtn').addEventListener('click', ()=>{
+  if(window.bsExtEditProduct) window.bsExtEditProduct();
+  else showToast('একটু অপেক্ষা করুন, লোড হচ্ছে...','info');
+});
+document.getElementById('addLandingPageBtn2').addEventListener('click', ()=> openLandingPageModal());
 
 function openProductModal(id){
   const modal = document.getElementById('productModal');
@@ -1703,8 +1490,6 @@ async function populateCatSelect(){
 }
 
 // ── Reusable single-image drag-and-drop uploader ──────────────
-// Wires a dropzone (click-to-browse + drag&drop) to upload a single image
-// via /products/upload and fill a URL input + live preview.
 function bsWireImageDropzone({ dropzoneId, fileInputId, urlInputId, previewId, progressId, barId }){
   const dz = document.getElementById(dropzoneId);
   const fileInput = document.getElementById(fileInputId);
@@ -2153,11 +1938,11 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
    ----------------------------------------------------------------
    বিদ্যমান admin.html-এ নিচের নতুন সেকশন যোগ করে:
    1) রিভিউ ব্যবস্থাপনা (দেখানো/লুকানো/মুছে ফেলা)
-   2) ফেক অর্ডার সতর্কতা (এবং তালিকা)
+   2) এডভান্সড পন্য এডিটর (Products পেজের বাটন থেকে খোলে)
    3) পন্য কার্ডের placement (Home Popular / Bestseller / Shop)
    4) নতুন পন্যের জন্য "product-<sku>.html" এর মত বিস্তারিত পেজ
       স্বয়ংক্রিয় তৈরির টগল
-   5) পেজ সেটিংস (frontend এর প্রতিটা পেজের জন্য মেনু)
+   5) পেজ সেটিংস (frontend এর প্রতিটা পেজের জন্য ড্রপডাউন মেনু)
    6) ব্যবহারকারী তালিকা
    ================================================================ */
 (function () {
@@ -2199,22 +1984,20 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
         <h2 style="color:#14213D;font-size:20px;margin:0 0 4px">
           <i class="fas fa-cogs" style="color:#FCA311"></i> Advanced Options
         </h2>
-        <p style="color:#64748b;font-size:13px;margin:0 0 8px">রিভিউ, ফেক অর্ডার, প্লেসমেন্ট, পেজ সেটিংস</p>
+        <p style="color:#64748b;font-size:13px;margin:0 0 8px">পেজ সেটিংস, গ্রাহক, রিভিউ, যোগাযোগ</p>
       </div>
       <div class="bs-ext-tabs" id="bsExtTabs">
-        <button data-tab="reviews"><i class="fas fa-star"></i> রিভিউ (<span data-count="reviews">0</span>)</button>
-        <button data-tab="fake"><i class="fas fa-exclamation-triangle"></i> ফেক অর্ডার (<span data-count="fake">0</span>)</button>
-        <button data-tab="products"><i class="fas fa-box"></i> এডভান্সড পন্য</button>
-        <button data-tab="contacts"><i class="fas fa-envelope"></i> যোগাযোগ (<span data-count="contacts">0</span>)</button>
         <button data-tab="settings"><i class="fas fa-sliders-h"></i> পেজ সেটিংস</button>
         <button data-tab="users"><i class="fas fa-users"></i> গ্রাহক</button>
+        <button data-tab="reviews"><i class="fas fa-star"></i> রিভিউ (<span data-count="reviews">0</span>)</button>
+        <button data-tab="contacts"><i class="fas fa-envelope"></i> যোগাযোগ (<span data-count="contacts">0</span>)</button>
       </div>
       <div id="bsExtBody"></div>
       <div class="bs-ext-modal" id="bsExtModal"><div class="box" id="bsExtModalBody"></div></div>
     `;
 
     // Mount into its own dedicated page section so it only shows when
-    // the "এডভান্সড অপশন" sidebar item is active, never alongside other pages
+    // the "Advanced Options" sidebar item is active, never alongside other pages
     const mount = document.getElementById('page-advanced') || document.querySelector('main, #main, .content, .main-content') || document.body;
     mount.appendChild(root);
 
@@ -2271,11 +2054,10 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
-  // ── TAB: Fake Orders ───────────────────────────────────────
+  // ── Fake Orders (used by Orders page directly, not a tab anymore) ──
   async function loadFake() {
     try {
       const { orders } = await fetchJSON('/orders?fake=true&limit=100');
-      document.querySelector('[data-count=fake]').textContent = orders.length;
       const rows = orders.map(o => `
         <tr class="bs-ext-fake-row">
           <td><b>${esc(o.orderId)}</b><br><small>${new Date(o.createdAt).toLocaleString('en-GB')}</small></td>
@@ -2305,7 +2087,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
-  // ── TAB: Advanced Products (with placement + detail page) ──
+  // ── Advanced Products (opened from Products page "এডভান্সড পন্য" button) ──
   async function loadProducts() {
     try {
       const list = await fetchJSON('/products?limit=200');
@@ -2521,29 +2303,28 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     catch (e) { toast(e.message, 'err'); }
   };
 
-  // ── TAB: Page Settings ─────────────────────────────────────
+  // ── TAB: Page Settings (compact dropdown) ─────────────────────
   async function loadSettings() {
     try {
       const pages = await fetchJSON('/page-settings');
       const html = `
         <div class="bs-ext-panel">
-          <p style="color:#64748b;font-size:13px;margin-bottom:16px">
-            প্রতিটি পেজের টাইটেল, মেটা ডেসক্রিপশন, হিরো সেকশন এবং কাস্টম কন্টেন্ট এখান থেকে পরিবর্তন করা যাবে।
-            পরিবর্তনগুলো ডেটাবেজে সেভ হয় এবং frontend থেকে API-এর মাধ্যমে fetch হয়।
-          </p>
-          <div style="display:grid;grid-template-columns:220px 1fr;gap:16px">
-            <div id="bsExtPageList" style="border-right:1px solid #e2e8f0;padding-right:16px">
-              ${pages.map(p => `
-                <button class="bs-ext-btn ghost" data-page="${p.page}" style="display:block;width:100%;text-align:left;margin-bottom:6px">
-                  <i class="fas fa-file"></i> ${esc(p.label || p.page)}
-                </button>`).join('')}
-            </div>
-            <div id="bsExtPageEditor"><p style="color:#94a3b8">বাম দিক থেকে একটি পেজ নির্বাচন করুন</p></div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px">
+            <label style="font-size:13px;font-weight:700;color:#14213D;white-space:nowrap">পেজ নির্বাচন করুন</label>
+            <select id="bsExtPageSelect" style="flex:1;min-width:180px;max-width:300px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:13.5px;background:#fff">
+              <option value="">— একটি পেজ বাছাই করুন —</option>
+              ${pages.map(p => `<option value="${p.page}">${esc(p.label || p.page)}</option>`).join('')}
+            </select>
           </div>
+          <div id="bsExtPageEditor"><p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করলে সেই পেজের সব সেটিংস এখানে দেখাবে।</p></div>
         </div>`;
       document.getElementById('bsExtBody').innerHTML = html;
-      document.querySelectorAll('#bsExtPageList [data-page]').forEach(b => {
-        b.onclick = () => editPage(b.dataset.page, pages.find(x => x.page === b.dataset.page));
+      document.getElementById('bsExtPageSelect').addEventListener('change', function(){
+        if(!this.value){
+          document.getElementById('bsExtPageEditor').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:26px 10px">উপরের ড্রপডাউন থেকে পেজ বাছাই করুন।</p>';
+          return;
+        }
+        editPage(this.value, pages.find(x => x.page === this.value));
       });
     } catch (e) { toast(e.message, 'err'); }
   }
@@ -2570,7 +2351,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     const f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
     if (f) window.bsUploadImageFile(f, targetId);
   };
-  // targetId = যে input-এর id-তে URL বসবে; curImg = বর্তমান ছবি (থাকলে)
   window.bsDzHtml = function (targetId, curImg) {
     return '<div class="bs-dropzone" ' +
       'ondragover="event.preventDefault();this.classList.add(\'drag\')" ' +
@@ -2602,9 +2382,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       <div class="row"><label>ঠিকানা <input name="cnt_address" value="${esc(cnt.address||'')}"/></label><label>ফোন <input name="cnt_phone" value="${esc(cnt.phone||'')}"/></label></div>
       <div class="row"><label>ইমেইল <input name="cnt_email" value="${esc(cnt.email||'')}"/></label><label>সময় <input name="cnt_hours" value="${esc(cnt.hours||'')}"/></label></div>` : '';
 
-    // ── Home page: structured, editable & savable sections that mirror
-    // index.html exactly (Promo Banners, Deal of Month, Why Choose Us, Reviews, Newsletter).
-    // Saving PUTs to /page-settings/home; index.html fetches this and renders live.
     const homeFields = pageKey === 'home' ? (() => {
       const banners = cnt.promoBanners || [];
       const deal = cnt.dealOfMonth || {};
@@ -2692,7 +2469,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           <label>টাইটেল <input id="bsDealTitle" value="${esc(deal.title||'')}"/></label>
           <label>বিবরণ <textarea id="bsDealText" rows="2">${esc(deal.text||'')}</textarea></label>
           <div class="row">
-            <label>বাটন টেক্স��� <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
+            <label>বাটন টেক্সট <input id="bsDealBtnText" value="${esc(deal.btnText||'Buy Now')}"/></label>
             <label>বাটন লিংক <input id="bsDealBtnLink" value="${esc(deal.btnLink||'shop.html')}"/></label>
           </div>
           <div class="row">
@@ -2817,7 +2594,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
       </form>
     `;
 
-    // Home পেজে Filter Tabs টেবিল লোড (এখন পেজ সেটিংস → Home এর ভেতরে)
     if (pageKey === 'home') {
       const ftBody = document.getElementById('bsHomeFilterTabsBody');
       if (ftBody) {
@@ -2837,7 +2613,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
     document.getElementById('bsExtPageForm').onsubmit = async (e) => {
       e.preventDefault(); const fd = new FormData(e.target);
       let content = {}; try { content = JSON.parse(fd.get('content') || '{}'); } catch { return toast('JSON invalid', 'err'); }
-      // Merge structured fields into content
       ['address','phone','email','hours'].forEach(k=>{ const v=fd.get('cnt_'+k); if(v) content[k]=v; });
       if(fd.get('cnt_facebook')) content.socialFacebook=fd.get('cnt_facebook');
       if(fd.get('cnt_whatsapp')) content.socialWhatsapp=fd.get('cnt_whatsapp');
@@ -2897,7 +2672,6 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=Math.imul(31,h)+s.charC
           img: document.getElementById('bsHeroImg')?.value || '',
         };
 
-        // Filter Tabs আলাদা এন্ডপয়েন্টে সেভ (হোম সেটিংসের ভেতর থেকেই)
         const ftRows = document.querySelectorAll('#filterTabsTable tbody tr[data-idx]');
         if (ftRows.length || document.getElementById('filterTabsTable')) {
           const tabs = Array.from(ftRows).map((tr, i) => ({
@@ -2939,7 +2713,7 @@ function bsRenderPromos(banners){
         '<button type="button" onclick="bsRemovePromo('+i+')" style="background:none;border:none;cursor:pointer;color:#ef4444"><i class="fas fa-trash"></i></button>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-        '<label style="font-size:12px;font-weight:600;color:#14213D">শ���রোনাম<input type="text" class="promo-field" data-field="title" value="'+esc(b.title||'')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
+        '<label style="font-size:12px;font-weight:600;color:#14213D">শিরোনাম<input type="text" class="promo-field" data-field="title" value="'+esc(b.title||'')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">স্টাইল<select class="promo-field" data-field="style" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"><option value="amber"'+(b.style==='amber'?' selected':'')+'>Amber (হলুদ)</option><option value="dark"'+(b.style==='dark'?' selected':'')+'>Dark (নীল)</option></select></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">ডিসকাউন্ট / ব্যাজ<input type="text" class="promo-field" data-field="discount" value="'+esc(b.discount||b.highlight||'')+'" placeholder="যেমন: 25% OFF" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
         '<label style="font-size:12px;font-weight:600;color:#14213D">বাটন টেক্সট<input type="text" class="promo-field" data-field="btnText" value="'+esc(b.btnText||'Shop Now')+'" style="display:block;width:100%;margin-top:4px;border:1px solid #e2e8f0;padding:7px 10px;font-size:13px"/></label>' +
@@ -3275,8 +3049,6 @@ window.bsRemovePromo = function(idx){
   function loadTab(tab) {
     switch (tab) {
       case 'reviews': return loadReviews();
-      case 'fake': return loadFake();
-      case 'products': return loadProducts();
       case 'contacts': return loadContacts();
       case 'about': return loadAboutEditor();
       case 'filtertabs': return loadFilterTabs();
@@ -3291,7 +3063,6 @@ window.bsRemovePromo = function(idx){
     buildUI();
     // preload badges
     fetchJSON('/admin/reviews').then(l => { const el=document.querySelector('[data-count=reviews]'); if(el) el.textContent = l.length; }).catch(() => {});
-    fetchJSON('/orders?fake=true&limit=1').then(r => { const el=document.querySelector('[data-count=fake]'); if(el) el.textContent = r.total || 0; }).catch(() => {});
     fetchJSON('/contacts').then(l => { const el=document.querySelector('[data-count=contacts]'); if(el) el.textContent = l.filter(c=>!c.read).length || l.length; }).catch(() => {});
     // Auto-open first tab
     const first = document.querySelector('.bs-ext-tabs button');
@@ -3310,83 +3081,167 @@ window.bsRemovePromo = function(idx){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
+</script>
 
 
 
+<!-- ==================== LANDING PAGE MODAL ==================== -->
+<div class="modal-overlay hidden lp-panel" id="landingPageModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3 id="lpModalTitle">নতুন ল্যান্ডিং পেজ তৈরি করুন</h3>
+      <button class="modal-close" onclick="document.getElementById('landingPageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="lpEditSlug">
 
-
-/* ============================================================
-   LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা
-   ============================================================ */
-function lpSetStats(total,active,linked){
-  const t=document.getElementById('lpTotalVal'); if(t) t.textContent=total;
-  const a=document.getElementById('lpActiveVal'); if(a) a.textContent=active;
-  const l=document.getElementById('lpLinkedVal'); if(l) l.textContent=linked;
-}
-async function loadLandingPages(){
-  const tbody=document.getElementById('landingPagesTableBody');
-  if(!tbody) return;
-  tbody.innerHTML='<tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>';
-  if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
-  apiJSON('/landing-pages').then(pages=>{
-    if(!pages||!pages.length){
-      lpSetStats(0,0,0);
-      tbody.innerHTML=`<tr><td colspan="6">
-        <div class="lp-empty">
-          <div class="lp-empty-icon"><i class="fas fa-file-circle-plus"></i></div>
-          <strong>কোনো ল্যান্ডিং পেজ নেই</strong>
-          <span>উপরের "নতুন পেজ তৈরি করুন" বাটনে ক্লিক করে প্রথম পেজটি তৈরি করুন।</span>
-        </div>
-      </td></tr>`;
-      return;
-    }
-    let activeCount=0, linkedCount=0;
-    const rows=pages.map(p=>{
-      const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+p.slug)!==-1);
-      if(p.active) activeCount++;
-      if(linked) linkedCount++;
-      return `
-      <tr>
-        <td>
-          <div class="lp-row-title">
-            <div class="lp-thumb"><i class="fas fa-file-lines"></i></div>
-            <div>
-              <span class="lp-name">${esc(p.title||'')}</span>
-              <span class="lp-slug">${esc(p.slug)}</span>
-            </div>
+      <!-- ① Basic Info -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-info-circle" style="color:#FCA311"></i> মূল তথ্য</h4>
+        <div class="form-row">
+          <div class="form-group2"><label>পেজের নাম (Title) *</label><input type="text" id="lpTitle" placeholder="JY-2570 Rechargeable Fan — বিশেষ অফার"/></div>
+          <div class="form-group2">
+            <label>Slug * <small style="color:#94a3b8;font-weight:400">(ইউনিক আইডি, URL-এ ব্যবহৃত হবে)</small></label>
+            <input type="text" id="lpSlug" placeholder="product-jy2570" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
           </div>
-        </td>
-        <td>${esc(p.hero&&p.hero.headline||'—')}</td>
-        <td>
-          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" class="lp-preview-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
-            প্রিভিউ দেখুন
-          </a><br>
-          ${linked
-            ? `<span class="lp-link-badge linked"><i class="fas fa-link"></i> লিংকড: ${esc(linked.name)}</span>`
-            : `<span class="lp-link-badge unlinked"><i class="fas fa-triangle-exclamation"></i> কোনো পণ্যের সাথে লিংক করা নেই</span>`}
-        </td>
-        <td><span class="badge ${p.active?'green':'red'}">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
-        <td style="font-size:12px;color:var(--text-soft)">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
-        <td>
-          <button class="icon-btn" title="সম্পাদনা" onclick="editLandingPage('${esc(p.slug)}')"><i class="fas fa-pen"></i></button>
-          <button class="icon-btn" title="ঐচ্ছিক অফলাইন কপি ডাউনলোড করুন (কার্ড লিংকের জন্য প্রয়োজন নেই)" onclick="downloadLandingHtml('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-download"></i></button>
-          <button class="icon-btn danger" title="মুছুন" onclick="deleteLandingPage('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>`;}).join('');
-    tbody.innerHTML=rows;
-    lpSetStats(pages.length, activeCount, linkedCount);
-  }).catch(err=>{
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--red)">লোড করতে সমস্যা: '+esc(err.message)+'</td></tr>';
-  });
-}
+        </div>
+        <div class="form-row">
+          <div class="form-group2">
+            <label>পেজ যেই পণ্যের সাথে লিংক হবে <small style="color:#94a3b8;font-weight:400">(সেভ করলে স্বয়ংক্রিয়ভাবে সেই পণ্যের সাথে যুক্ত হবে)</small></label>
+            <select id="lpLinkedProduct">
+              <option value="">— পণ্য নির্বাচন করুন —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/></div>
+          <div class="form-group2"><label>ক্যাটাগরি লেবেল</label><input type="text" id="lpCategory" placeholder="Table Fan / সিলিং ফ্যান"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="lpRating" min="1" max="5" step="0.1" placeholder="5"/></div>
+          <div class="form-group2"><label>মোট রিভিউ সংখ্যা</label><input type="number" id="lpRatingCount" min="0" placeholder="6"/></div>
+          <div class="form-group2"><label>স্টক পরিমাণ</label><input type="number" id="lpStock" min="0" placeholder="10"/></div>
+        </div>
+        <div class="form-group2"><label>পণ্যের বিবরণ (সংক্ষিপ্ত)</label><input type="text" id="lpDescription" placeholder="সংক্ষিপ্ত পণ্য বর্ণনা যা প্রোডাক্ট কার্ডে দেখাবে"/></div>
+        <div class="form-row">
+          <div class="form-group2"><label>হাইলাইট বক্স — কালার তথ্য</label><input type="text" id="lpHighlightColor" placeholder="মাল্টিকালার (৩টি অপশন)"/></div>
+          <div class="form-group2"><label>হাইলাইট বক্স — চার্জিং ব্যাকআপ</label><input type="text" id="lpHighlightCharge" placeholder="৬–৮ ঘণ্টা"/></div>
+        </div>
+        <div class="form-group2"><label>প্রাইস স্ট্রিপ অতিরিক্ত টেক্সট</label><input type="text" id="lpPriceStripText" placeholder="কোনো অগ্রিম নয় · সারা বাংলাদেশে Cash on Delivery"/></div>
+      </div>
 
-/* ── helpers ── */
+      <!-- ② Hero Section -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-bolt" style="color:#FCA311"></i> প্রোডাক্ট হিরো / দাম</h4>
+        <div class="form-group2"><label>মূল হেডলাইন (পণ্যের নাম) *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
+        <div class="form-group2"><label>সাব-হেডলাইন / সংক্ষিপ্ত বিবরণ</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
+        <div class="form-row">
+          <div class="form-group2"><label>বর্তমান দাম (৳)</label><input type="number" id="lpHeroPriceNow" placeholder="2150"/></div>
+          <div class="form-group2"><label>পুরনো দাম (৳)</label><input type="number" id="lpHeroPriceOld" placeholder="2550"/></div>
+          <div class="form-group2"><label>CTA বাটন লেখা</label><input type="text" id="lpHeroCtaLabel" placeholder="এখনই অর্ডার করুন"/></div>
+          <div class="form-group2"><label>CTA লিংক</label><input type="text" id="lpHeroCtaLink" placeholder="#order-form"/></div>
+        </div>
+        <div class="form-group2">
+          <label>মূল পণ্য ছবি (Hero Image URL) — URL দিন অথবা নিচে ড্রাগ/ক্লিক করুন</label>
+          <input type="url" id="lpHeroImage" placeholder="https://..." oninput="var p=document.getElementById('lpHeroImgPreview');p.src=this.value;p.style.display=this.value?'block':'none'"/>
+        </div>
+        <div class="bs-ext-dropzone" id="lpHeroDropzone" style="padding:16px;margin-top:8px;font-size:13px;cursor:pointer">
+          <i class="fas fa-cloud-upload-alt" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
+          হিরো ছবি এখানে ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
+          <input type="file" id="lpHeroFile" accept="image/*" style="display:none">
+        </div>
+        <img id="lpHeroImgPreview" style="display:none;max-height:160px;margin-top:8px;object-fit:contain;border:1px solid #e2e8f0;padding:4px;background:#fff" alt="Hero preview"/>
+      </div>
+
+      <!-- ③ Thumbnail Images -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-images" style="color:#FCA311"></i> থাম্বনেইল ছবিসমূহ (গ্যালারি)</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি থাম্বনেইল ছবির URL ও Alt টেক্সট দিন। একাধিক ছবি একসাথে আপলোড করতে নিচে ড্রাগ করুন।</p>
+        <div class="bs-ext-dropzone" id="lpThumbDropzone" style="padding:16px;margin-bottom:12px;font-size:13px;cursor:pointer">
+          <i class="fas fa-images" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
+          একাধিক ছবি ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
+          <input type="file" id="lpThumbFiles" accept="image/*" multiple style="display:none">
+        </div>
+        <div id="lpThumbsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddThumb()"><i class="fas fa-plus"></i> ম্যানুয়ালি URL দিয়ে যোগ করুন</button>
+      </div>
+
+      <!-- ④ Color Swatches -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-palette" style="color:#FCA311"></i> কালার সোয়াচ</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি কালারের নাম, hex কোড এবং সংশ্লিষ্ট থাম্বনেইল ইন্ডেক্স (০ থেকে শুরু) দিন।</p>
+        <div id="lpColorsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddColor()"><i class="fas fa-plus"></i> কালার যোগ করুন</button>
+      </div>
+
+      <!-- ⑤ Why-Buy Features -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-check-circle" style="color:#FCA311"></i> "কেন কিনবেন" ফিচার লিস্ট (বিবরণ ট্যাব)</h4>
+        <div id="lpFeaturesContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFeature()"><i class="fas fa-plus"></i> ফিচার যোগ করুন</button>
+      </div>
+
+      <!-- ⑥ Specs -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-list-ul" style="color:#FCA311"></i> স্পেসিফিকেশন (Specs টেবিল)</h4>
+        <div id="lpSpecsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSpec()"><i class="fas fa-plus"></i> স্পেক যোগ করুন</button>
+      </div>
+
+      <!-- ⑦ Sidebar Related Products -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-sidebar" style="color:#FCA311"></i> সাইডবার — সম্পর্কিত পণ্য</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">ডানদিকের সাইডবারে দেখানো কমপ্যাক্ট পণ্য কার্ডসমূহ।</p>
+        <div id="lpSidebarRelContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSidebarRel()"><i class="fas fa-plus"></i> সাইডবার পণ্য যোগ করুন</button>
+      </div>
+
+      <!-- ⑧ Bottom Related Grid -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-grid" style="color:#FCA311"></i> নিচের রিলেটেড প্রোডাক্ট গ্রিড</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">পেজের নিচে ৫টি পর্যন্ত রিলেটেড পণ্য দেখাবে (আপনার জন্য প্রস্তাবিত)।</p>
+        <div id="lpRelatedGridContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddRelatedGrid()"><i class="fas fa-plus"></i> রিলেটেড পণ্য যোগ করুন</button>
+      </div>
+
+      <!-- ⑨ Reviews -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-star" style="color:#FCA311"></i> রিভিউসমূহ</h4>
+        <div id="lpReviewsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddReview()"><i class="fas fa-plus"></i> রিভিউ যোগ করুন</button>
+      </div>
+
+      <!-- ⑩ FAQ / Q&A -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-question-circle" style="color:#FCA311"></i> প্রশ্নোত্তর (FAQ / Q&amp;A)</h4>
+        <div id="lpFaqContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFaq()"><i class="fas fa-plus"></i> FAQ যোগ করুন</button>
+      </div>
+
+      <!-- Status -->
+      <div class="form-group2" style="margin-bottom:4px">
+        <label><input type="checkbox" id="lpActive" checked style="width:auto;margin-right:6px"> পেজটি সক্রিয় রাখুন (Active)</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="margin-right:auto">
+        <a id="lpPreviewLink" href="#" target="_blank" class="bs-ext-btn ghost" style="text-decoration:none;display:none">
+          <i class="fas fa-eye"></i> প্রিভিউ করুন
+        </a>
+      </div>
+      <button class="cancel-btn" onclick="document.getElementById('landingPageModal').classList.add('hidden')">বাতিল</button>
+      <button class="save-btn" id="lpSaveBtn" onclick="saveLandingPage()"><i class="fas fa-save"></i> সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা (Products পেজ থেকে ব্যবহৃত)
+   ============================================================ */
 function lpV(id){const el=document.getElementById(id);return el?el.value.trim():'';}
 function lpSet(id,v){const el=document.getElementById(id);if(el)el.value=v||'';}
 
-/* Fill the "linked product" dropdown from the cached product list, keeping
-   whatever value is currently selected (or `preselectId` if provided). */
 async function lpPopulateProductSelect(preselectId){
   const sel=document.getElementById('lpLinkedProduct');
   if(!sel) return;
@@ -3402,13 +3257,11 @@ async function lpPopulateProductSelect(preselectId){
 function openLandingPageModal(slug){
   const modal=document.getElementById('landingPageModal');
   const titleEl=document.getElementById('lpModalTitle');
-  /* clear basic fields */
   ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpCategory','lpRating','lpRatingCount','lpStock',
    'lpHighlightColor','lpHighlightCharge','lpHeroHeadline','lpHeroSub','lpHeroPriceNow','lpHeroPriceOld',
    'lpHeroCtaLabel','lpHeroCtaLink','lpHeroImage','lpPriceStripText','lpDescription']
     .forEach(id=>lpSet(id,''));
   const activeChk=document.getElementById('lpActive');if(activeChk)activeChk.checked=true;
-  /* clear dynamic containers */
   ['lpFeaturesContainer','lpSpecsContainer','lpReviewsContainer','lpFaqContainer',
    'lpThumbsContainer','lpColorsContainer','lpSidebarRelContainer','lpRelatedGridContainer'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.innerHTML='';
@@ -3424,7 +3277,6 @@ function openLandingPageModal(slug){
   }
   titleEl.textContent='ল্যান্ডিং পেজ সম্পাদনা';
   apiJSON('/landing-pages/'+encodeURIComponent(slug)).then(async p=>{
-    /* find which product (if any) currently points its detailPage at this landing page */
     if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
     const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage &&
       x.detailPage.indexOf('slug='+p.slug)!==-1);
@@ -3450,7 +3302,6 @@ function openLandingPageModal(slug){
     lpSet('lpHeroImage',p.hero&&p.hero.image);
     if(activeChk)activeChk.checked=p.active!==false;
     if(p.hero&&p.hero.image&&imgPrev){imgPrev.src=p.hero.image;imgPrev.style.display='block';}
-    /* populate dynamic rows */
     (p.thumbImages||[]).forEach(t=>lpAddThumb(t.url,t.alt));
     (p.colors||[]).forEach(c=>lpAddColor(c.name,c.hex,c.thumb));
     (p.descFeatures||p.features||[]).forEach(f=>lpAddFeature(f));
@@ -3474,20 +3325,17 @@ async function saveLandingPage(){
   if(!slug)return notifyFn('Slug (ইউনিক আইডি) দিন','err');
   if(!title)return notifyFn('পেজের নাম দিন','err');
 
-  /* collect thumb images */
   const thumbImages=Array.from(document.querySelectorAll('#lpThumbsContainer .lp-thumb-row')).map(row=>({
     url:(row.querySelector('.lp-thumb-url')||{}).value||'',
     alt:(row.querySelector('.lp-thumb-alt')||{}).value||''
   })).filter(t=>t.url);
 
-  /* collect colors */
   const colors=Array.from(document.querySelectorAll('#lpColorsContainer .lp-color-row')).map((row,i)=>({
     name:(row.querySelector('.lp-color-name')||{}).value||'',
     hex:(row.querySelector('.lp-color-hex')||{}).value||'#000000',
     thumb:Number((row.querySelector('.lp-color-thumb')||{}).value)||i
   })).filter(c=>c.name||c.hex);
 
-  /* collect sidebar related */
   const sidebarRelated=Array.from(document.querySelectorAll('#lpSidebarRelContainer .lp-sidrel-row')).map(row=>({
     name:(row.querySelector('.lp-sr-name')||{}).value||'',
     price:Number((row.querySelector('.lp-sr-price')||{}).value)||0,
@@ -3498,7 +3346,6 @@ async function saveLandingPage(){
     ratingCount:Number((row.querySelector('.lp-sr-rcount')||{}).value)||0
   })).filter(r=>r.name);
 
-  /* collect related grid */
   const relatedGrid=Array.from(document.querySelectorAll('#lpRelatedGridContainer .lp-rg-row')).map(row=>({
     cat:(row.querySelector('.lp-rg-cat')||{}).value||'',
     name:(row.querySelector('.lp-rg-name')||{}).value||'',
@@ -3564,8 +3411,6 @@ async function saveLandingPage(){
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||'সেভ হয়নি');
 
-    /* Auto-deploy: link the selected product straight to this live page —
-       no manual download or frontend/ folder placement required. */
     const linkedProductId=lpV('lpLinkedProduct');
     let linkMsg='';
     if(linkedProductId){
@@ -3586,82 +3431,10 @@ async function saveLandingPage(){
 
     notifyFn((isEdit?'পেজ আপডেট হয়েছে!':'নতুন পেজ তৈরি ও লাইভ হয়ে গেছে!')+linkMsg,'ok');
     document.getElementById('landingPageModal').classList.add('hidden');
-    loadLandingPages();
   }catch(e){notifyFn('সমস্যা: '+e.message,'err');}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> সেভ করুন';}
 }
 
-async function deleteLandingPage(slug,title){
-  if(!confirm('"'+title+'" পেজটি মুছে ফেলবেন? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।'))return;
-  const API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
-  const tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
-  const notifyFn=window.toast||function(m,k){alert(m);};
-  /* unlink from any product pointing at this page, so the card doesn't break */
-  if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
-  const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+slug)!==-1);
-  if(linked){
-    try{
-      await fetch(API+'/products/id/'+encodeURIComponent(linked._id),{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},
-        body:JSON.stringify({hasDetailPage:false,detailPage:''})
-      });
-    }catch(e){}
-  }
-  fetch(API+'/landing-pages/'+encodeURIComponent(slug),{method:'DELETE',headers:{'Authorization':'Bearer '+tk}})
-    .then(r=>r.json()).then(d=>{if(d.ok){notifyFn('পেজ মুছে ফেলা হয়েছে'+(linked?' এবং পণ্য থেকে লিংক সরানো হয়েছে':''),'ok');loadProducts();loadLandingPages();}else notifyFn(d.error||'মুছতে সমস্যা','err');})
-    .catch(()=>notifyFn('নেটওয়ার্ক সমস্যা','err'));
-}
-
-/* Convert slug/title to a safe HTML filename: "JY-2570 Fan" → "JY-2570-Fan.html" */
-function slugToFilename(slug, title){
-  const base = (title || slug).trim()
-    .replace(/[^\w\u0980-\u09FF\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-{2,}/g, '-');
-  return base + '.html';
-}
-
-/* Generate a fully self-contained HTML file for a landing page and trigger download.
-   The file embeds all product data as window.__LP_PRELOADED__ so it works offline. */
-async function downloadLandingHtml(slug, title){
-  const notifyFn = window.toast || function(m,k){ alert(m); };
-  const API = window.API_BASE||'https://bscollectionbd.onrender.com/api';
-  const tk  = localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
-  notifyFn('HTML ফাইল তৈরি হচ্ছে…','ok');
-  try{
-    /* 1. Fetch full page data */
-    const dataRes = await fetch(API+'/landing-pages/'+encodeURIComponent(slug),
-      {headers:{'Authorization':'Bearer '+tk}});
-    if(!dataRes.ok) throw new Error('পেজ ডেটা পাওয়া যায়নি ('+dataRes.status+')');
-    const pageData = await dataRes.json();
-
-    /* 2. Fetch landing.html template (relative path from admin_panel/) */
-    const tplRes = await fetch('../frontend/landing.html');
-    if(!tplRes.ok) throw new Error('landing.html টেমপ্লেট পাওয়া যায়নি ('+tplRes.status+')');
-    let html = await tplRes.text();
-
-    /* 3. Embed data so init() uses __LP_PRELOADED__ instead of fetching API */
-    const dataScript = '<script>window.__LP_PRELOADED__ = '+JSON.stringify(pageData)+';<\/script>';
-    html = html.replace('</head>', dataScript + '\n</head>');
-
-    /* 4. Download as ProductName.html */
-    const filename = slugToFilename(slug, title);
-    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    notifyFn('✅ ডাউনলোড সম্পন্ন: '+filename+' — এটি frontend/ ফোল্ডারে রাখুন এবং পণ্যের "বিস্তারিত পেজ" ফিল্ডে "'+filename+'" সেট করুন।','ok');
-  }catch(e){
-    notifyFn('ডাউনলোড ব্যর্থ: '+e.message,'err');
-  }
-}
-
-/* ── row builders ── */
 const LP_ROW_STYLE='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:8px';
 const LP_INP='padding:7px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:12.5px;box-sizing:border-box';
 const LP_RM='<button type="button" onclick="this.closest(\'[data-lp-row]\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:5px 9px;cursor:pointer;font-size:13px;flex-shrink:0">✕</button>';
@@ -3758,8 +3531,6 @@ function lpAddSidebarRel(name,price,oldPrice,image,link,rating,ratingCount){
   c.appendChild(row);
 }
 
-
-/* ── Landing Page Image Dropzones ── */
 function lpWireDropzones(){
   var API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
   var tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
@@ -3773,7 +3544,6 @@ function lpWireDropzones(){
       .catch(function(){cb(URL.createObjectURL(file));});
   }
 
-  /* Hero dropzone */
   var heroDz=document.getElementById('lpHeroDropzone');
   var heroFile=document.getElementById('lpHeroFile');
   if(heroDz&&heroFile){
@@ -3792,7 +3562,6 @@ function lpWireDropzones(){
     });
   }
 
-  /* Multi-thumb dropzone */
   var thumbDz=document.getElementById('lpThumbDropzone');
   var thumbFiles=document.getElementById('lpThumbFiles');
   if(thumbDz&&thumbFiles){
@@ -3810,7 +3579,6 @@ function lpWireDropzones(){
   }
 }
 
-/* Hook into modal open */
 (function(){
   var orig=window.openLandingPageModal;
   if(typeof orig==='function'){
@@ -3838,160 +3606,7 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
     '<input type="text" class="lp-rg-link" placeholder="পণ্যের লিংক (HTML পেজ)" style="flex:1;min-width:120px;'+LP_INP+'" value="'+(link||'')+'"></div>';
   c.appendChild(row);
 }
-
 </script>
-
-
-
-<!-- ==================== LANDING PAGE MODAL ==================== -->
-<div class="modal-overlay hidden lp-fullpage" id="landingPageModal">
-  <div class="modal wide">
-    <div class="modal-head">
-      <h3 id="lpModalTitle">নতুন ল্যান্ডিং পেজ তৈরি করুন</h3>
-      <button class="modal-close" onclick="document.getElementById('landingPageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="lpEditSlug">
-
-      <!-- ① Basic Info -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-info-circle" style="color:#FCA311"></i> মূল তথ্য</h4>
-        <div class="form-row">
-          <div class="form-group2"><label>পেজের নাম (Title) *</label><input type="text" id="lpTitle" placeholder="JY-2570 Rechargeable Fan — বিশেষ অফার"/></div>
-          <div class="form-group2">
-            <label>Slug * <small style="color:#94a3b8;font-weight:400">(ইউনিক আইডি, URL-এ ব্যবহৃত হবে)</small></label>
-            <input type="text" id="lpSlug" placeholder="product-jy2570" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group2">
-            <label>পেজ যেই পণ্যের সাথে লিংক হবে <small style="color:#94a3b8;font-weight:400">(সেভ করলে স্বয়ংক্রিয়ভাবে সেই পণ্যের সাথে যুক্ত হবে)</small></label>
-            <select id="lpLinkedProduct">
-              <option value="">— পণ্য নির্বাচন করুন —</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/></div>
-          <div class="form-group2"><label>ক্যাটাগরি লেবেল</label><input type="text" id="lpCategory" placeholder="Table Fan / সিলিং ফ্যান"/></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="lpRating" min="1" max="5" step="0.1" placeholder="5"/></div>
-          <div class="form-group2"><label>মোট রিভিউ সংখ্যা</label><input type="number" id="lpRatingCount" min="0" placeholder="6"/></div>
-          <div class="form-group2"><label>স্টক পরিমাণ</label><input type="number" id="lpStock" min="0" placeholder="10"/></div>
-        </div>
-        <div class="form-group2"><label>পণ্যের বিবরণ (সংক্ষিপ্ত)</label><input type="text" id="lpDescription" placeholder="সংক্ষিপ্ত পণ্য বর্ণনা যা প্রোডাক্ট কার্ডে দেখাবে"/></div>
-        <div class="form-row">
-          <div class="form-group2"><label>হাইলাইট বক্স — কালার তথ্য</label><input type="text" id="lpHighlightColor" placeholder="মাল্টিকালার (৩টি অপশন)"/></div>
-          <div class="form-group2"><label>হাইলাইট বক্স — চার্জিং ব্যাকআপ</label><input type="text" id="lpHighlightCharge" placeholder="৬–৮ ঘণ্টা"/></div>
-        </div>
-        <div class="form-group2"><label>প্রাইস স্ট্রিপ অতিরিক্ত টেক্সট</label><input type="text" id="lpPriceStripText" placeholder="কোনো অগ্রিম নয় · সারা বাংলাদেশে Cash on Delivery"/></div>
-      </div>
-
-      <!-- ② Hero Section -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-bolt" style="color:#FCA311"></i> প্রোডাক্ট হিরো / দাম</h4>
-        <div class="form-group2"><label>মূল হেডলাইন (পণ্যের নাম) *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
-        <div class="form-group2"><label>সাব-হেডলাইন / সংক্ষিপ্ত বিবরণ</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
-        <div class="form-row">
-          <div class="form-group2"><label>বর্তমান দাম (৳)</label><input type="number" id="lpHeroPriceNow" placeholder="2150"/></div>
-          <div class="form-group2"><label>পুরনো দাম (৳)</label><input type="number" id="lpHeroPriceOld" placeholder="2550"/></div>
-          <div class="form-group2"><label>CTA বাটন লেখা</label><input type="text" id="lpHeroCtaLabel" placeholder="এখনই অর্ডার করুন"/></div>
-          <div class="form-group2"><label>CTA লিংক</label><input type="text" id="lpHeroCtaLink" placeholder="#order-form"/></div>
-        </div>
-        <div class="form-group2">
-          <label>মূল পণ্য ছবি (Hero Image URL) — URL দিন অথবা নিচে ড্রাগ/ক্লিক করুন</label>
-          <input type="url" id="lpHeroImage" placeholder="https://..." oninput="var p=document.getElementById('lpHeroImgPreview');p.src=this.value;p.style.display=this.value?'block':'none'"/>
-        </div>
-        <div class="bs-ext-dropzone" id="lpHeroDropzone" style="padding:16px;margin-top:8px;font-size:13px;cursor:pointer">
-          <i class="fas fa-cloud-upload-alt" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
-          হিরো ছবি এখানে ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
-          <input type="file" id="lpHeroFile" accept="image/*" style="display:none">
-        </div>
-        <img id="lpHeroImgPreview" style="display:none;max-height:160px;margin-top:8px;object-fit:contain;border:1px solid #e2e8f0;padding:4px;background:#fff" alt="Hero preview"/>
-      </div>
-
-      <!-- ③ Thumbnail Images -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-images" style="color:#FCA311"></i> থাম্বনেইল ছবিসমূহ (গ্যালারি)</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি থাম্বনেইল ছবির URL ও Alt টেক্সট দিন। একাধিক ছবি একসাথে আপলোড করতে নিচে ড্রাগ করুন।</p>
-        <div class="bs-ext-dropzone" id="lpThumbDropzone" style="padding:16px;margin-bottom:12px;font-size:13px;cursor:pointer">
-          <i class="fas fa-images" style="font-size:22px;color:#FCA311;display:block;margin-bottom:6px"></i>
-          একাধিক ছবি ড্রাগ করুন অথবা <b>ক্লিক করে বেছে নিন</b>
-          <input type="file" id="lpThumbFiles" accept="image/*" multiple style="display:none">
-        </div>
-        <div id="lpThumbsContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddThumb()"><i class="fas fa-plus"></i> ম্যানুয়ালি URL দিয়ে যোগ করুন</button>
-      </div>
-
-      <!-- ④ Color Swatches -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-palette" style="color:#FCA311"></i> কালার সোয���াচ</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি কালারের নাম, hex কোড এবং সংশ্লিষ্ট থাম্বনেইল ইন্ডেক্স (০ থেকে শুরু) দিন।</p>
-        <div id="lpColorsContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddColor()"><i class="fas fa-plus"></i> কালার যোগ করুন</button>
-      </div>
-
-      <!-- ⑤ Why-Buy Features -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-check-circle" style="color:#FCA311"></i> "কেন কিনবেন" ফিচার লিস্ট (বিবরণ ট্যাব)</h4>
-        <div id="lpFeaturesContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFeature()"><i class="fas fa-plus"></i> ফিচার যোগ করুন</button>
-      </div>
-
-      <!-- ⑥ Specs -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-list-ul" style="color:#FCA311"></i> স্পেসিফিকেশন (Specs টেবিল)</h4>
-        <div id="lpSpecsContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSpec()"><i class="fas fa-plus"></i> স্পেক যোগ করুন</button>
-      </div>
-
-      <!-- ⑦ Sidebar Related Products -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-sidebar" style="color:#FCA311"></i> সাইডবার — সম্পর্কিত পণ্য</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">ডানদিকের সাইডবারে দেখানো কমপ্যাক্ট পণ্য কার্ডসমূহ।</p>
-        <div id="lpSidebarRelContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSidebarRel()"><i class="fas fa-plus"></i> সাইডবার পণ্য যোগ করুন</button>
-      </div>
-
-      <!-- ⑧ Bottom Related Grid -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-grid" style="color:#FCA311"></i> নিচের রিলেটেড প্রোডাক্ট গ্রিড</h4>
-        <p style="font-size:12px;color:#64748b;margin-bottom:10px">পেজের নিচে ৫টি পর্যন্ত রিলেটেড পণ্য দেখাবে (আপনার জন্য প্রস্তাবিত)।</p>
-        <div id="lpRelatedGridContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddRelatedGrid()"><i class="fas fa-plus"></i> রিলেটেড পণ্য যোগ করুন</button>
-      </div>
-
-      <!-- ⑨ Reviews -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-star" style="color:#FCA311"></i> রিভিউসমূহ</h4>
-        <div id="lpReviewsContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddReview()"><i class="fas fa-plus"></i> রিভিউ যোগ করুন</button>
-      </div>
-
-      <!-- ⑩ FAQ / Q&A -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
-        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-question-circle" style="color:#FCA311"></i> প্রশ্নোত্তর (FAQ / Q&amp;A)</h4>
-        <div id="lpFaqContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFaq()"><i class="fas fa-plus"></i> FAQ যোগ করুন</button>
-      </div>
-
-      <!-- Status -->
-      <div class="form-group2" style="margin-bottom:4px">
-        <label><input type="checkbox" id="lpActive" checked style="width:auto;margin-right:6px"> পেজটি সক্রিয় রাখুন (Active)</label>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div style="margin-right:auto">
-        <a id="lpPreviewLink" href="#" target="_blank" class="bs-ext-btn ghost" style="text-decoration:none;display:none">
-          <i class="fas fa-eye"></i> প্রিভিউ করুন
-        </a>
-      </div>
-      <button class="cancel-btn" onclick="document.getElementById('landingPageModal').classList.add('hidden')">বাতিল</button>
-      <button class="save-btn" id="lpSaveBtn" onclick="saveLandingPage()"><i class="fas fa-save"></i> সেভ করুন</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
