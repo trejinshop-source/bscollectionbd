@@ -1303,7 +1303,7 @@ window.openOrderForm = function(){
     var total = price * qty;
     summaryEl.innerHTML =
       '<div style="display:flex;gap:12px;align-items:center;background:#f8fafc;padding:12px;margin-bottom:12px;border:1px solid #e2e8f0;border-radius:8px">' +
-      (window.PRODUCT_IMG ? '<img src="'+window.PRODUCT_IMG+'" style="width:56px;height:56px;object-fit:contain;border:1px solid #e2e8f0" onerror="this.style.display='none'" alt="">' : '') +
+      (window.PRODUCT_IMG ? '<img src="'+window.PRODUCT_IMG+'" style="width:56px;height:56px;object-fit:contain;border:1px solid #e2e8f0" onerror="this.style.display=\'none\'" alt="">' : '') +
       '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:#14213D">'+(window.PRODUCT_NAME||'পণ্য')+'</div>' +
       '<div style="font-size:13px;color:#64748b;margin:2px 0">পরিমাণ: '+qty+'</div>' +
       '<div style="font-size:18px;font-weight:800;color:#FCA311">৳'+total.toLocaleString('en-IN')+'</div>' +
