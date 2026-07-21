@@ -86,8 +86,9 @@
     const lf = document.getElementById('loginForm');
     if (lf) lf.onsubmit = async function (e) {
       e.preventDefault(); const fd = new FormData(lf);
+      // account.html uses name="id" for email/phone field; fallback to name="email"
       const r = await window.bsAuth.login({
-        email: fd.get('email'), password: fd.get('pw') || fd.get('password'),
+        email: fd.get('id') || fd.get('email'), password: fd.get('pw') || fd.get('password'),
       });
       if (!r.ok) return toast(r.msg, 'err');
       toast('লগইন সফল', 'ok');

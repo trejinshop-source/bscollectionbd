@@ -723,18 +723,35 @@ var PRODUCT_PRICE = 0;
 var PRODUCT_IMG = '';
 
 async function init(){
+  /* Self-contained mode: data embedded by admin download (no API needed) */
+  if(window.__LP_PRELOADED__){
+    PAGE_DATA = window.__LP_PRELOADED__;
+    renderPage(window.__LP_PRELOADED__);
+    return;
+  }
+
   var params = new URLSearchParams(location.search);
   var slug = params.get('slug');
   if(!slug){ renderError('Slug নেই', 'URL-এ ?slug=xxx দিতে হবে।'); return; }
+
   try{
-    var res = await fetch(API + '/landing-pages/' + encodeURIComponent(slug));
+    /* 20-second timeout — Render free tier cold-start takes ~15–30s */
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function(){ controller.abort(); }, 20000);
+    var res = await fetch(API + '/landing-pages/' + encodeURIComponent(slug), { signal: controller.signal });
+    clearTimeout(timeoutId);
     if(!res.ok) throw new Error('পেজ পাওয়া যায়নি ('+res.status+')');
     var page = await res.json();
     if(page.active === false){ renderError('পেজটি অনুপলব্ধ', 'এই পেজটি এই মুহূর্তে সক্রিয় নেই।'); return; }
     PAGE_DATA = page;
     renderPage(page);
   } catch(e){
-    renderError('পেজ লোড ব্যর্থ', e.message);
+    if(e.name === 'AbortError'){
+      renderError('সার্ভার সাড়া দিচ্ছে না',
+        'সার্ভার এখন ঘুমিয়ে আছে (Render free tier cold start)। একটু পর রিফ্রেশ করুন।', true);
+    } else {
+      renderError('পেজ লোড ব্যর্থ', e.message, true);
+    }
   }
 }
 
@@ -1209,8 +1226,15 @@ function bindInteractions(thumbImages, colors) {
   });
 }
 
-function renderError(title, msg){
-  document.getElementById('mainContent').innerHTML = '<div class="error-box"><div class="icon"><i class="fas fa-exclamation-circle"></i></div><h2>'+esc(title)+'</h2><p>'+esc(msg)+'</p><a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> হোমে ফিরুন</a></div>';
+function renderError(title, msg, showRetry){
+  var retryBtn = showRetry
+    ? '<button onclick="location.reload()" class="btn btn-accent" style="margin-left:10px"><i class="fas fa-rotate-right"></i> আবার চেষ্টা করুন</button>'
+    : '';
+  document.getElementById('mainContent').innerHTML =
+    '<div class="error-box"><div class="icon"><i class="fas fa-exclamation-circle"></i></div>' +
+    '<h2>'+esc(title)+'</h2><p>'+esc(msg)+'</p>' +
+    '<a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> হোমে ফিরুন</a>' +
+    retryBtn + '</div>';
   document.getElementById('siteFooter').style.display = '';
 }
 
@@ -1231,10 +1255,13 @@ var yearEl = document.getElementById('year'); if(yearEl) yearEl.textContent = ne
   var menu = document.getElementById('navMenu');
   var ovl = document.getElementById('overlay');
   if(ham && menu){
+    // Prevent bs-app.js from adding a second conflicting handler
+    ham.dataset.bsNativeNav = 'true';
     ham.addEventListener('click', function(){
       ham.classList.toggle('open');
       menu.classList.toggle('open');
       if(ovl) ovl.classList.toggle('show');
+      document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
     });
   }
   if(ovl) ovl.addEventListener('click', function(){

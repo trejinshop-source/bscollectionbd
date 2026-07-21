@@ -802,8 +802,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       <ol style="color:#78350f;font-size:13.5px;line-height:2;padding-left:20px">
         <li>উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন এবং পণ্যের তথ্য দিয়ে পেজ তৈরি করুন।</li>
         <li>পেজ তৈরি হলে <b>Products</b> ট্যাবে যান → পণ্য এডিট করুন।</li>
-        <li><b>"বিস্তারিত পেজ"</b> ফিল্ডে <code>landing.html?slug=আপনার-স্লাগ</code> লিখুন এবং "বিস্তারিত পেজ আছে" চেক করুন।</li>
-        <li>এখন পণ্য কার্ডে ক্লিক করলে ঐ ল্যান্ডিং পেজে নিয়ে যাবে।</li>
+        <li>পেজ তৈরির পর টেবিলে <b><i class="fas fa-download"></i> ডাউনলোড</b> বাটনে ক্লিক করুন — এটি <code>ProductName.html</code> নামে একটি স্বতন্ত্র (self-contained) ফাইল ডাউনলোড করবে।</li>
+        <li>ডাউনলোড করা ফাইলটি <code>frontend/</code> ফোল্ডারে রাখুন।</li>
+        <li><b>"বিস্তারিত পেজ"</b> ফিল্ডে ফাইলের নাম (যেমন: <code>ProductName.html</code>) লিখুন এবং "বিস্তারিত পেজ আছে" চেক করুন।</li>
+        <li>এখন পণ্য কার্ডে ক্লিক করলে সরাসরি ঐ স্বতন্ত্র পেজে নিয়ে যাবে।</li>
       </ol>
     </div>
   </section>
@@ -2931,10 +2933,14 @@ function loadLandingPages(){
       <tr>
         <td><strong>${esc(p.title||'')}</strong><br><code style="font-size:11px;color:#64748b">${esc(p.slug)}</code></td>
         <td>${esc(p.hero&&p.hero.headline||'—')}</td>
-        <td><a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">landing.html?slug=${esc(p.slug)}</a></td>
+        <td>
+          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">প্রিভিউ (অনলাইন)</a><br>
+          <code style="font-size:10px;color:#94a3b8">${esc(slugToFilename(p.slug,p.title))}</code>
+        </td>
         <td><span style="background:${p.active?'#dcfce7':'#fee2e2'};color:${p.active?'#166534':'#991b1b'};padding:2px 10px;font-size:12px;font-weight:600">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
         <td style="font-size:12px;color:#64748b">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
         <td>
+          <button class="icon-btn" title="HTML ডাউনলোড (স্বতন্ত্র ফাইল)" onclick="downloadLandingHtml('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-download"></i></button>
           <button class="icon-btn" title="সম্পাদনা" onclick="editLandingPage('${esc(p.slug)}')"><i class="fas fa-pen"></i></button>
           <button class="icon-btn danger" title="মুছুন" onclick="deleteLandingPage('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-trash"></i></button>
         </td>
@@ -3121,6 +3127,54 @@ function deleteLandingPage(slug,title){
   fetch(API+'/landing-pages/'+encodeURIComponent(slug),{method:'DELETE',headers:{'Authorization':'Bearer '+tk}})
     .then(r=>r.json()).then(d=>{if(d.ok){notifyFn('পেজ মুছে ফেলা হয়েছে','ok');loadLandingPages();}else notifyFn(d.error||'মুছতে সমস্যা','err');})
     .catch(()=>notifyFn('নেটওয়ার্ক সমস্যা','err'));
+}
+
+/* Convert slug/title to a safe HTML filename: "JY-2570 Fan" → "JY-2570-Fan.html" */
+function slugToFilename(slug, title){
+  const base = (title || slug).trim()
+    .replace(/[^\w\u0980-\u09FF\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-{2,}/g, '-');
+  return base + '.html';
+}
+
+/* Generate a fully self-contained HTML file for a landing page and trigger download.
+   The file embeds all product data as window.__LP_PRELOADED__ so it works offline. */
+async function downloadLandingHtml(slug, title){
+  const notifyFn = window.toast || function(m,k){ alert(m); };
+  const API = window.API_BASE||'https://bscollectionbd.onrender.com/api';
+  const tk  = localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
+  notifyFn('HTML ফাইল তৈরি হচ্ছে…','ok');
+  try{
+    /* 1. Fetch full page data */
+    const dataRes = await fetch(API+'/landing-pages/'+encodeURIComponent(slug),
+      {headers:{'Authorization':'Bearer '+tk}});
+    if(!dataRes.ok) throw new Error('পেজ ডেটা পাওয়া যায়নি ('+dataRes.status+')');
+    const pageData = await dataRes.json();
+
+    /* 2. Fetch landing.html template (relative path from admin_panel/) */
+    const tplRes = await fetch('../frontend/landing.html');
+    if(!tplRes.ok) throw new Error('landing.html টেমপ্লেট পাওয়া যায়নি ('+tplRes.status+')');
+    let html = await tplRes.text();
+
+    /* 3. Embed data so init() uses __LP_PRELOADED__ instead of fetching API */
+    const dataScript = '<script>window.__LP_PRELOADED__ = '+JSON.stringify(pageData)+';<\/script>';
+    html = html.replace('</head>', dataScript + '\n</head>');
+
+    /* 4. Download as ProductName.html */
+    const filename = slugToFilename(slug, title);
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    notifyFn('✅ ডাউনলোড সম্পন্ন: '+filename+' — এটি frontend/ ফোল্ডারে রাখুন এবং পণ্যের "বিস্তারিত পেজ" ফিল্ডে "'+filename+'" সেট করুন।','ok');
+  }catch(e){
+    notifyFn('ডাউনলোড ব্যর্থ: '+e.message,'err');
+  }
 }
 
 /* ── row builders ── */

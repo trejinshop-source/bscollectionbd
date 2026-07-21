@@ -493,8 +493,10 @@
   }
   function interceptHamburger(){
     // common hamburger classes in the site
-    $$('.hamburger, [data-hamburger], .mobile-toggle, #hamburger, .menu-toggle').forEach(b=>{
+    $('.hamburger, [data-hamburger], .mobile-toggle, #hamburger, .menu-toggle').forEach(b=>{
       if (b.dataset.bsIntercepted) return;
+      // skip if the page already wired its own native nav toggle
+      if (b.dataset.bsNativeNav === 'true') return;
       b.dataset.bsIntercepted='1';
       b.addEventListener('click', e=>{ e.preventDefault(); window.bsOpenMNav(); });
     });

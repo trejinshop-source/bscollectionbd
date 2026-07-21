@@ -1458,9 +1458,14 @@ applyState();
 /* ================= HAMBURGER ================= */
 const nav = document.getElementById('navMenu');
 const overlay = document.getElementById('overlay');
-document.getElementById('hamburger').addEventListener('click',()=>{
+const shopHamBtn = document.getElementById('hamburger');
+// Prevent bs-app.js from adding a second conflicting handler
+shopHamBtn.dataset.bsNativeNav = 'true';
+shopHamBtn.addEventListener('click',()=>{
+  shopHamBtn.classList.toggle('open');
   nav.classList.toggle('open');
   overlay.classList.toggle('show');
+  document.body.style.overflow = nav.classList.contains('open') ? 'hidden' : '';
 });
 overlay.addEventListener('click',()=>{nav.classList.remove('open');overlay.classList.remove('show');});
 document.querySelectorAll('.nav-menu a').forEach(a=>{

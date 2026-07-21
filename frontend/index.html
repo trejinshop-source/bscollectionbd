@@ -1508,23 +1508,31 @@ var WL_KEY = 'bs_wish_v1';
 function getWL(){try{return JSON.parse(localStorage.getItem(WL_KEY))||[];}catch(e){return[];}}
 function saveWL(w){localStorage.setItem(WL_KEY,JSON.stringify(w));}
 function syncWishBadge(){var wl=getWL();document.querySelectorAll('.wishlist-badge').forEach(function(b){b.textContent=wl.length;});}
+function findProductById(id){
+  /* Search fallback products first, then API catalog pool */
+  return allProducts.find(function(x){ return String(x.id)===String(id); }) ||
+         (_catalogPool && _catalogPool.find(function(x){ return String(x.id)===String(id); })) ||
+         null;
+}
 function addCart(id){
-  const p = allProducts.find(x=>x.id===id);
+  const p = findProductById(id);
   if(!p) return;
   if(window.BSCart) BSCart.addToCart({id:p.id, name:p.name, price:p.now, img:p.img});
   toast('"' + p.name + '" cart-এ যোগ হয়েছে');
 }
 function addWishlist(el){
-  var dataId = Number(el.dataset && el.dataset.id ? el.dataset.id : 0);
+  /* Use raw string ID so MongoDB _id strings work alongside numeric IDs */
+  var rawId = (el.dataset && el.dataset.id) ? el.dataset.id : null;
   var card = el.closest('[data-id]');
-  if(!dataId && card) dataId = Number(card.dataset.id||0);
+  if(!rawId && card) rawId = card.dataset.id || null;
   var i = el.querySelector('i');
   var wl = getWL();
-  var p = dataId ? allProducts.find(function(x){return x.id===dataId;}) : null;
-  var idx = dataId ? wl.findIndex(function(x){return (x.id||x)===dataId;}) : -1;
+  var p = rawId ? findProductById(rawId) : null;
+  var idx = rawId ? wl.findIndex(function(x){ return String(x.id||x)===String(rawId); }) : -1;
   if(i.classList.contains('far')){
     i.classList.replace('far','fas'); i.style.color='#FCA311';
-    if(p && idx===-1) wl.push({id:p.id, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat, url:p.url});
+    if(p && idx===-1) wl.push({id:p.id, name:p.name, now:p.now, old:p.old, img:p.img, cat:p.cat,
+      url:p.url, detailPage:p.url /* url already contains detailPage via toCardProduct */});
     toast('Wishlist-এ যোগ হয়েছে');
   } else {
     i.classList.replace('fas','far'); i.style.color='';
@@ -1588,6 +1596,8 @@ document.addEventListener('keydown',e=>{
 const nav = document.getElementById('navMenu');
 const overlay = document.getElementById('overlay');
 const hamburgerBtn = document.getElementById('hamburger');
+// Prevent bs-app.js from adding a second conflicting handler
+hamburgerBtn.dataset.bsNativeNav = 'true';
 hamburgerBtn.addEventListener('click',()=>{
   nav.classList.toggle('open');
   overlay.classList.toggle('show');
