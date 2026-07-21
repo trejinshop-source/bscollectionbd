@@ -843,14 +843,11 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
               <div class="dd-item" id="lpMenuViewList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg> তৈরিকৃত পেজসমূহ দেখুন</div>
             </div>
           </div>
-          <button class="pill-btn ghost" id="openBulkImageBtn"><i class="fas fa-image"></i> সব পণ্যে ছবি বসান</button>
-          <button class="pill-btn ghost" id="resetPlacementsBtn"><i class="fas fa-store"></i> শুধু Shop-এ দেখান (সব পণ্য)</button>
-          <button class="pill-btn ghost" id="disableHomePlacementsBtn"><i class="fas fa-house-circle-xmark"></i> হোম প্লেসমেন্ট বন্ধ করুন (সব পণ্য)</button>
         </div>
       </div>
       <div class="filter-bar">
         <div class="chip-group" id="productCatChips">
-          <span class="chip active" data-cat="">All Categories</span>
+          <span class="chip active" data-cat="">সকল ক্যাটাগরি</span>
         </div>
         <div class="dropdown" id="productSortDropdown">
           <button class="pill-btn ghost" id="productSortBtn"><span class="btn-label">Sort: Newest</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -876,7 +873,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       </div>
       <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>Image</th><th>Name</th><th>Slug</th><th>Products</th><th>Actions</th></tr></thead>
+          <thead><tr><th>ছবি</th><th>নাম</th><th>স্লাগ</th><th>পণ্য সংখ্যা</th><th>অ্যাকশন</th></tr></thead>
           <tbody id="categoriesTableBody"><tr><td colspan="5"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr></tbody>
         </table>
       </div>
@@ -961,7 +958,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       </div>
       <div class="form-row">
         <div class="form-group2"><label>পন্যের নাম *</label><input type="text" id="pName" placeholder="যেমন: Rechargeable Fan RS-2218"></div>
-        <div class="form-group2"><label>ক্যাটাগরি</label><select id="pCat"><option value="">— Select Category —</option></select></div>
+        <div class="form-group2"><label>ক্যাটাগরি</label><select id="pCat"><option value="">— ক্যাটাগরি বেছে নিন —</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="pRating" min="0" max="5" step="0.1" placeholder="৪.৫"></div>
@@ -1012,15 +1009,15 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
 <div class="modal-overlay hidden" id="catModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="catModalTitle">Add Category</h3>
+      <h3 id="catModalTitle">ক্যাটাগরি যোগ করুন</h3>
       <button class="modal-close" id="catModalClose"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="catEditId">
-      <div class="form-group2"><label>Category Name *</label><input type="text" id="catName" placeholder="Ceiling Fans"></div>
-      <div class="form-group2"><label>Slug *</label><input type="text" id="catSlug" placeholder="ceiling-fans"></div>
+      <div class="form-group2"><label>ক্যাটাগরির নাম *</label><input type="text" id="catName" placeholder="Ceiling Fans"></div>
+      <div class="form-group2"><label>স্লাগ *</label><input type="text" id="catSlug" placeholder="ceiling-fans"></div>
       <div class="form-group2">
-        <label>Category Image</label>
+        <label>ক্যাটাগরির ছবি</label>
         <div class="bs-ext-dropzone" id="catImgDropzone">
           <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:#FCA311"></i>
           <p style="margin:6px 0 0;color:#64748b;font-size:13px">এখানে ছবি টেনে এনে ছাড়ুন, অথবা ক্লিক করে বেছে নিন</p>
@@ -1454,7 +1451,7 @@ document.getElementById('refreshProductsBtn').addEventListener('click', loadProd
 function buildProductCatChips(){
   const chips = document.getElementById('productCatChips');
   const slugs = [...new Set(allProducts.map(p=>p.categorySlug).filter(Boolean))];
-  chips.innerHTML = `<span class="chip active" data-cat="">All Categories</span>` +
+  chips.innerHTML = `<span class="chip active" data-cat="">সকল ক্যাটাগরি</span>` +
     slugs.map(s=>`<span class="chip" data-cat="${s}">${s}</span>`).join('');
   chips.querySelectorAll('.chip').forEach(c=>{
     c.addEventListener('click', ()=>{
@@ -1525,10 +1522,7 @@ document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
   openLandingPagesListModal();
 });
 
-/* সব পণ্যে ছবি বসানোর টুল */
-document.getElementById('openBulkImageBtn').addEventListener('click', ()=> openBulkImageModal());
-document.getElementById('resetPlacementsBtn').addEventListener('click', ()=> resetAllProductPlacementsToShopOnly());
-document.getElementById('disableHomePlacementsBtn').addEventListener('click', ()=> disableAllHomePlacements());
+
 
 function openProductModal(id){
   const modal = document.getElementById('productModal');
@@ -1750,8 +1744,8 @@ function renderCategoriesTable(){
     <td><code style="font-size:12px;background:var(--bg);padding:3px 7px;border-radius:5px;">${esc(c.slug)}</code></td>
     <td>${c.count||0}</td>
     <td><div style="display:flex;gap:6px;">
-      <button class="act-btn" onclick="openEditCat('${c._id}')"><i class="fas fa-pen"></i> Edit</button>
-      <button class="act-btn danger" onclick="confirmDeleteCat('${c._id}','${esc(c.name).replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i> Delete</button>
+      <button class="act-btn" onclick="openEditCat('${c._id}')"><i class="fas fa-pen"></i> এডিট</button>
+      <button class="act-btn danger" onclick="confirmDeleteCat('${c._id}','${esc(c.name).replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i> মুছুন</button>
     </div></td>
   </tr>`).join('');
 }
@@ -1759,7 +1753,7 @@ function renderCategoriesTable(){
 document.getElementById('addCatBtn').addEventListener('click',()=>openCatModal());
 function openCatModal(id){
   const isEdit=!!id;
-  document.getElementById('catModalTitle').textContent=isEdit?'Edit Category':'Add Category';
+  document.getElementById('catModalTitle').textContent=isEdit?'ক্যাটাগরি সম্পাদনা':'ক্যাটাগরি যোগ করুন';
   document.getElementById('catEditId').value=id||'';
   if(!isEdit){ ['catName','catSlug','catImg'].forEach(f=>document.getElementById(f).value=''); }
   else{
