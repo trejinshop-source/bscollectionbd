@@ -2943,17 +2943,24 @@ function loadLandingPages(){
   });
 }
 
+/* ── helpers ── */
+function lpV(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+function lpSet(id,v){const el=document.getElementById(id);if(el)el.value=v||'';}
+
 function openLandingPageModal(slug){
   const modal=document.getElementById('landingPageModal');
   const titleEl=document.getElementById('lpModalTitle');
-  ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpHeroHeadline','lpHeroSub','lpHeroPriceNow','lpHeroPriceOld','lpHeroCtaLabel','lpHeroCtaLink','lpHeroImage']
-    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  /* clear basic fields */
+  ['lpEditSlug','lpTitle','lpSlug','lpMetaDesc','lpCategory','lpRating','lpRatingCount','lpStock',
+   'lpHighlightColor','lpHighlightCharge','lpHeroHeadline','lpHeroSub','lpHeroPriceNow','lpHeroPriceOld',
+   'lpHeroCtaLabel','lpHeroCtaLink','lpHeroImage','lpPriceStripText','lpDescription']
+    .forEach(id=>lpSet(id,''));
   const activeChk=document.getElementById('lpActive');if(activeChk)activeChk.checked=true;
-  document.getElementById('lpFeaturesContainer').innerHTML='';
-  document.getElementById('lpSpecsContainer').innerHTML='';
-  document.getElementById('lpReviewsContainer').innerHTML='';
-  document.getElementById('lpFaqContainer').innerHTML='';
-  const galleryEl=document.getElementById('lpGallery');if(galleryEl)galleryEl.value='';
+  /* clear dynamic containers */
+  ['lpFeaturesContainer','lpSpecsContainer','lpReviewsContainer','lpFaqContainer',
+   'lpThumbsContainer','lpColorsContainer','lpSidebarRelContainer','lpRelatedGridContainer'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.innerHTML='';
+  });
   const imgPrev=document.getElementById('lpHeroImgPreview');if(imgPrev)imgPrev.style.display='none';
   const previewLink=document.getElementById('lpPreviewLink');
   if(!slug){
@@ -2964,24 +2971,36 @@ function openLandingPageModal(slug){
   }
   titleEl.textContent='ল্যান্ডিং পেজ সম্পাদনা';
   apiJSON('/landing-pages/'+encodeURIComponent(slug)).then(p=>{
-    document.getElementById('lpEditSlug').value=p.slug||'';
-    document.getElementById('lpTitle').value=p.title||'';
-    document.getElementById('lpSlug').value=p.slug||'';
-    document.getElementById('lpMetaDesc').value=p.metaDescription||'';
-    document.getElementById('lpHeroHeadline').value=(p.hero&&p.hero.headline)||'';
-    document.getElementById('lpHeroSub').value=(p.hero&&p.hero.subheadline)||'';
-    document.getElementById('lpHeroPriceNow').value=(p.hero&&p.hero.priceNow)||'';
-    document.getElementById('lpHeroPriceOld').value=(p.hero&&p.hero.priceOld)||'';
-    document.getElementById('lpHeroCtaLabel').value=(p.hero&&p.hero.ctaLabel)||'';
-    document.getElementById('lpHeroCtaLink').value=(p.hero&&p.hero.ctaLink)||'';
-    document.getElementById('lpHeroImage').value=(p.hero&&p.hero.image)||'';
+    lpSet('lpEditSlug',p.slug);
+    lpSet('lpTitle',p.title);
+    lpSet('lpSlug',p.slug);
+    lpSet('lpMetaDesc',p.metaDescription);
+    lpSet('lpCategory',p.category);
+    lpSet('lpRating',p.rating);
+    lpSet('lpRatingCount',p.ratingCount);
+    lpSet('lpStock',p.stock);
+    lpSet('lpHighlightColor',p.highlightColor);
+    lpSet('lpHighlightCharge',p.highlightCharge);
+    lpSet('lpDescription',p.description);
+    lpSet('lpPriceStripText',p.priceStripText);
+    lpSet('lpHeroHeadline',p.hero&&p.hero.headline);
+    lpSet('lpHeroSub',p.hero&&p.hero.subheadline);
+    lpSet('lpHeroPriceNow',p.hero&&p.hero.priceNow);
+    lpSet('lpHeroPriceOld',p.hero&&p.hero.priceOld);
+    lpSet('lpHeroCtaLabel',p.hero&&p.hero.ctaLabel);
+    lpSet('lpHeroCtaLink',p.hero&&p.hero.ctaLink);
+    lpSet('lpHeroImage',p.hero&&p.hero.image);
     if(activeChk)activeChk.checked=p.active!==false;
     if(p.hero&&p.hero.image&&imgPrev){imgPrev.src=p.hero.image;imgPrev.style.display='block';}
-    (p.features||[]).forEach(f=>lpAddFeature(f));
+    /* populate dynamic rows */
+    (p.thumbImages||[]).forEach(t=>lpAddThumb(t.url,t.alt));
+    (p.colors||[]).forEach(c=>lpAddColor(c.name,c.hex,c.thumb));
+    (p.descFeatures||p.features||[]).forEach(f=>lpAddFeature(f));
     (p.specs||[]).forEach(s=>lpAddSpec(s.label,s.value));
-    if(galleryEl)galleryEl.value=(p.gallery||[]).join('\n');
-    (p.reviews||[]).forEach(r=>lpAddReview(r.name,r.rating,r.text));
+    (p.reviews||[]).forEach(r=>lpAddReview(r.name,r.rating,r.title,r.text,r.date));
     (p.faq||[]).forEach(q=>lpAddFaq(q.q,q.a));
+    (p.sidebarRelated||[]).forEach(r=>lpAddSidebarRel(r.name,r.price,r.oldPrice,r.image,r.link,r.rating,r.ratingCount));
+    (p.relatedGrid||[]).forEach(r=>lpAddRelatedGrid(r.cat,r.name,r.price,r.oldPrice,r.badge,r.image,r.link,r.rating,r.ratingCount));
     if(previewLink){previewLink.href='../frontend/landing.html?slug='+encodeURIComponent(p.slug);previewLink.style.display='';}
     modal.classList.remove('hidden');
   }).catch(err=>{ const fn=window.toast||function(m){alert(m);}; fn('ডেটা লোড সমস্যা: '+err.message,'err'); });
@@ -2990,30 +3009,91 @@ function openLandingPageModal(slug){
 function editLandingPage(slug){ openLandingPageModal(slug); }
 
 async function saveLandingPage(){
-  const editSlug=(document.getElementById('lpEditSlug').value||'').trim();
-  const slug=(document.getElementById('lpSlug').value||'').trim();
-  const title=(document.getElementById('lpTitle').value||'').trim();
+  const editSlug=lpV('lpEditSlug');
+  const slug=lpV('lpSlug');
+  const title=lpV('lpTitle');
   const notifyFn=window.toast||function(m,k){alert(m);};
   if(!slug)return notifyFn('Slug (ইউনিক আইডি) দিন','err');
   if(!title)return notifyFn('পেজের নাম দিন','err');
+
+  /* collect thumb images */
+  const thumbImages=Array.from(document.querySelectorAll('#lpThumbsContainer .lp-thumb-row')).map(row=>({
+    url:(row.querySelector('.lp-thumb-url')||{}).value||'',
+    alt:(row.querySelector('.lp-thumb-alt')||{}).value||''
+  })).filter(t=>t.url);
+
+  /* collect colors */
+  const colors=Array.from(document.querySelectorAll('#lpColorsContainer .lp-color-row')).map((row,i)=>({
+    name:(row.querySelector('.lp-color-name')||{}).value||'',
+    hex:(row.querySelector('.lp-color-hex')||{}).value||'#000000',
+    thumb:Number((row.querySelector('.lp-color-thumb')||{}).value)||i
+  })).filter(c=>c.name||c.hex);
+
+  /* collect sidebar related */
+  const sidebarRelated=Array.from(document.querySelectorAll('#lpSidebarRelContainer .lp-sidrel-row')).map(row=>({
+    name:(row.querySelector('.lp-sr-name')||{}).value||'',
+    price:Number((row.querySelector('.lp-sr-price')||{}).value)||0,
+    oldPrice:Number((row.querySelector('.lp-sr-oldprice')||{}).value)||0,
+    image:(row.querySelector('.lp-sr-img')||{}).value||'',
+    link:(row.querySelector('.lp-sr-link')||{}).value||'',
+    rating:Number((row.querySelector('.lp-sr-rating')||{}).value)||5,
+    ratingCount:Number((row.querySelector('.lp-sr-rcount')||{}).value)||0
+  })).filter(r=>r.name);
+
+  /* collect related grid */
+  const relatedGrid=Array.from(document.querySelectorAll('#lpRelatedGridContainer .lp-rg-row')).map(row=>({
+    cat:(row.querySelector('.lp-rg-cat')||{}).value||'',
+    name:(row.querySelector('.lp-rg-name')||{}).value||'',
+    price:Number((row.querySelector('.lp-rg-price')||{}).value)||0,
+    oldPrice:Number((row.querySelector('.lp-rg-oldprice')||{}).value)||0,
+    badge:Number((row.querySelector('.lp-rg-badge')||{}).value)||0,
+    image:(row.querySelector('.lp-rg-img')||{}).value||'',
+    link:(row.querySelector('.lp-rg-link')||{}).value||'',
+    rating:Number((row.querySelector('.lp-rg-rating')||{}).value)||5,
+    ratingCount:Number((row.querySelector('.lp-rg-rcount')||{}).value)||0
+  })).filter(r=>r.name);
+
   const body={
-    slug,title,
-    metaDescription:document.getElementById('lpMetaDesc').value.trim(),
-    active:document.getElementById('lpActive').checked,
+    slug, title,
+    metaDescription: lpV('lpMetaDesc'),
+    active: document.getElementById('lpActive').checked,
+    category: lpV('lpCategory'),
+    rating: Number(lpV('lpRating'))||5,
+    ratingCount: Number(lpV('lpRatingCount'))||0,
+    stock: Number(lpV('lpStock'))||0,
+    highlightColor: lpV('lpHighlightColor'),
+    highlightCharge: lpV('lpHighlightCharge'),
+    description: lpV('lpDescription'),
+    priceStripText: lpV('lpPriceStripText'),
     hero:{
-      headline:document.getElementById('lpHeroHeadline').value.trim(),
-      subheadline:document.getElementById('lpHeroSub').value.trim(),
-      priceNow:Number(document.getElementById('lpHeroPriceNow').value)||undefined,
-      priceOld:Number(document.getElementById('lpHeroPriceOld').value)||undefined,
-      ctaLabel:document.getElementById('lpHeroCtaLabel').value.trim()||'এখনই অর্ডার করুন',
-      ctaLink:document.getElementById('lpHeroCtaLink').value.trim(),
-      image:document.getElementById('lpHeroImage').value.trim(),
+      headline: lpV('lpHeroHeadline'),
+      subheadline: lpV('lpHeroSub'),
+      priceNow: Number(lpV('lpHeroPriceNow'))||undefined,
+      priceOld: Number(lpV('lpHeroPriceOld'))||undefined,
+      ctaLabel: lpV('lpHeroCtaLabel')||'এখনই অর্ডার করুন',
+      ctaLink: lpV('lpHeroCtaLink'),
+      image: lpV('lpHeroImage'),
     },
-    features:Array.from(document.querySelectorAll('#lpFeaturesContainer .lp-feature-input')).map(i=>i.value.trim()).filter(Boolean),
-    specs:Array.from(document.querySelectorAll('#lpSpecsContainer .lp-spec-row')).map(row=>({label:row.querySelector('.lp-spec-label').value.trim(),value:row.querySelector('.lp-spec-value').value.trim()})).filter(s=>s.label||s.value),
-    gallery:(document.getElementById('lpGallery').value||'').split('\n').map(s=>s.trim()).filter(Boolean),
-    reviews:Array.from(document.querySelectorAll('#lpReviewsContainer .lp-review-row')).map(row=>({name:row.querySelector('.lp-rv-name').value.trim(),rating:Number(row.querySelector('.lp-rv-rating').value)||5,text:row.querySelector('.lp-rv-text').value.trim()})).filter(r=>r.name||r.text),
-    faq:Array.from(document.querySelectorAll('#lpFaqContainer .lp-faq-row')).map(row=>({q:row.querySelector('.lp-faq-q').value.trim(),a:row.querySelector('.lp-faq-a').value.trim()})).filter(f=>f.q||f.a),
+    thumbImages,
+    colors,
+    descFeatures: Array.from(document.querySelectorAll('#lpFeaturesContainer .lp-feature-input')).map(i=>i.value.trim()).filter(Boolean),
+    specs: Array.from(document.querySelectorAll('#lpSpecsContainer .lp-spec-row')).map(row=>({
+      label: row.querySelector('.lp-spec-label').value.trim(),
+      value: row.querySelector('.lp-spec-value').value.trim()
+    })).filter(s=>s.label||s.value),
+    reviews: Array.from(document.querySelectorAll('#lpReviewsContainer .lp-review-row')).map(row=>({
+      name: (row.querySelector('.lp-rv-name')||{}).value||'',
+      rating: Number((row.querySelector('.lp-rv-rating')||{}).value)||5,
+      title: (row.querySelector('.lp-rv-title')||{}).value||'',
+      text: (row.querySelector('.lp-rv-text')||{}).value||'',
+      date: (row.querySelector('.lp-rv-date')||{}).value||''
+    })).filter(r=>r.name||r.text),
+    faq: Array.from(document.querySelectorAll('#lpFaqContainer .lp-faq-row')).map(row=>({
+      q: row.querySelector('.lp-faq-q').value.trim(),
+      a: row.querySelector('.lp-faq-a').value.trim()
+    })).filter(f=>f.q||f.a),
+    sidebarRelated,
+    relatedGrid,
   };
   const btn=document.getElementById('lpSaveBtn');
   btn.disabled=true;btn.textContent='সেভ হচ্ছে...';
@@ -3042,11 +3122,40 @@ function deleteLandingPage(slug,title){
     .catch(()=>notifyFn('নেটওয়ার্ক সমস্যা','err'));
 }
 
+/* ── row builders ── */
+const LP_ROW_STYLE='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:8px';
+const LP_INP='padding:7px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:12.5px;box-sizing:border-box';
+const LP_RM='<button type="button" onclick="this.closest(\'[data-lp-row]\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:5px 9px;cursor:pointer;font-size:13px;flex-shrink:0">✕</button>';
+
+function lpAddThumb(url,alt){
+  const c=document.getElementById('lpThumbsContainer');
+  const row=document.createElement('div');
+  row.setAttribute('data-lp-row','');
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
+  row.innerHTML='<input type="url" class="lp-thumb-url" placeholder="ছবির URL" style="flex:2;min-width:200px;'+LP_INP+'" value="'+(url||'')+'">'+
+    '<input type="text" class="lp-thumb-alt" placeholder="Alt টেক্সট" style="flex:1;min-width:100px;'+LP_INP+'" value="'+(alt||'')+'">'+
+    LP_RM;
+  c.appendChild(row);
+}
+
+function lpAddColor(name,hex,thumb){
+  const c=document.getElementById('lpColorsContainer');
+  const row=document.createElement('div');
+  row.setAttribute('data-lp-row','');
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap';
+  row.innerHTML='<input type="text" class="lp-color-name" placeholder="রং এর নাম (যেমন: সাদা)" style="flex:2;min-width:100px;'+LP_INP+'" value="'+(name||'')+'">'+
+    '<input type="color" class="lp-color-hex" title="রং বাছুন" style="width:44px;height:34px;padding:2px;border:1px solid #e2e8f0;cursor:pointer;flex-shrink:0" value="'+(hex||'#000000')+'">'+
+    '<input type="number" class="lp-color-thumb" placeholder="থাম্ব ইন্ডেক্স" min="0" style="width:80px;'+LP_INP+'" value="'+(thumb||0)+'">'+
+    LP_RM;
+  c.appendChild(row);
+}
+
 function lpAddFeature(val){
   const c=document.getElementById('lpFeaturesContainer');
   const row=document.createElement('div');
-  row.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
-  row.innerHTML='<input type="text" class="lp-feature-input" placeholder="যেমন: ১২ ঘন্টা ব্যাটারি ব্যাকআপ" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(val||'')+'"><button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer;font-size:14px">✕</button>';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  row.innerHTML='<input type="text" class="lp-feature-input" placeholder="যেমন: ১২ ঘন্টা ব্যাটারি ব্যাকআপ" style="flex:1;'+LP_INP+'" value="'+(val||'')+'">'+LP_RM;
   c.appendChild(row);
 }
 
@@ -3054,17 +3163,26 @@ function lpAddSpec(label,value){
   const c=document.getElementById('lpSpecsContainer');
   const row=document.createElement('div');
   row.className='lp-spec-row';
-  row.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
-  row.innerHTML='<input type="text" class="lp-spec-label" placeholder="বৈশিষ্ট্য (যেমন: ব্যাটারি)" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(label||'')+'"><input type="text" class="lp-spec-value" placeholder="মান (যেমন: ৬০০০ mAh)" style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(value||'')+'"><button type="button" onclick="this.parentElement.remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer;font-size:14px">✕</button>';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
+  row.innerHTML='<input type="text" class="lp-spec-label" placeholder="বৈশিষ্ট্য (যেমন: ব্যাটারি)" style="flex:1;'+LP_INP+'" value="'+(label||'')+'">'+
+    '<input type="text" class="lp-spec-value" placeholder="মান (যেমন: ৬০০০ mAh)" style="flex:1;'+LP_INP+'" value="'+(value||'')+'">'+LP_RM;
   c.appendChild(row);
 }
 
-function lpAddReview(name,rating,text){
+function lpAddReview(name,rating,title,text,date){
   const c=document.getElementById('lpReviewsContainer');
   const row=document.createElement('div');
   row.className='lp-review-row';
-  row.style.cssText='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:10px';
-  row.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="lp-rv-name" placeholder="নাম" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(name||'')+'"><input type="number" class="lp-rv-rating" placeholder="রেটিং (১-৫)" min="1" max="5" style="width:80px;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(rating||5)+'"><button type="button" onclick="this.closest(\'.lp-review-row\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer">✕</button></div><textarea class="lp-rv-text" placeholder="রিভিউ টেক্সট" rows="2" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;box-sizing:border-box">'+(text||'')+'</textarea>';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText=LP_ROW_STYLE;
+  row.innerHTML='<div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;align-items:center">'+
+    '<input type="text" class="lp-rv-name" placeholder="নাম" style="flex:2;min-width:100px;'+LP_INP+'" value="'+(name||'')+'">'+
+    '<input type="number" class="lp-rv-rating" placeholder="রেটিং (১-৫)" min="1" max="5" style="width:70px;'+LP_INP+'" value="'+(rating||5)+'">'+
+    '<input type="text" class="lp-rv-date" placeholder="তারিখ" style="width:100px;'+LP_INP+'" value="'+(date||'')+'">'+
+    LP_RM+'</div>'+
+    '<input type="text" class="lp-rv-title" placeholder="রিভিউ টাইটেল (ঐচ্ছিক)" style="width:100%;margin-bottom:6px;'+LP_INP+'" value="'+(title||'')+'">'+
+    '<textarea class="lp-rv-text" placeholder="রিভিউ টেক্সট" rows="2" style="width:100%;'+LP_INP+'">'+(text||'')+'</textarea>';
   c.appendChild(row);
 }
 
@@ -3072,8 +3190,51 @@ function lpAddFaq(q,a){
   const c=document.getElementById('lpFaqContainer');
   const row=document.createElement('div');
   row.className='lp-faq-row';
-  row.style.cssText='background:#f8fafc;border:1px solid #e2e8f0;padding:10px;margin-bottom:10px';
-  row.innerHTML='<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" class="lp-faq-q" placeholder="প্রশ্ন" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" value="'+(q||'')+'"><button type="button" onclick="this.closest(\'.lp-faq-row\').remove()" style="background:#fee2e2;border:0;color:#ef4444;padding:6px 10px;cursor:pointer">✕</button></div><textarea class="lp-faq-a" placeholder="উত্তর" rows="2" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px;box-sizing:border-box">'+(a||'')+'</textarea>';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText=LP_ROW_STYLE;
+  row.innerHTML='<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'+
+    '<input type="text" class="lp-faq-q" placeholder="প্রশ্ন" style="flex:1;'+LP_INP+'" value="'+(q||'')+'">'+LP_RM+'</div>'+
+    '<textarea class="lp-faq-a" placeholder="উত্তর" rows="2" style="width:100%;'+LP_INP+'">'+(a||'')+'</textarea>';
+  c.appendChild(row);
+}
+
+function lpAddSidebarRel(name,price,oldPrice,image,link,rating,ratingCount){
+  const c=document.getElementById('lpSidebarRelContainer');
+  const row=document.createElement('div');
+  row.className='lp-sidrel-row';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText=LP_ROW_STYLE;
+  row.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">'+
+    '<input type="text" class="lp-sr-name" placeholder="পণ্যের নাম *" style="flex:3;min-width:150px;'+LP_INP+'" value="'+(name||'')+'">'+
+    '<input type="number" class="lp-sr-price" placeholder="দাম (৳)" style="width:90px;'+LP_INP+'" value="'+(price||'')+'">'+
+    '<input type="number" class="lp-sr-oldprice" placeholder="পুরনো দাম" style="width:90px;'+LP_INP+'" value="'+(oldPrice||'')+'">'+
+    '<input type="number" class="lp-sr-rating" placeholder="রেটিং" min="1" max="5" style="width:70px;'+LP_INP+'" value="'+(rating||5)+'">'+
+    '<input type="number" class="lp-sr-rcount" placeholder="রিভিউ সংখ্যা" style="width:80px;'+LP_INP+'" value="'+(ratingCount||0)+'">'+
+    LP_RM+'</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+    '<input type="url" class="lp-sr-img" placeholder="ছবির URL" style="flex:2;min-width:140px;'+LP_INP+'" value="'+(image||'')+'">'+
+    '<input type="text" class="lp-sr-link" placeholder="পণ্যের লিংক (HTML পেজ)" style="flex:1;min-width:120px;'+LP_INP+'" value="'+(link||'')+'"></div>';
+  c.appendChild(row);
+}
+
+function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,ratingCount){
+  const c=document.getElementById('lpRelatedGridContainer');
+  const row=document.createElement('div');
+  row.className='lp-rg-row';
+  row.setAttribute('data-lp-row','');
+  row.style.cssText=LP_ROW_STYLE;
+  row.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">'+
+    '<input type="text" class="lp-rg-cat" placeholder="ক্যাটাগরি" style="width:110px;'+LP_INP+'" value="'+(cat||'')+'">'+
+    '<input type="text" class="lp-rg-name" placeholder="পণ্যের নাম *" style="flex:3;min-width:150px;'+LP_INP+'" value="'+(name||'')+'">'+
+    '<input type="number" class="lp-rg-price" placeholder="দাম (৳)" style="width:80px;'+LP_INP+'" value="'+(price||'')+'">'+
+    '<input type="number" class="lp-rg-oldprice" placeholder="পুরনো" style="width:75px;'+LP_INP+'" value="'+(oldPrice||'')+'">'+
+    '<input type="number" class="lp-rg-badge" placeholder="ছাড়% " style="width:65px;'+LP_INP+'" value="'+(badge||'')+'">'+
+    '<input type="number" class="lp-rg-rating" placeholder="রেটিং" min="1" max="5" style="width:65px;'+LP_INP+'" value="'+(rating||5)+'">'+
+    '<input type="number" class="lp-rg-rcount" placeholder="রিভিউ" style="width:65px;'+LP_INP+'" value="'+(ratingCount||0)+'">'+
+    LP_RM+'</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+    '<input type="url" class="lp-rg-img" placeholder="ছবির URL" style="flex:2;min-width:140px;'+LP_INP+'" value="'+(image||'')+'">'+
+    '<input type="text" class="lp-rg-link" placeholder="পণ্যের লিংক (HTML পেজ)" style="flex:1;min-width:120px;'+LP_INP+'" value="'+(link||'')+'"></div>';
   c.appendChild(row);
 }
 
@@ -3083,16 +3244,17 @@ function lpAddFaq(q,a){
 
 <!-- ==================== LANDING PAGE MODAL ==================== -->
 <div class="modal-overlay hidden" id="landingPageModal">
-  <div class="modal wide" style="max-width:800px">
+  <div class="modal wide" style="max-width:900px">
     <div class="modal-head">
       <h3 id="lpModalTitle">নতুন ল্যান্ডিং পেজ তৈরি করুন</h3>
       <button class="modal-close" onclick="document.getElementById('landingPageModal').classList.add('hidden')"><i class="fas fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="lpEditSlug">
-      <!-- Basic Info -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-info-circle" style="color:#FCA311"></i> মূল তথ্য</h4>
+
+      <!-- ① Basic Info -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-info-circle" style="color:#FCA311"></i> মূল তথ্য</h4>
         <div class="form-row">
           <div class="form-group2"><label>পেজের নাম (Title) *</label><input type="text" id="lpTitle" placeholder="JY-2570 Rechargeable Fan — বিশেষ অফার"/></div>
           <div class="form-group2">
@@ -3100,61 +3262,109 @@ function lpAddFaq(q,a){
             <input type="text" id="lpSlug" placeholder="product-jy2570" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
           </div>
         </div>
-        <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="এই পণ্য সম্পর্কে সংক্ষিপ্ত বিবরণ (160 অক্ষর পর্যন্ত)"/></div>
+        <div class="form-row">
+          <div class="form-group2"><label>Meta Description (SEO)</label><input type="text" id="lpMetaDesc" placeholder="সংক্ষিপ্ত বিবরণ (160 অক্ষর)"/></div>
+          <div class="form-group2"><label>ক্যাটাগরি লেবেল</label><input type="text" id="lpCategory" placeholder="Table Fan / সিলিং ফ্যান"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group2"><label>রেটিং (১–৫)</label><input type="number" id="lpRating" min="1" max="5" step="0.1" placeholder="5"/></div>
+          <div class="form-group2"><label>মোট রিভিউ সংখ্যা</label><input type="number" id="lpRatingCount" min="0" placeholder="6"/></div>
+          <div class="form-group2"><label>স্টক পরিমাণ</label><input type="number" id="lpStock" min="0" placeholder="10"/></div>
+        </div>
+        <div class="form-group2"><label>পণ্যের বিবরণ (সংক্ষিপ্ত)</label><input type="text" id="lpDescription" placeholder="সংক্ষিপ্ত পণ্য বর্ণনা যা প্রোডাক্ট কার্ডে দেখাবে"/></div>
+        <div class="form-row">
+          <div class="form-group2"><label>হাইলাইট বক্স — কালার তথ্য</label><input type="text" id="lpHighlightColor" placeholder="মাল্টিকালার (৩টি অপশন)"/></div>
+          <div class="form-group2"><label>হাইলাইট বক্স — চার্জিং ব্যাকআপ</label><input type="text" id="lpHighlightCharge" placeholder="৬–৮ ঘণ্টা"/></div>
+        </div>
+        <div class="form-group2"><label>প্রাইস স্ট্রিপ অতিরিক্ত টেক্সট</label><input type="text" id="lpPriceStripText" placeholder="কোনো অগ্রিম নয় · সারা বাংলাদেশে Cash on Delivery"/></div>
       </div>
-      <!-- Hero Section -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> Hero সেকশন</h4>
-        <div class="form-group2"><label>মূল হেডলাইন *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
-        <div class="form-group2"><label>সাব-হেডলাইন</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
+
+      <!-- ② Hero Section -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 12px;color:#14213D;font-size:13.5px"><i class="fas fa-bolt" style="color:#FCA311"></i> প্রোডাক্ট হিরো / দাম</h4>
+        <div class="form-group2"><label>মূল হেডলাইন (পণ্যের নাম) *</label><input type="text" id="lpHeroHeadline" placeholder="JY-2570 রিচার্জেবল ফ্যান — সর্বোচ্চ বাতাস, দীর্ঘতম ব্যাটারি ব্যাকআপ"/></div>
+        <div class="form-group2"><label>সাব-হেডলাইন / সংক্ষিপ্ত বিবরণ</label><input type="text" id="lpHeroSub" placeholder="১২ ঘন্টা ব্যাটারি ব্যাকআপ · রিমোট কন্ট্রোল · ডুয়াল LED লাইট"/></div>
         <div class="form-row">
           <div class="form-group2"><label>বর্তমান দাম (৳)</label><input type="number" id="lpHeroPriceNow" placeholder="2150"/></div>
           <div class="form-group2"><label>পুরনো দাম (৳)</label><input type="number" id="lpHeroPriceOld" placeholder="2550"/></div>
-        </div>
-        <div class="form-row">
           <div class="form-group2"><label>CTA বাটন লেখা</label><input type="text" id="lpHeroCtaLabel" placeholder="এখনই অর্ডার করুন"/></div>
-          <div class="form-group2"><label>CTA লিংক (খালি রাখলে Cart-এ যাবে)</label><input type="text" id="lpHeroCtaLink" placeholder="cart.html অথবা #order-form"/></div>
+          <div class="form-group2"><label>CTA লিংক</label><input type="text" id="lpHeroCtaLink" placeholder="#order-form"/></div>
         </div>
-        <div class="form-group2"><label>Hero ছবির URL</label><input type="url" id="lpHeroImage" placeholder="https://..." oninput="document.getElementById('lpHeroImgPreview').src=this.value;document.getElementById('lpHeroImgPreview').style.display='block'"/></div>
+        <div class="form-group2">
+          <label>মূল পণ্য ছবি (Hero Image URL)</label>
+          <input type="url" id="lpHeroImage" placeholder="https://..." oninput="var p=document.getElementById('lpHeroImgPreview');p.src=this.value;p.style.display=this.value?'block':'none'"/>
+        </div>
         <img id="lpHeroImgPreview" style="display:none;max-height:160px;margin-top:8px;object-fit:contain;border:1px solid #e2e8f0;padding:4px;background:#fff" alt="Hero preview"/>
       </div>
-      <!-- Features -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-check-circle" style="color:#FCA311"></i> বৈশিষ্ট্য (Features)</h4>
-        <div id="lpFeaturesContainer"></div>
-        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFeature()"><i class="fas fa-plus"></i> বৈশিষ্ট্য যোগ করুন</button>
+
+      <!-- ③ Thumbnail Images -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-images" style="color:#FCA311"></i> থাম্বনেইল ছবিসমূহ (গ্যালারি)</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি থাম্বনেইল ছবির URL ও Alt টেক্সট দিন। প্রথম ছবিটি মূল ছবি হিসেবে দেখাবে।</p>
+        <div id="lpThumbsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddThumb()"><i class="fas fa-plus"></i> থাম্বনেইল যোগ করুন</button>
       </div>
-      <!-- Specs -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-list-ul" style="color:#FCA311"></i> স্পেসিফিকেশন (Specs)</h4>
+
+      <!-- ④ Color Swatches -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-palette" style="color:#FCA311"></i> কালার সোয়াচ</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">প্রতিটি কালারের নাম, hex কোড এবং সংশ্লিষ্ট থাম্বনেইল ইন্ডেক্স (০ থেকে শুরু) দিন।</p>
+        <div id="lpColorsContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddColor()"><i class="fas fa-plus"></i> কালার যোগ করুন</button>
+      </div>
+
+      <!-- ⑤ Why-Buy Features -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-check-circle" style="color:#FCA311"></i> "কেন কিনবেন" ফিচার লিস্ট (বিবরণ ট্যাব)</h4>
+        <div id="lpFeaturesContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddFeature()"><i class="fas fa-plus"></i> ফিচার যোগ করুন</button>
+      </div>
+
+      <!-- ⑥ Specs -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-list-ul" style="color:#FCA311"></i> স্পেসিফিকেশন (Specs টেবিল)</h4>
         <div id="lpSpecsContainer"></div>
         <button type="button" class="bs-ext-btn ghost" onclick="lpAddSpec()"><i class="fas fa-plus"></i> স্পেক যোগ করুন</button>
       </div>
-      <!-- Gallery -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-images" style="color:#FCA311"></i> গ্যালারি (ছবির URL, এক লাইনে একটি)</h4>
-        <textarea id="lpGallery" rows="4" style="width:100%;padding:10px;border:1px solid #e2e8f0;font-family:inherit;font-size:13px" placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg"></textarea>
+
+      <!-- ⑦ Sidebar Related Products -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-sidebar" style="color:#FCA311"></i> সাইডবার — সম্পর্কিত পণ্য</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">ডানদিকের সাইডবারে দেখানো কমপ্যাক্ট পণ্য কার্ডসমূহ।</p>
+        <div id="lpSidebarRelContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddSidebarRel()"><i class="fas fa-plus"></i> সাইডবার পণ্য যোগ করুন</button>
       </div>
-      <!-- Reviews -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-star" style="color:#FCA311"></i> রিভিউ</h4>
+
+      <!-- ⑧ Bottom Related Grid -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-grid" style="color:#FCA311"></i> নিচের রিলেটেড প্রোডাক্ট গ্রিড</h4>
+        <p style="font-size:12px;color:#64748b;margin-bottom:10px">পেজের নিচে ৫টি পর্যন্ত রিলেটেড পণ্য দেখাবে (আপনার জন্য প্রস্তাবিত)।</p>
+        <div id="lpRelatedGridContainer"></div>
+        <button type="button" class="bs-ext-btn ghost" onclick="lpAddRelatedGrid()"><i class="fas fa-plus"></i> রিলেটেড পণ্য যোগ করুন</button>
+      </div>
+
+      <!-- ⑨ Reviews -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-star" style="color:#FCA311"></i> রিভিউসমূহ</h4>
         <div id="lpReviewsContainer"></div>
         <button type="button" class="bs-ext-btn ghost" onclick="lpAddReview()"><i class="fas fa-plus"></i> রিভিউ যোগ করুন</button>
       </div>
-      <!-- FAQ -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:16px">
-        <h4 style="margin:0 0 12px;color:#14213D;font-size:14px"><i class="fas fa-question-circle" style="color:#FCA311"></i> প্রশ্নোত্তর (FAQ)</h4>
+
+      <!-- ⑩ FAQ / Q&A -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px">
+        <h4 style="margin:0 0 10px;color:#14213D;font-size:13.5px"><i class="fas fa-question-circle" style="color:#FCA311"></i> প্রশ্নোত্তর (FAQ / Q&amp;A)</h4>
         <div id="lpFaqContainer"></div>
         <button type="button" class="bs-ext-btn ghost" onclick="lpAddFaq()"><i class="fas fa-plus"></i> FAQ যোগ করুন</button>
       </div>
+
       <!-- Status -->
-      <div class="form-group2">
+      <div class="form-group2" style="margin-bottom:4px">
         <label><input type="checkbox" id="lpActive" checked style="width:auto;margin-right:6px"> পেজটি সক্রিয় রাখুন (Active)</label>
       </div>
     </div>
     <div class="modal-footer">
       <div style="margin-right:auto">
-        <a id="lpPreviewLink" href="#" target="_blank" class="bs-ext-btn ghost" style="text-decoration:none">
+        <a id="lpPreviewLink" href="#" target="_blank" class="bs-ext-btn ghost" style="text-decoration:none;display:none">
           <i class="fas fa-eye"></i> প্রিভিউ করুন
         </a>
       </div>
