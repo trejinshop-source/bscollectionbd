@@ -800,12 +800,10 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
     <div class="card" style="margin-top:16px;background:#fff7ed;border-color:#FCD79E;">
       <h3 style="color:#92400e;margin-bottom:10px"><i class="fas fa-info-circle"></i> কিভাবে ব্যবহার করবেন</h3>
       <ol style="color:#78350f;font-size:13.5px;line-height:2;padding-left:20px">
-        <li>উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন এবং পণ্যের তথ্য দিয়ে পেজ তৈরি করুন।</li>
-        <li>পেজ তৈরি হলে <b>Products</b> ট্যাবে যান → পণ্য এডিট করুন।</li>
-        <li>পেজ তৈরির পর টেবিলে <b><i class="fas fa-download"></i> ডাউনলোড</b> বাটনে ক্লিক করুন — এটি <code>ProductName.html</code> নামে একটি স্বতন্ত্র (self-contained) ফাইল ডাউনলোড করবে।</li>
-        <li>ডাউনলোড করা ফাইলটি <code>frontend/</code> ফোল্ডারে রাখুন।</li>
-        <li><b>"বিস্তারিত পেজ"</b> ফিল্ডে ফাইলের নাম (যেমন: <code>ProductName.html</code>) লিখুন এবং "বিস্তারিত পেজ আছে" চেক করুন।</li>
-        <li>এখন পণ্য কার্ডে ক্লিক করলে সরাসরি ঐ স্বতন্ত্র পেজে নিয়ে যাবে।</li>
+        <li>উপরে <b>"নতুন পেজ তৈরি করুন"</b> ক্লিক করুন, পণ্যের তথ্য দিন এবং <b>"পেজ যেই পণ্যের সাথে লিংক হবে"</b> ড্রপডাউন থেকে পণ্যটি বেছে নিন।</li>
+        <li><b>"সেভ করুন"</b> চাপুন — ব্যস, এতটুকুই। পেজটি সাথে সাথেই লাইভ হয়ে যাবে এবং নির্বাচিত পণ্যের <b>"বিস্তারিত পেজ"</b> ফিল্ড ও <b>"বিস্তারিত পেজ আছে"</b> চেকবক্স স্বয়ংক্রিয়ভাবে সেট হয়ে যাবে — কোনো ফাইল ডাউনলোড বা <code>frontend/</code> ফোল্ডারে রাখার প্রয়োজন নেই।</li>
+        <li>এখন থেকে পণ্য কার্ডে ক্লিক করলেই সরাসরি ঐ পেজে নিয়ে যাবে। পরে পেজটি এডিট করে সেভ করলে লাইভ পেজও নিজে থেকেই আপডেট হয়ে যাবে।</li>
+        <li>চাইলে টেবিলে <b><i class="fas fa-download"></i> ডাউনলোড</b> বাটন দিয়ে একটি অফলাইন/ব্যাকআপ কপি আলাদাভাবে সংরক্ষণ করতে পারবেন — এটি ঐচ্ছিক, কার্ড লিংক কাজ করতে এটির দরকার নেই।</li>
       </ol>
     </div>
   </section>
@@ -2920,31 +2918,36 @@ window.bsRemovePromo = function(idx){
 /* ============================================================
    LANDING PAGES — সম্পূর্ণ কার্যকর ব্যবস্থাপনা
    ============================================================ */
-function loadLandingPages(){
+async function loadLandingPages(){
   const tbody=document.getElementById('landingPagesTableBody');
   if(!tbody) return;
   tbody.innerHTML='<tr><td colspan="6"><div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div></td></tr>';
+  if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
   apiJSON('/landing-pages').then(pages=>{
     if(!pages||!pages.length){
       tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8">কোনো ল্যান্ডিং পেজ নেই। উপরের বাটন দিয়ে তৈরি করুন।</td></tr>';
       return;
     }
-    tbody.innerHTML=pages.map(p=>`
+    tbody.innerHTML=pages.map(p=>{
+      const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+p.slug)!==-1);
+      return `
       <tr>
         <td><strong>${esc(p.title||'')}</strong><br><code style="font-size:11px;color:#64748b">${esc(p.slug)}</code></td>
         <td>${esc(p.hero&&p.hero.headline||'—')}</td>
         <td>
-          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">প্রিভিউ (অনলাইন)</a><br>
-          <code style="font-size:10px;color:#94a3b8">${esc(slugToFilename(p.slug,p.title))}</code>
+          <a href="../frontend/landing.html?slug=${encodeURIComponent(p.slug)}" target="_blank" style="color:#FCA311;font-size:12px">প্রিভিউ (অনলাইন, লাইভ)</a><br>
+          ${linked
+            ? `<span style="font-size:10px;color:#166534">🔗 লিংকড: ${esc(linked.name)}</span>`
+            : `<span style="font-size:10px;color:#b45309">⚠ কোনো পণ্যের সাথে লিংক করা নেই</span>`}
         </td>
         <td><span style="background:${p.active?'#dcfce7':'#fee2e2'};color:${p.active?'#166534':'#991b1b'};padding:2px 10px;font-size:12px;font-weight:600">${p.active?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
         <td style="font-size:12px;color:#64748b">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-GB'):'—'}</td>
         <td>
-          <button class="icon-btn" title="HTML ডাউনলোড (স্বতন্ত্র ফাইল)" onclick="downloadLandingHtml('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-download"></i></button>
           <button class="icon-btn" title="সম্পাদনা" onclick="editLandingPage('${esc(p.slug)}')"><i class="fas fa-pen"></i></button>
+          <button class="icon-btn" title="ঐচ্ছিক অফলাইন কপি ডাউনলোড করুন (কার্ড লিংকের জন্য প্রয়োজন নেই)" onclick="downloadLandingHtml('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-download"></i></button>
           <button class="icon-btn danger" title="মুছুন" onclick="deleteLandingPage('${esc(p.slug)}','${esc(p.title||p.slug)}')"><i class="fas fa-trash"></i></button>
         </td>
-      </tr>`).join('');
+      </tr>`;}).join('');
   }).catch(err=>{
     tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#ef4444">লোড করতে সমস্যা: '+esc(err.message)+'</td></tr>';
   });
@@ -2953,6 +2956,20 @@ function loadLandingPages(){
 /* ── helpers ── */
 function lpV(id){const el=document.getElementById(id);return el?el.value.trim():'';}
 function lpSet(id,v){const el=document.getElementById(id);if(el)el.value=v||'';}
+
+/* Fill the "linked product" dropdown from the cached product list, keeping
+   whatever value is currently selected (or `preselectId` if provided). */
+async function lpPopulateProductSelect(preselectId){
+  const sel=document.getElementById('lpLinkedProduct');
+  if(!sel) return;
+  if(!Array.isArray(allProducts) || !allProducts.length){
+    try{ await loadProducts(); }catch(e){}
+  }
+  const current=preselectId!==undefined?preselectId:sel.value;
+  sel.innerHTML='<option value="">— পণ্য নির্বাচন করুন —</option>'+
+    (allProducts||[]).map(p=>`<option value="${esc(p._id)}">${esc(p.name)}${p.sku?' ('+esc(p.sku)+')':''}</option>`).join('');
+  sel.value=current||'';
+}
 
 function openLandingPageModal(slug){
   const modal=document.getElementById('landingPageModal');
@@ -2973,11 +2990,17 @@ function openLandingPageModal(slug){
   if(!slug){
     titleEl.textContent='নতুন ল্যান্ডিং পেজ তৈরি করুন';
     if(previewLink)previewLink.style.display='none';
+    lpPopulateProductSelect('');
     modal.classList.remove('hidden');
     return;
   }
   titleEl.textContent='ল্যান্ডিং পেজ সম্পাদনা';
-  apiJSON('/landing-pages/'+encodeURIComponent(slug)).then(p=>{
+  apiJSON('/landing-pages/'+encodeURIComponent(slug)).then(async p=>{
+    /* find which product (if any) currently points its detailPage at this landing page */
+    if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
+    const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage &&
+      x.detailPage.indexOf('slug='+p.slug)!==-1);
+    await lpPopulateProductSelect(linked?linked._id:'');
     lpSet('lpEditSlug',p.slug);
     lpSet('lpTitle',p.title);
     lpSet('lpSlug',p.slug);
@@ -3112,20 +3135,53 @@ async function saveLandingPage(){
     const res=await fetch(url,{method:isEdit?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify(body)});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||'সেভ হয়নি');
-    notifyFn(isEdit?'পেজ আপডেট হয়েছে!':'নতুন পেজ তৈরি হয়েছে!','ok');
+
+    /* Auto-deploy: link the selected product straight to this live page —
+       no manual download or frontend/ folder placement required. */
+    const linkedProductId=lpV('lpLinkedProduct');
+    let linkMsg='';
+    if(linkedProductId){
+      try{
+        const liveUrl='landing.html?slug='+encodeURIComponent(slug);
+        const pRes=await fetch(API+'/products/id/'+encodeURIComponent(linkedProductId),{
+          method:'PUT',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},
+          body:JSON.stringify({detailPage:liveUrl,hasDetailPage:true})
+        });
+        if(!pRes.ok){ const pd=await pRes.json().catch(()=>({})); throw new Error(pd.error||'পণ্য লিংক করা যায়নি'); }
+        linkMsg=' — পণ্যের কার্ডে স্বয়ংক্রিয়ভাবে লিংক করা হয়েছে';
+        if(typeof loadProducts==='function') loadProducts();
+      }catch(le){
+        notifyFn('পেজ সেভ হয়েছে, তবে পণ্যের সাথে লিংক করতে সমস্যা হয়েছে: '+le.message,'err');
+      }
+    }
+
+    notifyFn((isEdit?'পেজ আপডেট হয়েছে!':'নতুন পেজ তৈরি ও লাইভ হয়ে গেছে!')+linkMsg,'ok');
     document.getElementById('landingPageModal').classList.add('hidden');
     loadLandingPages();
   }catch(e){notifyFn('সমস্যা: '+e.message,'err');}
   finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> সেভ করুন';}
 }
 
-function deleteLandingPage(slug,title){
+async function deleteLandingPage(slug,title){
   if(!confirm('"'+title+'" পেজটি মুছে ফেলবেন? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।'))return;
   const API=window.API_BASE||'https://bscollectionbd.onrender.com/api';
   const tk=localStorage.getItem('bs_admin_token')||localStorage.getItem('adminToken')||'';
   const notifyFn=window.toast||function(m,k){alert(m);};
+  /* unlink from any product pointing at this page, so the card doesn't break */
+  if(!Array.isArray(allProducts) || !allProducts.length){ try{ await loadProducts(); }catch(e){} }
+  const linked=(allProducts||[]).find(x=>x.hasDetailPage && x.detailPage && x.detailPage.indexOf('slug='+slug)!==-1);
+  if(linked){
+    try{
+      await fetch(API+'/products/id/'+encodeURIComponent(linked._id),{
+        method:'PUT',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},
+        body:JSON.stringify({hasDetailPage:false,detailPage:''})
+      });
+    }catch(e){}
+  }
   fetch(API+'/landing-pages/'+encodeURIComponent(slug),{method:'DELETE',headers:{'Authorization':'Bearer '+tk}})
-    .then(r=>r.json()).then(d=>{if(d.ok){notifyFn('পেজ মুছে ফেলা হয়েছে','ok');loadLandingPages();}else notifyFn(d.error||'মুছতে সমস্যা','err');})
+    .then(r=>r.json()).then(d=>{if(d.ok){notifyFn('পেজ মুছে ফেলা হয়েছে'+(linked?' এবং পণ্য থেকে লিংক সরানো হয়েছে':''),'ok');loadProducts();loadLandingPages();}else notifyFn(d.error||'মুছতে সমস্যা','err');})
     .catch(()=>notifyFn('নেটওয়ার্ক সমস্যা','err'));
 }
 
@@ -3377,6 +3433,14 @@ function lpAddRelatedGrid(cat,name,price,oldPrice,badge,image,link,rating,rating
           <div class="form-group2">
             <label>Slug * <small style="color:#94a3b8;font-weight:400">(ইউনিক আইডি, URL-এ ব্যবহৃত হবে)</small></label>
             <input type="text" id="lpSlug" placeholder="product-jy2570" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-')"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group2">
+            <label>পেজ যেই পণ্যের সাথে লিংক হবে <small style="color:#94a3b8;font-weight:400">(সেভ করলে স্বয়ংক্রিয়ভাবে সেই পণ্যের সাথে যুক্ত হবে)</small></label>
+            <select id="lpLinkedProduct">
+              <option value="">— পণ্য নির্বাচন করুন —</option>
+            </select>
           </div>
         </div>
         <div class="form-row">
