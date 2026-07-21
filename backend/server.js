@@ -947,8 +947,8 @@ const DEFAULT_FILTER_TABS = [
   { id: "popular", label: "জনপ্রিয়", filter: "homePopular", order: 1, visible: true },
   { id: "bestseller", label: "সেরা বিক্রিত", filter: "homeBestseller", order: 2, visible: true },
   { id: "new", label: "নতুন পন্য", filter: "homeNew", order: 3, visible: true },
-  { id: "table-fan", label: "Table Fan", filter: "cat:table-fans", order: 4, visible: true },
-  { id: "rechargeable", label: "Rechargeable Fan", filter: "cat:rechargeable-fans", order: 5, visible: true },
+  { id: "table-fan", label: "টেবিল ফ্যান", filter: "cat:table-fans", order: 4, visible: true },
+  { id: "rechargeable", label: "রিচার্জেবল ফ্যান", filter: "cat:rechargeable-fans", order: 5, visible: true },
 ];
 
 app.get("/api/filter-tabs", async (req, res) => {
@@ -976,15 +976,15 @@ app.put("/api/filter-tabs", authAdmin, async (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 // ডিফল্ট ক্যাটাগরি তালিকা
 const DEFAULT_CATEGORIES = [
-  { name: "Ceiling Fans", slug: "ceiling-fans", img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg" },
-  { name: "Table Fans", slug: "table-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
-  { name: "Stand Fans", slug: "stand-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
-  { name: "Industrial Fans", slug: "industrial-fans", img: "" },
-  { name: "Exhaust Fans", slug: "exhaust-fans", img: "" },
-  { name: "Rechargeable Fans", slug: "rechargeable-fans", img: "" },
-  { name: "LED Lights", slug: "led-lights", img: "" },
-  { name: "Wall Fans", slug: "wall-fans", img: "" },
-  { name: "Accessories", slug: "accessories", img: "" },
+  { name: "সিলিং ফ্যান", slug: "ceiling-fans", img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg" },
+  { name: "টেবিল ফ্যান", slug: "table-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
+  { name: "স্ট্যান্ড ফ্যান", slug: "stand-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
+  { name: "ইন্ডাস্ট্রিয়াল ফ্যান", slug: "industrial-fans", img: "" },
+  { name: "এক্সহস্ট ফ্যান", slug: "exhaust-fans", img: "" },
+  { name: "রিচার্জেবল ফ্যান", slug: "rechargeable-fans", img: "" },
+  { name: "এলইডি লাইট", slug: "led-lights", img: "" },
+  { name: "ওয়াল ফ্যান", slug: "wall-fans", img: "" },
+  { name: "এক্সেসরিজ", slug: "accessories", img: "" },
 ];
 
 // প্রতিটি ক্যাটাগরির জন্য ৫টি করে ডিফল্ট পণ্য তৈরি করে (মোট ৪৫টি)

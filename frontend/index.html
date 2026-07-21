@@ -34,16 +34,16 @@
 
   // ================= FALLBACK DATA (backend থেকে ডেটা না এলে ব্যবহৃত হবে) =================
   const FALLBACK_CATEGORIES = [
-    { id: "c1", name: "Ceiling Fans", slug: "ceiling-fans", count: 0, img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg" },
-    { id: "c2", name: "Table Fans", slug: "table-fans", count: 2, img: "assets/photo_2026-07-15_18-28-56.png" },
-    { id: "c3", name: "Stand Fans", slug: "stand-fans", count: 0, img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
-    { id: "c4", name: "Industrial Fans", slug: "industrial-fans", count: 0, img: "" },
-    { id: "c5", name: "Exhaust Fans", slug: "exhaust-fans", count: 0, img: "" },
-    { id: "c6", name: "Rechargeable Fans", slug: "rechargeable-fans", count: 0, img: "assets/photo_2026-07-15_18-29-17.png" },
-    { id: "c7", name: "LED Lights", slug: "led-lights", count: 0, img: "" },
-    { id: "c8", name: "Home Appliances", slug: "home-appliances", count: 0, img: "" },
-    { id: "c9", name: "Wall Fans", slug: "wall-fans", count: 0, img: "" },
-    { id: "c10", name: "Accessories", slug: "accessories", count: 0, img: "" },
+    { id: "c1", name: "সিলিং ফ্যান", slug: "ceiling-fans", count: 0, img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg" },
+    { id: "c2", name: "টেবিল ফ্যান", slug: "table-fans", count: 2, img: "assets/photo_2026-07-15_18-28-56.png" },
+    { id: "c3", name: "স্ট্যান্ড ফ্যান", slug: "stand-fans", count: 0, img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
+    { id: "c4", name: "ইন্ডাস্ট্রিয়াল ফ্যান", slug: "industrial-fans", count: 0, img: "" },
+    { id: "c5", name: "এক্সহস্ট ফ্যান", slug: "exhaust-fans", count: 0, img: "" },
+    { id: "c6", name: "রিচার্জেবল ফ্যান", slug: "rechargeable-fans", count: 0, img: "assets/photo_2026-07-15_18-29-17.png" },
+    { id: "c7", name: "এলইডি লাইট", slug: "led-lights", count: 0, img: "" },
+    { id: "c8", name: "হোম অ্যাপ্লায়েন্স", slug: "home-appliances", count: 0, img: "" },
+    { id: "c9", name: "ওয়াল ফ্যান", slug: "wall-fans", count: 0, img: "" },
+    { id: "c10", name: "এক্সেসরিজ", slug: "accessories", count: 0, img: "" },
   ];
 
   const FALLBACK_PRODUCTS = [
@@ -853,12 +853,12 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
         <a href="cart.html" class="mobile-cart-icon" id="cartIconMobile" title="Cart"><i class="fas fa-shopping-bag"></i><span class="badge cart-badge" id="cartBadgeMobile">0</span></a>
         <div class="search-bar" id="searchBar" role="search">
           <select aria-label="Category">
-            <option>All Categories</option>
-            <option>Ceiling Fans</option>
-            <option>Table Fans</option>
-            <option>Exhaust Fans</option>
-            <option>Industrial Fans</option>
-            <option>Accessories</option>
+            <option>সকল ক্যাটাগরি</option>
+            <option>সিলিং ফ্যান</option>
+            <option>টেবিল ফ্যান</option>
+            <option>এক্সহস্ট ফ্যান</option>
+            <option>ইন্ডাস্ট্রিয়াল ফ্যান</option>
+            <option>এক্সেসরিজ</option>
           </select>
           <input type="text" id="searchInput" placeholder="Search for fans, appliances..." aria-label="Search"/>
           <button aria-label="Search" type="button" onclick="doSearch()"><i class="fas fa-search"></i></button>
@@ -1187,10 +1187,10 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
       <div class="footer-col">
         <h4>Products</h4>
         <ul>
-          <li><a href="shop.html?category=ceiling-fans"><i class="fas fa-angle-right"></i> Ceiling Fans</a></li>
-          <li><a href="shop.html?category=stand-fans"><i class="fas fa-angle-right"></i> Stand Fans</a></li>
-          <li><a href="shop.html?category=table-fans"><i class="fas fa-angle-right"></i> Table Fans</a></li>
-          <li><a href="shop.html?category=accessories"><i class="fas fa-angle-right"></i> Accessories</a></li>
+          <li><a href="shop.html?category=ceiling-fans"><i class="fas fa-angle-right"></i> সিলিং ফ্যান</a></li>
+          <li><a href="shop.html?category=stand-fans"><i class="fas fa-angle-right"></i> স্ট্যান্ড ফ্যান</a></li>
+          <li><a href="shop.html?category=table-fans"><i class="fas fa-angle-right"></i> টেবিল ফ্যান</a></li>
+          <li><a href="shop.html?category=accessories"><i class="fas fa-angle-right"></i> এক্সেসরিজ</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -1301,7 +1301,12 @@ function restartHeroAutoplay(){
   heroAutoplayTimer = setInterval(nextHeroSlide, 5000);
 }
 
-buildHeroSlider(categories);
+// নোট: এখানে categories দিয়ে buildHeroSlider() কল করা হয় না, কারণ হিরো ব্যানারে
+// এখন আর প্রতিটি ক্যাটাগরির জন্য একটি করে স্লাইড অটোমেটিক দেখানো হয় না।
+// ডিফল্ট/রিফ্রেশে শুধু স্ট্যাটিক প্রোমো স্লাইডটি (বা অ্যাডমিনের "হিরো ব্যানার") দেখাবে,
+// এবং অ্যাডমিন প্যানেলের "পেজ সেটিংস → Home → হিরো স্লাইড" থেকে যা যোগ করা হবে
+// (renderHomeSections() ফাংশনে) কেবল সেটিই অতিরিক্ত স্লাইড হিসেবে যুক্ত হবে।
+buildHeroSlider([]);
 
 (function(){
   const heroMainEl = document.querySelector('.hero-main');
@@ -1346,7 +1351,9 @@ document.addEventListener('bsdata:ready', function(){
         <div class="cat-img-wrap"><img loading="lazy" src="${c.img}" alt="${c.name}"/></div>
       </a>`;
     }).join('');
-    buildHeroSlider(liveCats);
+    // এখানেও আর buildHeroSlider(liveCats) কল করা হয় না — ক্যাটাগরি লাইভ ডেটা এলেও
+    // হিরো ব্যানারে অটোমেটিক ক্যাটাগরি স্লাইড যোগ হবে না, শুধু "ক্যাটাগরি অনুযায়ী কেনাকাটা"
+    // সেকশনের গ্রিডটি (categoryGrid) আপডেট হবে।
   }
 
   const skuByFeaturedId = {101:'jy2570', 102:'jy2218'};
@@ -1609,7 +1616,7 @@ function renderHomeSections(){
               <div class="hero-content">
                 ${s.tag ? `<span class="tag">${s.tag}</span>` : ''}
                 <h1>${s.title||''}</h1>
-                ${s.text ? `<p>${s.text}</p>` : ''}
+                ${s.desc ? `<p>${s.desc}</p>` : ''}
                 <a href="${s.btnLink||'shop.html'}" class="btn btn-accent">${s.btnText||'Shop Now'} <i class="fas fa-arrow-right"></i></a>
               </div>
               <div class="hero-img">${imgHtml}</div>
