@@ -39,7 +39,14 @@ app.use(express.json({ limit: "5mb" }));
 
 // ─── MongoDB ──────────────────────────────────────────────────────────────────
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(async () => {
+    console.log("✅ MongoDB connected");
+    // স্টার্টআপে অটো-সিড: প্রতিটি ক্যাটাগরিতে ডিফল্ট ৫টি করে পণ্য নিশ্চিত করে
+    try {
+      const r = await runSeed();
+      if (r.categories || r.products) console.log(`🌱 Auto-seed: +${r.categories} categories, +${r.products} products`);
+    } catch (e) { console.error("Auto-seed error:", e.message); }
+  })
   .catch(err => console.error("MongoDB error:", err.message));
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -331,8 +338,8 @@ app.post("/api/customer/forgot", async (req, res) => {
       appsScriptPost({ action: "sendOtp", email: emailForOtp, code, name: user.name });
     }
     const msg = emailForOtp
-      ? "OTP আপনার ইমেইলে পাঠানো হয়েছে। ১০ মিনিটের মধ্যে ব্যবহার করুন।"
-      : "OTP তৈরি হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করুন।";
+      ? "OTP আপনার ইমেইলে ���াঠানো হয়েছে। ১০ মিনিটের মধ্যে ব্যবহার করুন।"
+      : "OTP তৈরি হয়েছে। অ্যাডমিনের সাথে ���োগাযোগ করুন।";
     res.json({ msg });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -816,7 +823,7 @@ const DEFAULT_PAGES = [
       whyChooseUs: [
         { icon: "fa-award", title: "Quality Products", text: "যাচাই করা পণ্যই আপনার হাতে পৌঁছে দেওয়ার চেষ্টা করি।" },
         { icon: "fa-truck-fast", title: "Nationwide Delivery", text: "সারা বাংলাদেশে দ্রুত ও নিরাপদে আপনার ঠিকানায় পৌঁছে দেওয়া হয়।" },
-        { icon: "fa-money-bill-wave", title: "Cash on Delivery", text: "আগে পণ্য হাতে নিন, তারপর মূল্য পরিশোধ করুন।" },
+        { icon: "fa-money-bill-wave", title: "Cash on Delivery", text: "আগে পণ্�� হাতে নিন, তারপর মূল্য পরিশোধ করুন।" },
         { icon: "fa-lock", title: "No Advance Payment", text: "কোনো অগ্রিম প্রয়োজন নেই, নিশ্চিন্তে অর্ডার করুন।" },
         { icon: "fa-headset", title: "Customer Support", text: "অর্ডারের আগে ও পরে প্রয়োজনীয় সহায়তা পেতে আমাদের সাথে যোগাযোগ করতে পারবেন।" },
         { icon: "fa-heart", title: "Customer Satisfaction", text: "আপনার আস্থা ও সন্তুষ্টি অর্জনই আমাদের লক্ষ্য।" },
@@ -967,98 +974,116 @@ app.put("/api/filter-tabs", authAdmin, async (req, res) => {
 // ═════════════════════════════════════════════════════════════════════════════
 // SEED — default products & categories (admin only)
 // ═════════════════════════════════════════════════════════════════════════════
+// ডিফল্ট ক্যাটাগরি তালিকা
+const DEFAULT_CATEGORIES = [
+  { name: "Ceiling Fans", slug: "ceiling-fans", img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg" },
+  { name: "Table Fans", slug: "table-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
+  { name: "Stand Fans", slug: "stand-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg" },
+  { name: "Industrial Fans", slug: "industrial-fans", img: "" },
+  { name: "Exhaust Fans", slug: "exhaust-fans", img: "" },
+  { name: "Rechargeable Fans", slug: "rechargeable-fans", img: "" },
+  { name: "LED Lights", slug: "led-lights", img: "" },
+  { name: "Wall Fans", slug: "wall-fans", img: "" },
+  { name: "Accessories", slug: "accessories", img: "" },
+];
+
+// প্রতিটি ক্যাটাগরির জন্য ৫টি করে ডিফল্ট পণ্য তৈরি করে (মোট ৪৫টি)
+function buildDefaultProducts() {
+  const templates = {
+    "ceiling-fans":     { cat: "Ceiling Fan",     brand: "BS Collection", base: 3200, unit: "সিলিং ফ্যান" },
+    "table-fans":       { cat: "Table Fan",       brand: "BS Collection", base: 1800, unit: "টেবিল ফ্যান" },
+    "stand-fans":       { cat: "Stand Fan",       brand: "BS Collection", base: 2600, unit: "স্ট্যান্ড ফ্যান" },
+    "industrial-fans":  { cat: "Industrial Fan",  brand: "BS Collection", base: 5500, unit: "ইন্ডাস্ট্রিয়াল ফ্যান" },
+    "exhaust-fans":     { cat: "Exhaust Fan",     brand: "BS Collection", base: 1400, unit: "এক্সহস্ট ফ্যান" },
+    "rechargeable-fans":{ cat: "Rechargeable Fan",brand: "JYSUPER",       base: 999,  unit: "রিচার্জেবল ফ্যান" },
+    "led-lights":       { cat: "LED Light",       brand: "BS Collection", base: 350,  unit: "এলইডি লাইট" },
+    "wall-fans":        { cat: "Wall Fan",        brand: "BS Collection", base: 2200, unit: "ওয়াল ফ্যান" },
+    "accessories":      { cat: "Accessory",       brand: "BS Collection", base: 250,  unit: "এক্সেসরিজ" },
+  };
+  const products = [];
+  DEFAULT_CATEGORIES.forEach(c => {
+    const t = templates[c.slug];
+    if (!t) return;
+    for (let i = 1; i <= 5; i++) {
+      const now = t.base + (i - 1) * Math.round(t.base * 0.12);
+      const old = Math.round(now * 1.2);
+      products.push({
+        sku: `${c.slug}-${i}`,
+        name: `${t.cat} Model ${i}`,
+        cat: t.cat,
+        categorySlug: c.slug,
+        brand: t.brand,
+        now, old,
+        stock: 15,
+        featured: i === 1,
+        rating: 5,
+        img: c.img || "",
+        gallery: c.img ? [c.img] : [],
+        description: `${t.cat} Model ${i} — ${t.unit}, উন্নত মান ও দীর্ঘস্থায়ী পারফরম্যান্স। BS Collection BD থেকে সেরা দামে কিনুন।`,
+        shortDescription: `${t.cat} Model ${i} — ${t.unit}`,
+        tags: [t.cat.toLowerCase(), c.slug, "bangladesh"],
+        seoTitle: `${t.cat} Model ${i} - Buy Online in Bangladesh | BS Collection BD`,
+        seoDescription: `${t.cat} Model ${i} best price in Bangladesh. Fast delivery nationwide from BS Collection BD.`,
+        seoKeywords: `${t.cat}, ${c.slug}, ${t.unit}, bangladesh`,
+        specs: [
+          { label: "Model", value: `${t.cat} Model ${i}` },
+          { label: "Brand", value: t.brand },
+          { label: "Warranty", value: "6 months" },
+        ],
+        features: ["উন্নত মান", "দীর্ঘস্থায়ী", "কম বিদ্যুৎ খরচ"],
+        placements: {
+          shop: true,
+          homePopular: i <= 2,
+          homeBestseller: i === 3,
+          homeNew: i >= 4,
+        },
+      });
+    }
+  });
+  return products;
+}
+
+// ক্যাটাগরি ও পণ্য সিড করার শেয়ারড ফাংশন (স্টার্টআপ + অ্যাডমিন উভয় ক্ষেত্রে)
+async function runSeed() {
+  const results = { categories: 0, products: 0, skipped: 0 };
+
+  for (const cat of DEFAULT_CATEGORIES) {
+    const exists = await Category.findOne({ slug: cat.slug });
+    if (!exists) { await Category.create({ ...cat, count: 0 }); results.categories++; }
+  }
+
+  const defaultProducts = buildDefaultProducts();
+  for (const prod of defaultProducts) {
+    const exists = await Product.findOne({ sku: prod.sku });
+    if (!exists) {
+      await Product.create(prod);
+      results.products++;
+      if (prod.categorySlug) await Category.updateOne({ slug: prod.categorySlug }, { $inc: { count: 1 } });
+    } else { results.skipped++; }
+  }
+
+  const aboutExists = await PageSetting.findOne({ page: "about" });
+  if (!aboutExists) {
+    const ap = DEFAULT_PAGES.find(d => d.page === "about");
+    if (ap) await PageSetting.create(ap);
+  }
+
+  return results;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SEED — প্রতিটি ক্যাটাগরিতে ডিফল্ট ৫টি করে পণ্য (admin only)
+// ═════════════════════════════════════════════════════════════════════════════
 app.post("/api/seed", authAdmin, async (req, res) => {
   try {
-    const results = { categories: 0, products: 0, skipped: 0 };
-
-    const defaultCategories = [
-      { name: "Ceiling Fans", slug: "ceiling-fans", img: "https://5.imimg.com/data5/TI/ES/TB/SELLER-93582485/bldc-ceiling-fan.jpg", count: 0 },
-      { name: "Table Fans", slug: "table-fans", img: "https://bscollectionbd.onrender.com/placeholder-fan.jpg", count: 2 },
-      { name: "Stand Fans", slug: "stand-fans", img: "https://m.media-amazon.com/images/I/71X-Pth5ULS.jpg", count: 0 },
-      { name: "Industrial Fans", slug: "industrial-fans", img: "", count: 0 },
-      { name: "Exhaust Fans", slug: "exhaust-fans", img: "", count: 0 },
-      { name: "Rechargeable Fans", slug: "rechargeable-fans", img: "", count: 2 },
-      { name: "LED Lights", slug: "led-lights", img: "", count: 0 },
-      { name: "Wall Fans", slug: "wall-fans", img: "", count: 0 },
-      { name: "Accessories", slug: "accessories", img: "", count: 0 },
-    ];
-
-    for (const cat of defaultCategories) {
-      const exists = await Category.findOne({ slug: cat.slug });
-      if (!exists) { await Category.create(cat); results.categories++; }
-    }
-
-    const defaultProducts = [
-      {
-        sku: "jy2570", name: "JY-2570 Rechargeable Fan",
-        cat: "Rechargeable Fan", categorySlug: "rechargeable-fans",
-        brand: "JYSUPER", now: 2150, old: 2550, stock: 10, featured: true, rating: 5,
-        img: "assets/photo_2026-07-15_18-29-17.png",
-        gallery: ["assets/photo_2026-07-15_18-29-17.png"],
-        description: "Premium rechargeable fan with high-capacity battery, remote control and dual LED light bar.",
-        shortDescription: "Premium rechargeable fan with remote control",
-        detailPage: "product-jy2570.html", hasDetailPage: true,
-        tags: ["rechargeable", "fan", "LED", "remote control", "battery"],
-        seoTitle: "JY-2570 Rechargeable Fan - Buy Online in Bangladesh | BS Collection BD",
-        seoDescription: "Buy JY-2570 Rechargeable Fan at best price in Bangladesh. 14-inch, 12-hour backup, remote control, dual LED. Fast delivery nationwide.",
-        seoKeywords: "JY-2570, rechargeable fan, battery fan bangladesh, LED fan",
-        specs: [
-          { label: "Model", value: "JY-2570" },
-          { label: "Blade Size", value: "14 inch" },
-          { label: "Battery", value: "6V / 7Ah" },
-          { label: "Backup Time", value: "Up to 12 hours" },
-          { label: "LED Light", value: "Dual LED bar" },
-          { label: "Remote Control", value: "Included" },
-          { label: "Warranty", value: "6 months" },
-        ],
-        features: ["14-inch wide blade", "12-hour battery backup", "Wireless remote control", "Dual LED light bar", "Solar compatible"],
-        placements: { shop: true, homePopular: true, homeBestseller: false, homeNew: false },
-      },
-      {
-        sku: "jy2218", name: "JYSUPER JY-2218 Rechargeable Fan",
-        cat: "Rechargeable Fan", categorySlug: "rechargeable-fans",
-        brand: "JYSUPER", now: 999, old: 1200, stock: 10, featured: true, rating: 4,
-        img: "assets/photo_2026-07-15_18-28-56.png",
-        gallery: ["assets/photo_2026-07-15_18-28-56.png"],
-        description: "12-inch high-airflow rechargeable table & stand fan with LED light, USB charging and long backup.",
-        shortDescription: "12-inch rechargeable fan with LED light",
-        detailPage: "product-jy2218.html", hasDetailPage: true,
-        tags: ["rechargeable", "fan", "LED", "USB", "table fan"],
-        seoTitle: "JYSUPER JY-2218 Rechargeable Fan - Buy in Bangladesh | BS Collection BD",
-        seoDescription: "Buy JYSUPER JY-2218 Rechargeable Fan at Tk 999. 12-inch blade, 8-hour backup, built-in LED. Best price in Bangladesh.",
-        seoKeywords: "JY-2218, JYSUPER fan, rechargeable fan price, LED fan bangladesh",
-        specs: [
-          { label: "Model", value: "JY-2218" },
-          { label: "Blade Size", value: "12 inch" },
-          { label: "Battery", value: "6V / 4.5Ah" },
-          { label: "Backup Time", value: "Up to 8 hours" },
-          { label: "LED Light", value: "Built-in LED panel" },
-          { label: "Warranty", value: "6 months" },
-        ],
-        features: ["12-inch blade", "8-hour battery backup", "Built-in LED panel", "USB charging compatible"],
-        placements: { shop: true, homePopular: false, homeBestseller: true, homeNew: false },
-      },
-    ];
-
-    for (const prod of defaultProducts) {
-      const exists = await Product.findOne({ sku: prod.sku });
-      if (!exists) { await Product.create(prod); results.products++; }
-      else { results.skipped++; }
-    }
-
-    // Also seed about page settings
-    const aboutExists = await PageSetting.findOne({ page: "about" });
-    if (!aboutExists) {
-      await PageSetting.create(DEFAULT_PAGES.find(d => d.page === "about"));
-    }
-
+    const results = await runSeed();
     res.json({ ok: true, ...results, message: `Seeded: ${results.categories} categories, ${results.products} products (${results.skipped} skipped)` });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
 // STATS
-// ═════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════��════════════════════════════════════════════
 app.get("/api/stats", authAdmin, async (req, res) => {
   try {
     const [totalProducts, totalOrders, pendingOrders, completedOrders, cancelledOrders,
