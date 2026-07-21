@@ -117,7 +117,7 @@ body[data-theme="dark"] .product-thumb{background:#241B12;}
 
 /* Main */
 .main{margin-left:var(--sidebar-w);padding:0 28px 60px;min-width:0;}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:22px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:30;background:var(--bg);padding:12px 0;margin-bottom:0;transition:box-shadow .2s,background .2s;}
 .topbar.scrolled{box-shadow:0 4px 14px rgba(20,20,30,.06);border-bottom:1px solid var(--border);}
 .topbar h1{font-size:24px;font-weight:800;}
 .topbar-left{display:flex;align-items:center;gap:12px;}
@@ -306,10 +306,33 @@ body[data-theme="dark"] .lp-link-badge.unlinked{color:var(--orange-light);}
 .lp-step-body b{color:var(--text);}
 .lp-step-body code{background:var(--bg);padding:1px 6px;border-radius:5px;font-size:12px;}
 body[data-theme="dark"] .lp-step-body code{background:#20232B;}
-@media(max-width:620px){.lp-row-title{gap:8px;}.lp-thumb{width:32px;height:32px;font-size:13px;}}
-.page{display:none;}
-.page.active{display:block;}
+@media(max-width:620px){
+  .topbar{
+    padding:10px 0;
+  }
 
+  .topbar h1{
+    font-size:18px;
+  }
+
+  .lp-row-title{
+    gap:8px;
+  }
+
+  .lp-thumb{
+    width:32px;
+    height:32px;
+    font-size:13px;
+  }
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
 /* ==================== REUSABLE IMAGE DRAG-DROP UPLOADER ==================== */
 .bs-dropzone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;text-align:center;font-size:12.5px;color:#64748b;cursor:pointer;background:#f8fafc;transition:.15s;margin-top:6px;}
 .bs-dropzone.drag,.bs-dropzone:hover{border-color:var(--orange);background:#fff7ed;color:#b45309;}
@@ -647,6 +670,27 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         </div>
       </div>
     </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>ফেক অর্ডার (8)</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Date</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>#8001</td><td><div class="cell-main">রহিম আহমেদ</div><div class="cell-sub">+88017XXXXXXXX</div></td><td>3 টি</td><td>2024-01-15</td><td>৳ 4,500</td><td>বিকাশ</td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8002</td><td><div class="cell-main">ফাতিমা খান</div><div class="cell-sub">+88018XXXXXXXX</div></td><td>2 টি</td><td>2024-01-14</td><td>৳ 3,200</td><td>নগদ</td><td><span class="badge orange">প্রসেসিং</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8003</td><td><div class="cell-main">করিম মিয়া</div><div class="cell-sub">+88019XXXXXXXX</div></td><td>1 টি</td><td>2024-01-13</td><td>৳ 2,800</td><td>রকেট</td><td><span class="badge blue">প্রেরণ করা</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8004</td><td><div class="cell-main">আয়েশা সুলতানা</div><div class="cell-sub">+88016XXXXXXXX</div></td><td>4 টি</td><td>2024-01-12</td><td>৳ 5,600</td><td>বিকাশ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8005</td><td><div class="cell-main">সালিম হোসেন</div><div class="cell-sub">+88017XXXXXXXX</div></td><td>2 টি</td><td>2024-01-11</td><td>৳ 3,800</td><td>বিকাশ</div></td><td><span class="badge red">বাতিল</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8006</td><td><div class="cell-main">নাজমা বেগম</div><div class="cell-sub">+88018XXXXXXXX</div></td><td>3 টি</td><td>2024-01-10</td><td>৳ 4,200</td><td>নগদ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8007</td><td><div class="cell-main">আব্বাস আলী</div><div class="cell-sub">+88019XXXXXXXX</div></td><td>2 টি</td><td>2024-01-09</td><td>৳ 3,500</td><td>রকেট</div></td><td><span class="badge blue">প্রেরণ করা</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+            <tr><td>#8008</td><td><div class="cell-main">সামিয়া আক্তার</div><div class="cell-sub">+88016XXXXXXXX</div></td><td>5 টি</td><td>2024-01-08</td><td>৳ 6,100</td><td>বিকাশ</div></td><td><span class="badge green">সম্পন্ন</span></td><td><button class="act-btn">বিস্তারিত</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
   </section>
 
   <!-- ===================== ORDERS PAGE ===================== -->
@@ -855,7 +899,109 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
   </section>
 
   <!-- ===================== ADVANCED OPTIONS PAGE ===================== -->
-  <section class="page" id="page-advanced"></section>
+  <section class="page" id="page-advanced">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+      <!-- Page Settings -->
+      <div class="card">
+        <div class="card-head"><h2>পেজ সেটিংস</h2></div>
+        <div style="padding:12px 0;">
+          <details style="border-bottom:1px solid var(--border);padding:12px 0;" open>
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
+              <i class="fas fa-cog"></i> সাইট তথ্য
+            </summary>
+            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
+              <div class="form-group2" style="margin-bottom:10px;">
+                <label>স্টোর নাম</label>
+                <input type="text" value="BS Collection BD" style="font-size:12px;padding:8px;">
+              </div>
+              <div class="form-group2">
+                <label>স্টোর ডেসক্রিপশন</label>
+                <textarea style="font-size:12px;padding:8px;min-height:60px;">আমাদের অনলাইন স্টোর</textarea>
+              </div>
+            </div>
+          </details>
+          
+          <details style="border-bottom:1px solid var(--border);padding:12px 0;">
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
+              <i class="fas fa-palette"></i> ডিজাইন সেটিংস
+            </summary>
+            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
+              <div class="form-group2" style="margin-bottom:10px;">
+                <label>থিম রঙ</label>
+                <select style="font-size:12px;padding:8px;">
+                  <option>নেভি + অরেঞ্জ (ডিফল্ট)</option>
+                  <option>নীল + সাদা</option>
+                  <option>সবুজ + কালো</option>
+                </select>
+              </div>
+              <div class="form-group2">
+                <label>ফন্ট স্টাইল</label>
+                <select style="font-size:12px;padding:8px;">
+                  <option>Noto Sans Bengali</option>
+                  <option>Poppins</option>
+                  <option>Hind Siliguri</option>
+                </select>
+              </div>
+            </div>
+          </details>
+          
+          <details style="border-bottom:1px solid var(--border);padding:12px 0;">
+            <summary style="cursor:pointer;font-weight:600;color:var(--text);user-select:none;padding:8px 0;">
+              <i class="fas fa-bell"></i> বিজ্ঞপ্তি সেটিংস
+            </summary>
+            <div style="padding:12px 0 0;margin-top:10px;border-top:1px solid var(--border);">
+              <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="checkbox" checked> নতুন অর্ডারের জন্য সতর্কতা
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="checkbox" checked> নিম্ন স্টক সতর্কতা
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox"> সাপ্তাহিক রিপোর্ট ইমেইল
+              </label>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Other sections -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Customers -->
+        <div class="card">
+          <div class="card-head"><h2>গ্রাহক</h2></div>
+          <div style="padding:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <div style="font-size:24px;font-weight:800;color:var(--orange);">—</div>
+                <div style="font-size:11px;color:var(--text-soft);">মোট গ্রাহক</div>
+              </div>
+              <div>
+                <div style="font-size:24px;font-weight:800;color:var(--green);">—</div>
+                <div style="font-size:11px;color:var(--text-soft);">এই মাসে নতুন</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="card">
+          <div class="card-head"><h2>রিভিউ (0)</h2></div>
+          <div style="padding:12px;color:var(--text-soft);font-size:12px;">কোন রিভিউ পাওয়া যায়নি</div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="card">
+          <div class="card-head"><h2>যোগাযোগ (1)</h2></div>
+          <div style="padding:12px;">
+            <div style="border:1px solid var(--border);padding:10px;border-radius:6px;font-size:12px;">
+              <div style="font-weight:600;margin-bottom:4px;">নতুন বার্তা</div>
+              <div style="color:var(--text-soft);font-size:11px;">আজ ১২:৩০ এ পাওয়া</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <!-- ==================== PRODUCT MODAL ==================== -->
