@@ -111,7 +111,7 @@ function renderHeader(){
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">
-        <img src="assets/logo.jpg" alt="bscollectionbd"/>
+        <img src="assets/logo.png" alt="bscollectionbd"/>
         <span>bscollectionbd</span>
       </a>
       <nav class="main-nav">
