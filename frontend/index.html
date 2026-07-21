@@ -1368,12 +1368,33 @@ document.addEventListener('bsdata:ready', function(){
   });
   // ফিচার্ড গ্রিড আর ডেমো ডেটা দিয়ে ভরা হয় না — শুধু filter-tabs/অ্যাডমিন ক্যাটালগ থেকে ভরবে।
 
+  // পেজ লোডের সময় BSAdmin.getProducts() ক্যাশে/ফলব্যাক ডেটা রিটার্ন করতে পারে
+  // (এখনো লাইভ ফেচ শেষ হয়নি বলে)। এখন লাইভ ডেটা এসে গেছে, তাই ক্যাটালগ পুল আবার
+  // তৈরি করে বর্তমানে সিলেক্টেড ট্যাবটি রি-অ্যাপ্লাই করা হচ্ছে — নাহলে "জনপ্রিয়
+  // পণ্যসমূহ" সেকশনে কখনোই আসল/হালনাগাদ পণ্য দেখাবে না।
+  if (typeof buildCatalogPool === 'function') {
+    _catalogLive = true;
+    buildCatalogPool();
+    if (typeof applyFilterTab === 'function') applyFilterTab(_activeFilterTab || 'all');
+  }
+
   // Categories/Featured Products এর নতুন এলিমেন্টগুলো fade-in ক্লাস নিয়ে যোগ হয়,
   // কিন্তু IntersectionObserver শুধু পেজ লোডের সময় যা DOM-এ ছিল তা-ই observe করে।
   // তাই আগের observer disconnect করে নতুন এলিমেন্টগুলো (re)-observe করতে হবে,
   // নাহলে সেগুলো opacity:0 তেই আটকে থেকে সাদা দেখায়।
   if (typeof observeFadeIns === 'function') observeFadeIns();
   if (typeof renderHomeSections === 'function') renderHomeSections();
+});
+
+document.addEventListener('bsdata:offline', function(){
+  // ব্যাকএন্ড আনরিচেবল হলে (bsdata:ready কখনো না এলে) "জনপ্রিয় পণ্যসমূহ" সেকশন
+  // যেন অনন্তকাল লোডিং স্পিনারে আটকে না থাকে — cache/fallback ডেটা দিয়েই
+  // একবার চূড়ান্তভাবে রেন্ডার করে দেওয়া হচ্ছে।
+  if (typeof buildCatalogPool === 'function') {
+    _catalogLive = true;
+    buildCatalogPool();
+    if (typeof applyFilterTab === 'function') applyFilterTab(_activeFilterTab || 'all');
+  }
 });
 
 function toggleCategories(){
@@ -1459,6 +1480,7 @@ loadBestSellers();
    পরিবর্তন/যোগ করলে এখানে তার কোনো প্রভাব পড়তো না)। */
 let _catalogPool = [];       // BSAdmin এর আসল পণ্য ক্যাটালগ (id, placements, categorySlug সহ)
 let _activeFilterTab = 'all';
+let _catalogLive = false;    // true হবে যখন ব্যাকএন্ড থেকে আসল (fallback নয়) ডেটা এসে গেছে
 
 function toCardProduct(p){
   const now = p.now, old = p.old;
@@ -1478,9 +1500,11 @@ function buildCatalogPool(){
   _catalogPool = list.map(toCardProduct);
 }
 function filterCatalogPool(filterValue){
-  // Only show products that have homeProduct placement approved by admin
+  // শুধুমাত্র সেই পণ্যগুলো দেখাবে যেগুলোতে অ্যাডমিন "হোম — ফিচার্ড পণ্য" (homeProduct)
+  // প্লেসমেন্ট চালু করে দিয়েছেন। এখানে আর পুরো ক্যাটালগে ফলব্যাক করা হয় না —
+  // অ্যাডমিন কিছু যোগ না করা পর্যন্ত এই সেকশনে কোনো কার্ডই দেখাবে না।
   const homeProd = _catalogPool.filter(p => p.placements && p.placements.homeProduct);
-  const pool = homeProd.length ? homeProd : _catalogPool;
+  const pool = homeProd;
   if (!filterValue || filterValue === 'all') return pool;
   if (filterValue.startsWith('cat:')) {
     const slug = filterValue.slice(4);
@@ -1490,8 +1514,18 @@ function filterCatalogPool(filterValue){
 }
 function applyFilterTab(filterValue){
   _activeFilterTab = filterValue;
+  const grid = document.getElementById('featuredGrid');
+  // ব্যাকএন্ড থেকে আসল ডেটা এখনো না এলে ভুল/অস্থায়ী "কোনো পণ্য নেই" টেক্সট না দেখিয়ে
+  // একটি নিরপেক্ষ লোডিং স্টেট দেখানো হচ্ছে — এতে রিফ্রেশে একবার ভুল টেক্সট দেখিয়ে
+  // পরে আসল টেক্সট দেখানোর ঝাঁকুনিটা (flash) আর হবে না।
+  if (!_catalogLive) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:30px 10px"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</p>';
+    return;
+  }
   const filtered = filterCatalogPool(filterValue);
-  document.getElementById('featuredGrid').innerHTML = (filtered.length ? filtered : _catalogPool).map(productHTML).join('');
+  grid.innerHTML = filtered.length
+    ? filtered.map(productHTML).join('')
+    : '<p style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:30px 10px">এই মুহূর্তে কোনো পণ্য যোগ করা হয়নি।</p>';
   observeFadeIns();
 }
 function renderFilterTabs(tabs){
