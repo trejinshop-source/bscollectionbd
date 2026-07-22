@@ -977,6 +977,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
         <p style="color:#94a3b8;font-size:11px;margin:2px 0 4px">পণ্যটি সবসময় শপ পেজে স্বয়ংক্রিয়ভাবে দেখাবে (আলাদা করে সিলেক্ট করার দরকার নেই)। Filter Tabs-এ যে ট্যাব যোগ/আপডেট/মুছবেন, সেটি স্বয়ংক্রিয়ভাবে এখানে যোগ/বাদ হয়ে যাবে।</p>
         <div class="bs-ext-placements" id="pPlacementsWrap">
           <label><input type="checkbox" id="pPlHome"> হোম — ফিচার্ড পণ্য (জনপ্রিয় পণ্যসমূহ সেকশনে দেখানোর পূর্বশর্ত)</label>
+          <label><input type="checkbox" id="pPlBestseller"> হোম — সেরা বিক্রিত পণ্য (হোম পেজের "সেরা বিক্রিত পণ্য" সেকশনে দেখাবে)</label>
         </div>
       </div>
     </div>
@@ -1537,14 +1538,17 @@ document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
 
 // ── প্লেসমেন্ট চেকবক্স — Filter Tabs থেকে ডাইনামিকভাবে তৈরি হয় ────────────
 // "শপ পেজ" বাদ (এটি আর টগল করার দরকার নেই — সব পণ্য ডিফল্টভাবেই শপ পেজে
-// দেখাবে, ব্যাকএন্ডে সবসময় true সেট করা হয়)। "হোম — ফিচার্ড পণ্য" স্ট্যাটিক
-// থাকে (এটাই "সকল পন্য" ট্যাবের পূর্বশর্ত)। বাকি সব ট্যাব (homePopular,
-// homeBestseller, homeNew সহ cat:slug ক্যাটাগরি-ট্যাবও) Filter Tabs
-// (page-settings → Home → Filter Tabs, অর্থাৎ bs-home-panel[data-home-tab="filters"])
-// থেকে লাইভ আনা হয় এবং প্রতিটির জন্য একটি করে চেকবক্স বানানো হয় — তাই
-// ফ্রন্টএন্ডে যে কয়টি ট্যাব বাটন দেখা যায় (all বাদে), এখানে ঠিক সে কয়টি
-// চেকবক্স + "হোম — ফিচার্ড পণ্য" (all-এর জন্য) থাকবে। কোনো ট্যাব যোগ/আপডেট/
-// মুছে ফেললে, পরেরবার প্রোডাক্ট Add/Edit মোডাল খুললেই এই লিস্ট স্বয়ংক্রিয়ভাবে
+// দেখাবে, ব্যাকএন্ডে সবসময় true সেট করা হয়)। "হোম — ফিচার্ড পণ্য" আর
+// "হোম — সেরা বিক্রিত পণ্য" দুটোই স্ট্যাটিক থাকে ("সকল পন্য" ট্যাবের ও
+// homepage-এর আলাদা "সেরা বিক্রিত পণ্য" সেকশনের পূর্বশর্ত — সেই সেকশনে কোনো
+// Filter Tab দেখায় না, তাই এটাকে Filter Tabs লিস্টের ওপর নির্ভরশীল রাখা হয়নি)।
+// বাকি সব ট্যাব (homePopular, homeNew সহ cat:slug ক্যাটাগরি-ট্যাবও) Filter
+// Tabs (page-settings → Home → Filter Tabs, অর্থাৎ
+// bs-home-panel[data-home-tab="filters"]) থেকে লাইভ আনা হয় এবং প্রতিটির
+// জন্য একটি করে চেকবক্স বানানো হয় — তাই ফ্রন্টএন্ডে "জনপ্রিয় পণ্যসমূহ"
+// সেকশনে যে কয়টি ট্যাব বাটন দেখা যায় (all বাদে), এখানে ঠিক সে কয়টি চেকবক্স
+// + "হোম — ফিচার্ড পণ্য" (all-এর জন্য) থাকবে। কোনো ট্যাব যোগ/আপডেট/মুছে
+// ফেললে, পরেরবার প্রোডাক্ট Add/Edit মোডাল খুললেই এই লিস্ট স্বয়ংক্রিয়ভাবে
 // সিঙ্ক হয়ে যাবে — আলাদা করে কোড পরিবর্তনের দরকার নেই।
 async function bsRenderProductPlacements(selectedPlacements){
   const wrap = document.getElementById('pPlacementsWrap');
@@ -1552,10 +1556,11 @@ async function bsRenderProductPlacements(selectedPlacements){
   const sel = selectedPlacements || {};
   wrap.querySelectorAll('.pl-dyn').forEach(el => el.remove());
   const plHome = document.getElementById('pPlHome'); if(plHome) plHome.checked = !!sel.homeProduct;
+  const plBest = document.getElementById('pPlBestseller'); if(plBest) plBest.checked = !!sel.homeBestseller;
   let tabs = [];
   try { tabs = await apiJSON('/filter-tabs') || []; } catch(e){ tabs = []; }
   const dynamicTabs = (Array.isArray(tabs) ? tabs : [])
-    .filter(t => t.filter && t.filter !== 'all')
+    .filter(t => t.filter && t.filter !== 'all' && t.filter !== 'homeBestseller')
     .sort((a,b) => (a.order||0) - (b.order||0));
   dynamicTabs.forEach(t => {
     const key = t.filter;
@@ -1570,6 +1575,7 @@ function bsCollectProductPlacements(){
   const placements = {
     shop: true, // সবসময় শপ পেজে দেখাবে — এখন আর ম্যানুয়াল টগল নয়
     homeProduct: document.getElementById('pPlHome')?.checked || false,
+    homeBestseller: document.getElementById('pPlBestseller')?.checked || false,
   };
   document.querySelectorAll('#pPlacementsWrap .pl-dyn-input').forEach(inp => {
     const key = inp.dataset.plKey;
