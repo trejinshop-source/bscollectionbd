@@ -14,6 +14,126 @@
 
   const API = window.BS_API_BASE || 'https://bscollectionbd.onrender.com/api';
 
+  /* ================================================================
+     SHARED CART ENGINE (window.BSCart)
+     ----------------------------------------------------------------
+     Runs on EVERY page that loads this script (landing pages, shop,
+     home, product pages) — must sit above the "product-<id>.html
+     only" early-return below, since it was previously missing
+     entirely, which is why "কার্টে যোগ করুন" did nothing anywhere
+     that referenced window.BSCart (e.g. landing.html).
+     Persists to localStorage so the cart survives page navigation
+     and reloads.
+     ================================================================ */
+  const CART_KEY = 'bs_cart_v1';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function fmtTk(n) { return 'Tk ' + Number(n || 0).toLocaleString('en-IN'); }
+
+  function getCart() {
+    try { const l = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); return Array.isArray(l) ? l : []; }
+    catch (_) { return []; }
+  }
+  function persistCart(items) {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+    renderCartUI();
+  }
+  function cartAddToCart(item) {
+    if (!item || !item.id) return;
+    const cart = getCart();
+    const addQty = Math.max(1, parseInt(item.qty, 10) || 1);
+    const existing = cart.find(c => c.id === item.id);
+    if (existing) existing.qty = Math.max(1, (parseInt(existing.qty, 10) || 1) + addQty);
+    else cart.push({
+      id: item.id,
+      name: item.name || 'পণ্য',
+      price: Number(item.price) || 0,
+      img: item.img || item.image || '',
+      icon: item.icon || 'fa-box',
+      qty: addQty,
+    });
+    persistCart(cart);
+  }
+  function cartRemove(id) { persistCart(getCart().filter(c => c.id !== id)); }
+  function cartUpdateQty(id, qty) {
+    qty = Math.max(1, parseInt(qty, 10) || 1);
+    const cart = getCart();
+    const it = cart.find(c => c.id === id);
+    if (it) { it.qty = qty; persistCart(cart); }
+  }
+  function cartClear() { persistCart([]); }
+  function cartCount() { return getCart().reduce((s, c) => s + (parseInt(c.qty, 10) || 0), 0); }
+  function cartTotal() { return getCart().reduce((s, c) => s + (parseInt(c.qty, 10) || 0) * (Number(c.price) || 0), 0); }
+
+  function renderCartUI() {
+    const items = getCart();
+    const count = cartCount();
+    document.querySelectorAll('.cart-badge').forEach(b => { b.textContent = count; });
+
+    const body = document.getElementById('cartSidebarBody');
+    const footer = document.getElementById('cartSidebarFooter');
+    const totalEl = document.getElementById('cartSidebarTotal');
+    if (!body) return; // this page has no cart sidebar markup
+
+    if (!items.length) {
+      body.innerHTML = '<div class="cart-empty"><i class="fas fa-cart-shopping"></i><p>No items in your cart!</p></div>';
+      if (footer) footer.style.display = 'none';
+      return;
+    }
+    body.innerHTML = items.map(it => `
+        <div class="cart-item-row" data-id="${escapeHtml(it.id)}">
+          <div class="cart-item-img">${it.img ? `<img src="${escapeHtml(it.img)}" alt="${escapeHtml(it.name)}">` : `<i class="fas ${escapeHtml(it.icon || 'fa-box')}"></i>`}</div>
+          <div class="cart-item-info">
+            <div class="ci-name">${escapeHtml(it.name)}</div>
+            <div class="ci-meta">${fmtTk(it.price)} &times; <input type="number" min="1" value="${parseInt(it.qty, 10) || 1}" class="cart-qty-input" data-id="${escapeHtml(it.id)}" style="width:44px;border:1px solid #e5e7eb;border-radius:4px;padding:2px 4px"></div>
+          </div>
+          <div class="cart-item-price">${fmtTk((Number(it.price) || 0) * (parseInt(it.qty, 10) || 1))}</div>
+          <button class="cart-item-remove" data-id="${escapeHtml(it.id)}" aria-label="মুছে ফেলুন"><i class="fas fa-xmark"></i></button>
+        </div>`).join('');
+    if (footer) footer.style.display = '';
+    if (totalEl) totalEl.textContent = fmtTk(cartTotal());
+  }
+
+  // delegated events: remove item / change qty inside the sidebar
+  document.addEventListener('click', function (e) {
+    const rm = e.target.closest('.cart-item-remove');
+    if (rm) cartRemove(rm.getAttribute('data-id'));
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.classList && e.target.classList.contains('cart-qty-input')) {
+      cartUpdateQty(e.target.getAttribute('data-id'), e.target.value);
+    }
+  });
+  // checkout button inside the sidebar (landing.html doesn't wire this itself)
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('#cartSidebarCheckout');
+    if (!btn) return;
+    if (typeof window.openOrderForm === 'function') window.openOrderForm();
+    else if (typeof window.bsOpenCheckout === 'function') window.bsOpenCheckout();
+    else location.href = 'cart.html';
+  });
+
+  window.BSCart = {
+    addToCart: cartAddToCart,
+    removeFromCart: cartRemove,
+    updateQty: cartUpdateQty,
+    clearCart: cartClear,
+    getCart: getCart,
+    cartCount: cartCount,
+    cartTotal: cartTotal,
+  };
+
+  function initCart() { renderCartUI(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCart);
+  else initCart();
+
+  /* ================================================================
+     Everything below this line is unchanged — product detail page
+     (product-<id>.html) only: reviews, compare, share, COD.
+     ================================================================ */
+
   // detect product id from URL: product-<id>.html
   const match = location.pathname.match(/product-([a-z0-9\-]+)\.html/i);
   if (!match) return;
@@ -199,10 +319,6 @@
         el.addEventListener('click', e => { e.preventDefault(); window.bsBuyCOD(); });
       }
     });
-  }
-
-  function escapeHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   function init() {
