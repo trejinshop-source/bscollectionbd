@@ -262,3 +262,14 @@
     document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+/* ---- Auto-load bs-fixes.js (comprehensive frontend fixes) ---- */
+(function(){
+  try {
+    if (document.querySelector('script[data-bs-fixes]')) return;
+    var s = document.createElement('script');
+    s.src = (document.currentScript && document.currentScript.src ? document.currentScript.src.replace(/bs-shared\.js.*/, 'bs-fixes.js') : 'js/bs-fixes.js');
+    s.defer = true;
+    s.setAttribute('data-bs-fixes','1');
+    document.head.appendChild(s);
+  } catch(e){}
+})();
