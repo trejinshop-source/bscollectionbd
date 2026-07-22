@@ -77,11 +77,13 @@ const ProductSchema = new mongoose.Schema({
   colors: [String],
   sizes: [String],
   weight: String,
+  // Mixed টাইপ ব্যবহার করা হয়েছে যাতে "শপ পেজ", "হোম — ফিচার্ড পণ্য" (homeProduct)
+  // ছাড়াও অ্যাডমিন প্যানেলের "Filter Tabs" থেকে ডাইনামিকভাবে যোগ করা যেকোনো
+  // কাস্টম ট্যাব-কী (placements.<filterKey>) নিরাপদে সেভ/আপডেট হয় — আগে এখানে
+  // ফিক্সড কয়েকটি ফিল্ড ছাড়া বাকি সব কী সাইলেন্টলি বাদ পড়ে যেত।
   placements: {
-    shop: { type: Boolean, default: true },
-    homePopular: { type: Boolean, default: false },
-    homeBestseller: { type: Boolean, default: false },
-    homeNew: { type: Boolean, default: false },
+    type: mongoose.Schema.Types.Mixed,
+    default: () => ({ shop: true, homeProduct: false, homePopular: false, homeBestseller: false, homeNew: false }),
   },
 }, { timestamps: true });
 
@@ -489,6 +491,8 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/products", authAdmin, async (req, res) => {
   try {
+    // "শপ পেজ" আর ম্যানুয়াল টগল নয় — সব পণ্য ডিফল্টভাবেই শপ পেজে দেখাবে।
+    req.body.placements = Object.assign({}, req.body.placements, { shop: true });
     const p = await Product.create(req.body);
     // update category count
     if (p.categorySlug) await Category.updateOne({ slug: p.categorySlug }, { $inc: { count: 1 } });
@@ -516,6 +520,8 @@ app.get("/api/products/id/:id", async (req, res) => {
 
 app.put("/api/products/id/:id", authAdmin, async (req, res) => {
   try {
+    // "শপ পেজ" আর ম্যানুয়াল টগল নয় — সব পণ্য ডিফল্টভাবেই শপ পেজে দেখাবে।
+    if (req.body.placements) req.body.placements = Object.assign({}, req.body.placements, { shop: true });
     const p = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!p) return res.status(404).json({ error: "পণ্য পাওয়া যায়নি" });
     res.json(p);

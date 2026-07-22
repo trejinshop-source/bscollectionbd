@@ -974,9 +974,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, label, td, th {
       </div>
       <div class="form-group2">
         <label>কোথায় দেখাবে (Placement)</label>
-        <p style="color:#94a3b8;font-size:11px;margin:2px 0 4px">Filter Tabs-এ যে ট্যাব যোগ/আপডেট করবেন, সেটি স্বয়ংক্রিয়ভাবে এখানে যোগ হয়ে যাবে।</p>
+        <p style="color:#94a3b8;font-size:11px;margin:2px 0 4px">পণ্যটি সবসময় শপ পেজে স্বয়ংক্রিয়ভাবে দেখাবে (আলাদা করে সিলেক্ট করার দরকার নেই)। Filter Tabs-এ যে ট্যাব যোগ/আপডেট/মুছবেন, সেটি স্বয়ংক্রিয়ভাবে এখানে যোগ/বাদ হয়ে যাবে।</p>
         <div class="bs-ext-placements" id="pPlacementsWrap">
-          <label><input type="checkbox" id="pPlShop"> শপ পেজ</label>
           <label><input type="checkbox" id="pPlHome"> হোম — ফিচার্ড পণ্য (জনপ্রিয় পণ্যসমূহ সেকশনে দেখানোর পূর্বশর্ত)</label>
         </div>
       </div>
@@ -1537,16 +1536,17 @@ document.getElementById('lpMenuViewList').addEventListener('click', ()=>{
 
 
 // ── প্লেসমেন্ট চেকবক্স — Filter Tabs থেকে ডাইনামিকভাবে তৈরি হয় ────────────
-// "শপ পেজ" ও "হোম — ফিচার্ড পণ্য" ছাড়া বাকি চেকবক্সগুলো Filter Tabs
-// (page-settings → Home → Filter Tabs) থেকে লাইভ আনা হয়, তাই কোনো নতুন
-// ট্যাব যোগ/আপডেট করলে পরের বার প্রোডাক্ট এডিট খুললেই সেটা এখানে দেখা যাবে —
-// আলাদা করে এই ফাইলে কোড পরিবর্তনের দরকার নেই।
+// "শপ পেজ" বাদ (এটি আর টগল করার দরকার নেই — সব পণ্য ডিফল্টভাবেই শপ পেজে
+// দেখাবে, ব্যাকএন্ডে সবসময় true সেট করা হয়)। "হোম — ফিচার্ড পণ্য" স্ট্যাটিক
+// থাকে। বাকি চেকবক্সগুলো Filter Tabs (page-settings → Home → Filter Tabs,
+// অর্থাৎ bs-home-panel[data-home-tab="filters"]) থেকে লাইভ আনা হয় — সেখানে
+// কোনো ট্যাব যোগ/আপডেট/মুছে ফেললে, পরেরবার প্রোডাক্ট Add/Edit মোডাল খুললেই
+// এই লিস্ট স্বয়ংক্রিয়ভাবে সিঙ্ক হয়ে যাবে — আলাদা করে কোড পরিবর্তনের দরকার নেই।
 async function bsRenderProductPlacements(selectedPlacements){
   const wrap = document.getElementById('pPlacementsWrap');
   if(!wrap) return;
   const sel = selectedPlacements || {};
   wrap.querySelectorAll('.pl-dyn').forEach(el => el.remove());
-  const plShop = document.getElementById('pPlShop'); if(plShop) plShop.checked = !!sel.shop;
   const plHome = document.getElementById('pPlHome'); if(plHome) plHome.checked = !!sel.homeProduct;
   let tabs = [];
   try { tabs = await apiJSON('/filter-tabs') || []; } catch(e){ tabs = []; }
@@ -1564,7 +1564,7 @@ async function bsRenderProductPlacements(selectedPlacements){
 
 function bsCollectProductPlacements(){
   const placements = {
-    shop: document.getElementById('pPlShop')?.checked || false,
+    shop: true, // সবসময় শপ পেজে দেখাবে — এখন আর ম্যানুয়াল টগল নয়
     homeProduct: document.getElementById('pPlHome')?.checked || false,
   };
   document.querySelectorAll('#pPlacementsWrap .pl-dyn-input').forEach(inp => {
