@@ -1506,10 +1506,9 @@ function filterCatalogPool(filterValue){
   const homeProd = _catalogPool.filter(p => p.placements && p.placements.homeProduct);
   const pool = homeProd;
   if (!filterValue || filterValue === 'all') return pool;
-  if (filterValue.startsWith('cat:')) {
-    const slug = filterValue.slice(4);
-    return pool.filter(p => p.categorySlug === slug);
-  }
+  // cat:slug ট্যাবও এখন বাকি সব ট্যাবের মতোই placements[filterValue] দিয়ে চেক হয় —
+  // অ্যাডমিন প্যানেলে পণ্যের ক্যাটাগরি সিলেক্ট করলে সংশ্লিষ্ট "cat:slug" চেকবক্স
+  // স্বয়ংক্রিয়ভাবে চেক হয়ে যায় (দেখুন admin.html → populateCatSelect)।
   return pool.filter(p => p.placements && p.placements[filterValue]);
 }
 function applyFilterTab(filterValue){
