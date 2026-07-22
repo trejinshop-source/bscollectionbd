@@ -932,7 +932,7 @@ function renderPage(p) {
     '<div class="pd-info bn">' +
     '<span class="pd-cat">'+esc(category)+'</span>' +
     '<h2 id="pdTitle">'+esc(PRODUCT_NAME)+'</h2>' +
-    '<div class="pd-rating">'+stars(rating)+'<span>('+(ratingCount?ratingCount.toLocaleString('en-IN')+' টি':'') +' রিভিউ)</span></div>' +
+    '<div class="pd-rating">'+stars(rating)+'<span id="pdTopReviewCount" data-count="'+(ratingCount||0)+'">'+(ratingCount?ratingCount.toLocaleString('en-IN')+' টি রিভিউ':'') +'</span></div>' +
     '<p class="pd-desc" id="pdDesc">'+esc(hero.subheadline||p.description||'')+'</p>' +
     '<div class="pd-price">' +
     (priceNow?'<span class="now" id="pdPriceNow">'+fmt(priceNow)+'</span>':'') +
@@ -978,7 +978,7 @@ function renderPage(p) {
     '<div class="pd-tabs-nav bn">' +
     '<button class="pd-tab-btn active" data-tab="desc">বিবরণ</button>' +
     '<button class="pd-tab-btn" data-tab="questions">প্রশ্ন (0)</button>' +
-    '<button class="pd-tab-btn" data-tab="reviews">রিভিউ ('+reviewsList.length+')</button>' +
+    '<button class="pd-tab-btn" data-tab="reviews" id="reviewsTabBtn">রিভিউ ('+reviewsList.length+')</button>' +
     '</div>' +
 
     /* DESC tab */
@@ -1008,10 +1008,10 @@ function renderPage(p) {
     '<div class="pd-review-summary">' +
     '<div class="pd-rs-left">' +
     '<div class="pd-rs-avg-label">গড় রেটিং</div>' +
-    '<div class="pd-rs-avg">'+avgRating+'</div>' +
-    '<div class="pd-rs-stars">'+stars(Math.round(parseFloat(avgRating)))+'</div>' +
-    '<div class="pd-rs-count">('+reviewsList.length+'টি রিভিউ)</div>' +
-    '<div class="pd-rs-recommend">'+recommendPct+'% <span style="color:var(--muted);font-weight:400">রিকমেন্ড করেছেন ('+ratingTotal+' জনের মধ্যে '+recommendCount+' জন)</span></div>' +
+    '<div class="pd-rs-avg" id="pdRsAvg">'+avgRating+'</div>' +
+    '<div class="pd-rs-stars" id="pdRsStars">'+stars(Math.round(parseFloat(avgRating)))+'</div>' +
+    '<div class="pd-rs-count" id="pdRsCount">('+reviewsList.length+'টি রিভিউ)</div>' +
+    '<div class="pd-rs-recommend" id="pdRsRecommend">'+recommendPct+'% <span style="color:var(--muted);font-weight:400">রিকমেন্ড করেছেন ('+ratingTotal+' জনের মধ্যে '+recommendCount+' জন)</span></div>' +
     ratingBarsHtml +
     '</div>' +
     '<div class="pd-rs-right"><h3>আপনার রিভিউ জমা দিন</h3>' +
@@ -1263,8 +1263,45 @@ function bindInteractions(thumbImages, colors) {
     list.insertBefore(card, list.firstChild);
     ta.value=''; pickedRating=0;
     starIcons.forEach(function(s){ s.className='far fa-star'; });
+    updateReviewCounts();
     bsToast('আপনার রিভিউ সাবমিট হয়েছে, ধন্যবাদ!','ok');
   });
+
+  /* Recalculate and refresh every review-count/rating display on the page.
+     Runs after a new review is added to the DOM list. */
+  function updateReviewCounts(){
+    var cards = document.querySelectorAll('#reviewsList .review-card-v2');
+    var n = cards.length;
+    var sum = 0;
+    cards.forEach(function(c){ sum += parseInt(c.getAttribute('data-rating'),10) || 5; });
+    var avg = n ? (sum/n).toFixed(1) : '5.0';
+
+    var tabBtn = document.getElementById('reviewsTabBtn');
+    if(tabBtn) tabBtn.textContent = 'রিভিউ ('+n+')';
+
+    var rsCount = document.getElementById('pdRsCount');
+    if(rsCount) rsCount.textContent = '('+n+'টি রিভিউ)';
+
+    var rsAvg = document.getElementById('pdRsAvg');
+    if(rsAvg) rsAvg.textContent = avg;
+
+    var rsStars = document.getElementById('pdRsStars');
+    if(rsStars) rsStars.innerHTML = stars(Math.round(parseFloat(avg)));
+
+    var recommendCount = 0;
+    cards.forEach(function(c){ if((parseInt(c.getAttribute('data-rating'),10)||5) >= 4) recommendCount++; });
+    var recommendPct = n ? Math.round(recommendCount/n*100*10)/10 : 100;
+    var rsRecommend = document.getElementById('pdRsRecommend');
+    if(rsRecommend) rsRecommend.innerHTML = recommendPct+'% <span style="color:var(--muted);font-weight:400">রিকমেন্ড করেছেন ('+n+' জনের মধ্যে '+recommendCount+' জন)</span>';
+
+    var topEl = document.getElementById('pdTopReviewCount');
+    if(topEl){
+      var baseCount = parseInt(topEl.getAttribute('data-count'),10) || 0;
+      var newCount = baseCount + 1; // this submission adds one more on top of the admin-set count
+      topEl.setAttribute('data-count', newCount);
+      topEl.textContent = newCount.toLocaleString('en-IN')+' টি রিভিউ';
+    }
+  }
 
   /* Submit question */
   var qBtn = document.getElementById('submitQuestionBtn');
