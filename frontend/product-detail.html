@@ -468,8 +468,8 @@ main{max-width:1200px;margin:32px auto;padding:0 20px}
     section.innerHTML =
       '<h2><i class="fas fa-comment-dots" style="color:var(--accent)"></i> রিভিউ বা প্রশ্ন করুন</h2>' +
       '<div class="rv-tabs">' +
-        '<button class="rv-tab active" onclick="window._rvTab(this,&quot;review&quot;)"><i class="fas fa-star"></i> রিভিউ লিখুন</button>' +
-        '<button class="rv-tab" onclick="window._rvTab(this,&quot;question&quot;)"><i class="fas fa-question-circle"></i> প্রশ্ন করুন</button>' +
+        '<button class="rv-tab active" onclick="window._rvTab(this,'review')"><i class="fas fa-star"></i> রিভিউ লিখুন</button>' +
+        '<button class="rv-tab" onclick="window._rvTab(this,'question')"><i class="fas fa-question-circle"></i> প্রশ্ন করুন</button>' +
       '</div>' +
       '<div id="rvBody">' + (loggedIn() ? formHTML(u, productId, productName) : gateHTML()) + '</div>';
     var mc = document.getElementById('mainContent');

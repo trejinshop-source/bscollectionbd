@@ -278,10 +278,8 @@
     nav.querySelector('.bs-mm-backdrop').addEventListener('click', () => nav.classList.remove('show'));
   }
 
-  // ---------- (8) Mobile order fix: silently queue any order POST that fails
-  //   at the network layer (no popup — the page's own handler already shows
-  //   feedback if needed, and bs-shared.js auto-flushes when connectivity
-  //   returns). Prevents duplicate/spurious "ইন্টারনেট সমস্যা" notifications. ----------
+  // ---------- (8) Mobile order fix: intercept checkout submissions;
+  //   if primary fetch fails, queue in bs_pending_orders and inform user. ----------
   const origFetch = window.fetch;
   window.fetch = function (input, init) {
     return origFetch.apply(this, arguments).catch(err => {
@@ -290,17 +288,11 @@
         if (/\/api\/orders(\/|$|\?)/.test(url) && init && init.method === 'POST' && init.body) {
           let bodyObj = null;
           try { bodyObj = JSON.parse(init.body); } catch (_) {}
-          // Only queue when we clearly have an order payload with customer info.
-          if (bodyObj && bodyObj.customer && (bodyObj.customer.name || bodyObj.customer.phone)) {
+          if (bodyObj) {
             const list = JSON.parse(localStorage.getItem('bs_pending_orders') || '[]');
-            // De-duplicate: don't push the same order twice (the page's own
-            // handler may also push into the queue in its catch block).
-            const key = JSON.stringify(bodyObj);
-            const already = list.some(o => JSON.stringify(o && o.payload ? o.payload : o) === key);
-            if (!already) {
-              list.push(bodyObj);
-              localStorage.setItem('bs_pending_orders', JSON.stringify(list));
-            }
+            list.push(bodyObj);
+            localStorage.setItem('bs_pending_orders', JSON.stringify(list));
+            popup('ইন্টারনেট সমস্যা — অর্ডার সংরক্ষিত হয়েছে, সংযোগ ফিরলে অটো-সাবমিট হবে', 'info');
           }
         }
       } catch (_) {}
