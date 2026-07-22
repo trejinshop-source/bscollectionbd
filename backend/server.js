@@ -594,7 +594,23 @@ app.post("/api/categories/upload", authAdmin, upload.single("image"), async (req
 app.post("/api/orders", optionalUser, async (req, res) => {
   try {
     const body = req.body || {};
-    const { customer, items, subtotal, deliveryCharge, deliveryFee, total, paymentMethod, source, note } = body;
+    let { customer, items, subtotal, deliveryCharge, deliveryFee, total, paymentMethod, source, note } = body;
+    // Backward-compat: accept flat landing-page payloads
+    // { customerName, phone, address:{division,district,upazila,union,detail}, totalAmount, ... }
+    if (!customer || typeof customer !== "object") customer = {};
+    if (!customer.name && body.customerName) customer.name = body.customerName;
+    if (!customer.phone && body.phone) customer.phone = body.phone;
+    if (!customer.email && body.email) customer.email = body.email;
+    if (body.address && typeof body.address === "object") {
+      customer.division = customer.division || body.address.division || "";
+      customer.district = customer.district || body.address.district || "";
+      customer.upazila  = customer.upazila  || body.address.upazila  || "";
+      customer.union    = customer.union    || body.address.union    || "";
+      customer.area     = customer.area     || body.address.detail   || body.address.area || "";
+    } else if (typeof body.address === "string" && !customer.address) {
+      customer.address = body.address;
+    }
+    if (total == null && body.totalAmount != null) total = body.totalAmount;
     if (!customer?.name || !customer?.phone)
       return res.status(400).json({ error: "নাম ও ফোন নম্বর আবশ্যক" });
 

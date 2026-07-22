@@ -1164,28 +1164,68 @@ function bindInteractions(thumbImages, colors) {
     var delivery = parseInt((document.querySelector('input[name="ofDelivery"]:checked')||{}).value||'70')||70;
     var total = (window.PRODUCT_PRICE||0)*qty + delivery;
     var API = (window.BSAdmin&&window.BSAdmin.API_BASE)||'https://bscollectionbd.onrender.com/api';
+    var _name = (document.getElementById('ofName')||{}).value||'';
+    var _phone = (document.getElementById('ofPhone')||{}).value||'';
+    var _division = (document.getElementById('ofDivision')||{}).value||'';
+    var _district = (document.getElementById('ofDistrict')||{}).value||'';
+    var _upazila = (document.getElementById('ofUpazila')||{}).value||'';
+    var _union = (document.getElementById('ofUnion')||{}).value||'';
+    var _area = (document.getElementById('ofArea')||{}).value||'';
+    var _subtotal = (window.PRODUCT_PRICE||0)*qty;
     var payload = {
-      customerName: (document.getElementById('ofName')||{}).value||'',
-      phone: (document.getElementById('ofPhone')||{}).value||'',
-      address: {
-        division: (document.getElementById('ofDivision')||{}).value||'',
-        district: (document.getElementById('ofDistrict')||{}).value||'',
-        upazila: (document.getElementById('ofUpazila')||{}).value||'',
-        union: (document.getElementById('ofUnion')||{}).value||'',
-        detail: (document.getElementById('ofArea')||{}).value||''
+      customer: {
+        name: _name,
+        phone: _phone,
+        division: _division,
+        district: _district,
+        upazila: _upazila,
+        union: _union,
+        area: _area,
+        address: [_area, _upazila, _district, _division].filter(Boolean).join(', ')
       },
+      items: [{
+        productId: window.PRODUCT_ID||'',
+        sku: window.PRODUCT_SKU||window.PRODUCT_ID||'',
+        name: window.PRODUCT_NAME||'পণ্য',
+        qty: qty,
+        price: window.PRODUCT_PRICE||0,
+        img: window.PRODUCT_IMG||''
+      }],
+      subtotal: _subtotal,
       deliveryCharge: delivery,
-      items: [{name:window.PRODUCT_NAME||'পণ্য', qty:qty, price:window.PRODUCT_PRICE||0, img:window.PRODUCT_IMG||''}],
-      totalAmount: total,
-      source: 'landing_page'
+      deliveryFee: delivery,
+      total: total,
+      paymentMethod: 'COD',
+      source: 'landing_page:' + (window.LANDING_SLUG || (location.pathname.split('/').pop()||'landing'))
     };
     fetch(API+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .catch(function(){})
-      .finally(function(){
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+      .then(function(res){
         var ov = document.getElementById('orderModalOverlay');
         if(ov) ov.classList.remove('show');
-        var succ = document.getElementById('successModalOverlay');
-        if(succ) succ.classList.add('show');
+        if(res.ok){
+          var succ = document.getElementById('successModalOverlay');
+          if(succ) succ.classList.add('show');
+        } else {
+          alert('অর্ডার পাঠানো যায়নি: ' + ((res.data&&res.data.error)||'সার্ভার ত্রুটি'));
+          try{
+            var pending = JSON.parse(localStorage.getItem('bs_pending_orders')||'[]');
+            pending.push({payload:payload, at:new Date().toISOString()});
+            localStorage.setItem('bs_pending_orders', JSON.stringify(pending));
+          }catch(e){}
+        }
+      })
+      .catch(function(err){
+        var ov = document.getElementById('orderModalOverlay');
+        if(ov) ov.classList.remove('show');
+        alert('নেটওয়ার্ক ত্রুটি — অর্ডার লোকালি সেভ করা হলো। পরে আবার চেষ্টা করুন।');
+        try{
+          var pending = JSON.parse(localStorage.getItem('bs_pending_orders')||'[]');
+          pending.push({payload:payload, at:new Date().toISOString()});
+          localStorage.setItem('bs_pending_orders', JSON.stringify(pending));
+        }catch(e){}
+      })
+      .finally(function(){
         if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Confirm Order';}
       });
   });
