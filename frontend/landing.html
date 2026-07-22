@@ -1078,7 +1078,7 @@ function renderRelatedGrid(items) {
     for(var x=1;x<=5;x++) starH += '<i class="'+(x<=rs?'fas':'far')+' fa-star"></i>';
     var badgePct = Number(r.badge)||0;
     var hasLink = !!(r.link);
-    html += '<div class="product-card" onclick="'+(hasLink?'location.href=''+esc(r.link)+''':'addRelatedToCart(''+esc(r.name)+'','+Number(r.now||0)+')')+'" style="cursor:pointer">' +
+    html += '<div class="product-card" onclick="'+(hasLink?'location.href=\''+esc(r.link)+'\'':'addRelatedToCart(\''+esc(r.name)+'\','+Number(r.now||0)+')')+'" style="cursor:pointer">' +
       '<div class="product-img-wrap" style="position:relative">' +
       (r.img?'<img loading="lazy" src="'+esc(r.img)+'" alt="'+esc(r.name)+'" style="width:100%;aspect-ratio:1;object-fit:cover"/>':'<div style="width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="font-size:2rem;color:#ccc"></i></div>') +
       (badgePct?'<span class="pd-badge-sale">-'+badgePct+'%</span>':'') +
@@ -1091,7 +1091,7 @@ function renderRelatedGrid(items) {
       '<span style="font-size:14px;font-weight:800;color:var(--accent)">৳'+Number(r.now||0).toLocaleString('en-IN')+'</span>' +
       (r.old&&r.old>r.now?'<span style="font-size:11px;color:var(--muted);text-decoration:line-through">৳'+Number(r.old).toLocaleString('en-IN')+'</span>':'') +
       '</div>' +
-      (hasLink?'':'<button onclick="event.stopPropagation();addRelatedToCart(''+esc(r.name)+'','+Number(r.now||0)+')" style="margin-top:8px;width:100%;padding:7px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">কার্টে যোগ করুন</button>') +
+      (hasLink?'':'<button onclick="event.stopPropagation();addRelatedToCart(\''+esc(r.name)+'\','+Number(r.now||0)+')" style="margin-top:8px;width:100%;padding:7px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">কার্টে যোগ করুন</button>') +
       '</div>' +
       '</div>';
   });
