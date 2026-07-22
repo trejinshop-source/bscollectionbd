@@ -267,6 +267,382 @@
     });
   }
 
+  // ============================================================
+  // ============  ভ্যারিয়েন্ট এডিটর (Color+Size+Weight+Thumb) ============
+  // ============================================================
+  // Injects a redesigned unified variant editor into #productModal.
+  // Colors are rows with (name + hex swatch + thumbnail upload).
+  // Sizes and Weights are chip inputs. A combination matrix is auto
+  // generated with per-combo price/stock/SKU. Data is merged into the
+  // request body when the Save button posts to /products.
+
+  const VE_STYLE = `
+  .bs-ve-section{margin-top:14px;padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#F8FAFC}
+  .bs-ve-section h4{margin:0 0 4px;font-size:14px;font-weight:800;color:#14213D;display:flex;align-items:center;gap:8px}
+  .bs-ve-section h4 .bs-ve-pill{background:#FCA311;color:#14213D;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:800}
+  .bs-ve-hint{color:#64748b;font-size:11.5px;margin:0 0 10px}
+  .bs-ve-tabs{display:flex;gap:6px;margin-bottom:10px;border-bottom:1px solid #e2e8f0}
+  .bs-ve-tab{padding:8px 14px;border:0;background:transparent;font-weight:700;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;font-size:13px}
+  .bs-ve-tab.active{color:#14213D;border-color:#FCA311}
+  .bs-ve-pane{display:none}
+  .bs-ve-pane.active{display:block}
+  .bs-ve-colrow{display:grid;grid-template-columns:64px 1fr 130px 90px 32px;gap:8px;align-items:center;margin-bottom:8px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:8px}
+  .bs-ve-thumb{width:56px;height:56px;border-radius:8px;border:1px dashed #cbd5e1;background:#F8FAFC center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;cursor:pointer;position:relative;overflow:hidden}
+  .bs-ve-thumb input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .bs-ve-thumb .bs-ve-thumb-lbl{pointer-events:none;text-align:center;line-height:1.1;padding:2px}
+  .bs-ve-name{border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;width:100%}
+  .bs-ve-hex{display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;background:#fff}
+  .bs-ve-hex input[type=color]{width:28px;height:28px;border:0;background:transparent;cursor:pointer;padding:0}
+  .bs-ve-hex input[type=text]{border:0;outline:none;font-size:12px;width:80px;font-family:monospace}
+  .bs-ve-stock{border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:13px;text-align:center;font-family:inherit}
+  .bs-ve-del{background:#FEE2E2;color:#DC2626;border:0;border-radius:8px;height:32px;font-weight:800;cursor:pointer}
+  .bs-ve-addbtn{background:#14213D;color:#fff;border:0;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+  .bs-ve-addbtn:hover{background:#FCA311;color:#14213D}
+  .bs-ve-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;min-height:46px}
+  .bs-ve-chip{display:inline-flex;align-items:center;gap:6px;background:#FFF3C4;color:#14213D;padding:5px 10px;border-radius:999px;font-size:12.5px;font-weight:700}
+  .bs-ve-chip .x{cursor:pointer;color:#DC2626;font-weight:900}
+  .bs-ve-chipinput{border:0;outline:none;font-size:13px;padding:4px;font-family:inherit;min-width:120px;flex:1}
+  .bs-ve-matrix{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0}
+  .bs-ve-matrix th,.bs-ve-matrix td{padding:6px 8px;border-bottom:1px solid #f1f5f9;text-align:left}
+  .bs-ve-matrix th{background:#F1F5F9;font-weight:700;color:#14213D;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
+  .bs-ve-matrix input{border:1px solid #e2e8f0;border-radius:6px;padding:5px 7px;width:100%;font-family:inherit;font-size:12.5px}
+  .bs-ve-swatch{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:4px}
+  .bs-ve-empty{color:#94a3b8;font-size:12px;padding:14px;text-align:center;font-style:italic}
+  `;
+
+  function ensureVeStyle(){
+    if(document.getElementById('bs-ve-style')) return;
+    const s = document.createElement('style'); s.id='bs-ve-style'; s.textContent = VE_STYLE;
+    document.head.appendChild(s);
+  }
+
+  function buildVariantSection(){
+    const sec = document.createElement('div');
+    sec.className = 'bs-ve-section';
+    sec.id = 'bsVariantEditor';
+    sec.innerHTML = `
+      <h4>ভ্যারিয়েন্ট এডিটর <span class="bs-ve-pill">নতুন</span></h4>
+      <p class="bs-ve-hint">কালার, সাইজ ও ওজন একসাথে সিলেক্ট করুন এবং প্রতিটি কালারের জন্য থাম্বনেইল আপলোড করুন। কম্বিনেশন ম্যাট্রিক্সে প্রতি ভ্যারিয়েন্টের দাম/স্টক আলাদাভাবে দিতে পারবেন।</p>
+      <div class="bs-ve-tabs">
+        <button type="button" class="bs-ve-tab active" data-vt="colors">🎨 কালার</button>
+        <button type="button" class="bs-ve-tab" data-vt="sizes">📏 সাইজ</button>
+        <button type="button" class="bs-ve-tab" data-vt="weights">⚖️ ওজন</button>
+        <button type="button" class="bs-ve-tab" data-vt="matrix">🧩 কম্বিনেশন</button>
+      </div>
+
+      <div class="bs-ve-pane active" data-vp="colors">
+        <div id="bsVeColorList"></div>
+        <button type="button" class="bs-ve-addbtn" id="bsVeAddColor">+ নতুন কালার যোগ করুন</button>
+      </div>
+
+      <div class="bs-ve-pane" data-vp="sizes">
+        <div class="bs-ve-chips" id="bsVeSizeChips">
+          <input type="text" class="bs-ve-chipinput" id="bsVeSizeInput" placeholder="যেমন: S, M, L, XL — Enter চাপুন">
+        </div>
+      </div>
+
+      <div class="bs-ve-pane" data-vp="weights">
+        <div class="bs-ve-chips" id="bsVeWeightChips">
+          <input type="text" class="bs-ve-chipinput" id="bsVeWeightInput" placeholder="যেমন: 500g, 1kg, 2kg — Enter চাপুন">
+        </div>
+      </div>
+
+      <div class="bs-ve-pane" data-vp="matrix">
+        <p class="bs-ve-hint">কালার/সাইজ/ওজন যোগ করার পর নিচে স্বয়ংক্রিয়ভাবে কম্বিনেশন তৈরি হবে। খালি ঘর রাখলে ডিফল্ট দাম/স্টক ব্যবহার হবে।</p>
+        <div id="bsVeMatrixWrap"><div class="bs-ve-empty">কোনো ভ্যারিয়েন্ট এখনো যোগ করা হয়নি।</div></div>
+      </div>
+    `;
+    return sec;
+  }
+
+  // ---------- State on window so save-hook can read it ----------
+  window.__bsVeState = { colors: [], sizes: [], weights: [], matrix: {} };
+
+  async function uploadThumb(file){
+    if(!file) return '';
+    const fd = new FormData(); fd.append('image', file);
+    const fn = window.apiFetch || window.fetch;
+    // Try to reuse admin apiFetch (adds base URL + auth)
+    const url = (window.API_BASE ? window.API_BASE : '') + '/products/upload';
+    const r = await (window.apiFetch ? window.apiFetch('/products/upload', { method:'POST', body:fd })
+                                     : fetch(url, { method:'POST', body:fd }));
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'upload failed');
+    return d.url;
+  }
+
+  function renderColorRows(){
+    const list = document.getElementById('bsVeColorList');
+    if(!list) return;
+    const st = window.__bsVeState;
+    if(!st.colors.length){ list.innerHTML = `<div class="bs-ve-empty">কোনো কালার যোগ করা হয়নি — নিচের বাটন চাপুন।</div>`; return; }
+    list.innerHTML = '';
+    st.colors.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'bs-ve-colrow';
+      row.innerHTML = `
+        <label class="bs-ve-thumb" style="${c.img ? `background-image:url('${c.img}')` : ''}">
+          <span class="bs-ve-thumb-lbl">${c.img ? '' : '📷 থাম্ব'}</span>
+          <input type="file" accept="image/*" data-idx="${i}" class="bs-ve-thumb-file">
+        </label>
+        <input type="text" class="bs-ve-name" data-idx="${i}" data-k="name" placeholder="কালারের নাম (যেমন: লাল)" value="${(c.name||'').replace(/"/g,'&quot;')}">
+        <div class="bs-ve-hex">
+          <input type="color" data-idx="${i}" data-k="hex" value="${c.hex||'#000000'}">
+          <input type="text" data-idx="${i}" data-k="hex" value="${c.hex||'#000000'}" maxlength="7">
+        </div>
+        <input type="number" class="bs-ve-stock" data-idx="${i}" data-k="stock" min="0" placeholder="স্টক" value="${c.stock ?? ''}">
+        <button type="button" class="bs-ve-del" data-idx="${i}" title="মুছুন">✕</button>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('.bs-ve-thumb-file').forEach(inp => {
+      inp.addEventListener('change', async (e) => {
+        const idx = +inp.dataset.idx;
+        const file = inp.files[0]; if(!file) return;
+        const lbl = inp.parentElement.querySelector('.bs-ve-thumb-lbl');
+        lbl.textContent = '⏳';
+        try{
+          const url = await uploadThumb(file);
+          window.__bsVeState.colors[idx].img = url;
+          renderColorRows();
+          popup('থাম্বনেইল আপলোড হয়েছে','ok');
+        } catch(err){ lbl.textContent = '⚠️'; popup('আপলোড ব্যর্থ: '+err.message,'err'); }
+      });
+    });
+    list.querySelectorAll('input[data-k]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const idx = +inp.dataset.idx, k = inp.dataset.k;
+        const v = inp.type === 'number' ? (inp.value === '' ? '' : +inp.value) : inp.value;
+        window.__bsVeState.colors[idx][k] = v;
+        if(k === 'hex'){
+          // sync sibling picker/text
+          const row = inp.closest('.bs-ve-colrow');
+          row.querySelectorAll(`input[data-k="hex"][data-idx="${idx}"]`).forEach(el => { if(el !== inp) el.value = v; });
+        }
+        if(k === 'name') renderMatrix();
+      });
+    });
+    list.querySelectorAll('.bs-ve-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = +btn.dataset.idx;
+        window.__bsVeState.colors.splice(idx,1);
+        renderColorRows(); renderMatrix();
+      });
+    });
+  }
+
+  function renderChips(kind){
+    const st = window.__bsVeState;
+    const arr = kind === 'sizes' ? st.sizes : st.weights;
+    const wrap = document.getElementById(kind === 'sizes' ? 'bsVeSizeChips' : 'bsVeWeightChips');
+    const input = document.getElementById(kind === 'sizes' ? 'bsVeSizeInput' : 'bsVeWeightInput');
+    if(!wrap || !input) return;
+    // Remove old chips (keep input at end)
+    wrap.querySelectorAll('.bs-ve-chip').forEach(c => c.remove());
+    arr.forEach((v, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'bs-ve-chip';
+      chip.innerHTML = `${v} <span class="x" data-i="${i}">✕</span>`;
+      chip.querySelector('.x').addEventListener('click', () => {
+        arr.splice(i,1); renderChips(kind); renderMatrix();
+      });
+      wrap.insertBefore(chip, input);
+    });
+  }
+
+  function wireChipInput(kind){
+    const input = document.getElementById(kind === 'sizes' ? 'bsVeSizeInput' : 'bsVeWeightInput');
+    if(!input || input.__wired) return; input.__wired = true;
+    const commit = () => {
+      const raw = input.value.trim();
+      if(!raw) return;
+      const st = window.__bsVeState;
+      const arr = kind === 'sizes' ? st.sizes : st.weights;
+      raw.split(/[,\n]/).map(s=>s.trim()).filter(Boolean).forEach(v => {
+        if(!arr.includes(v)) arr.push(v);
+      });
+      input.value = '';
+      renderChips(kind); renderMatrix();
+    };
+    input.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ',') { e.preventDefault(); commit(); }
+      else if(e.key === 'Backspace' && !input.value){
+        const st = window.__bsVeState;
+        const arr = kind === 'sizes' ? st.sizes : st.weights;
+        arr.pop(); renderChips(kind); renderMatrix();
+      }
+    });
+    input.addEventListener('blur', commit);
+  }
+
+  function renderMatrix(){
+    const wrap = document.getElementById('bsVeMatrixWrap');
+    if(!wrap) return;
+    const st = window.__bsVeState;
+    const colors = st.colors.length ? st.colors : [{name:'', hex:''}];
+    const sizes = st.sizes.length ? st.sizes : [''];
+    const weights = st.weights.length ? st.weights : [''];
+    const combos = [];
+    colors.forEach(c => sizes.forEach(s => weights.forEach(w => {
+      if(!c.name && !s && !w) return;
+      combos.push({ color: c.name || '', hex: c.hex || '', size: s, weight: w });
+    })));
+    if(!combos.length){ wrap.innerHTML = `<div class="bs-ve-empty">কোনো ভ্যারিয়েন্ট এখনো যোগ করা হয়নি।</div>`; return; }
+    let html = `<table class="bs-ve-matrix"><thead><tr>
+      <th>কালার</th><th>সাইজ</th><th>ওজন</th><th>দাম (৳)</th><th>স্টক</th><th>SKU</th>
+    </tr></thead><tbody>`;
+    combos.forEach(c => {
+      const key = `${c.color}||${c.size}||${c.weight}`;
+      const cur = st.matrix[key] || {};
+      html += `<tr data-key="${key.replace(/"/g,'&quot;')}">
+        <td>${c.hex ? `<span class="bs-ve-swatch" style="background:${c.hex}"></span>` : ''}${c.color || '<i style="color:#94a3b8">—</i>'}</td>
+        <td>${c.size || '<i style="color:#94a3b8">—</i>'}</td>
+        <td>${c.weight || '<i style="color:#94a3b8">—</i>'}</td>
+        <td><input type="number" data-mk="price" min="0" placeholder="ডিফল্ট" value="${cur.price ?? ''}"></td>
+        <td><input type="number" data-mk="stock" min="0" placeholder="0" value="${cur.stock ?? ''}"></td>
+        <td><input type="text" data-mk="sku" placeholder="auto" value="${(cur.sku||'').replace(/"/g,'&quot;')}"></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('tr[data-key]').forEach(tr => {
+      const key = tr.dataset.key;
+      tr.querySelectorAll('input[data-mk]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          st.matrix[key] = st.matrix[key] || {};
+          const k = inp.dataset.mk;
+          st.matrix[key][k] = inp.type === 'number' ? (inp.value === '' ? '' : +inp.value) : inp.value;
+        });
+      });
+    });
+  }
+
+  function wireVariantEditor(){
+    ensureVeStyle();
+    const modal = document.getElementById('productModal');
+    if(!modal || modal.__bsVeWired) return;
+    const body = modal.querySelector('.modal-body');
+    if(!body) return;
+    modal.__bsVeWired = true;
+    const sec = buildVariantSection();
+    body.appendChild(sec);
+
+    // Tab switching
+    sec.querySelectorAll('.bs-ve-tab').forEach(t => t.addEventListener('click', () => {
+      sec.querySelectorAll('.bs-ve-tab').forEach(x => x.classList.remove('active'));
+      sec.querySelectorAll('.bs-ve-pane').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      sec.querySelector(`.bs-ve-pane[data-vp="${t.dataset.vt}"]`).classList.add('active');
+      if(t.dataset.vt === 'matrix') renderMatrix();
+    }));
+
+    document.getElementById('bsVeAddColor').addEventListener('click', () => {
+      window.__bsVeState.colors.push({ name:'', hex:'#000000', img:'', stock:'' });
+      renderColorRows(); renderMatrix();
+    });
+
+    wireChipInput('sizes'); wireChipInput('weights');
+    renderColorRows(); renderChips('sizes'); renderChips('weights'); renderMatrix();
+  }
+
+  function loadVariantsFromProduct(p){
+    const st = { colors: [], sizes: [], weights: [], matrix: {} };
+    if(p){
+      if(Array.isArray(p.colorOptions) && p.colorOptions.length){
+        st.colors = p.colorOptions.map(c => ({ name:c.name||'', hex:c.hex||'#000000', img:c.img||'', stock:c.stock ?? '' }));
+      } else if(Array.isArray(p.colors)){
+        st.colors = p.colors.map(n => ({ name:String(n), hex:'#000000', img:'', stock:'' }));
+      }
+      st.sizes = Array.isArray(p.sizeOptions) && p.sizeOptions.length ? p.sizeOptions.slice() : (p.sizes||[]).slice();
+      st.weights = Array.isArray(p.weightOptions) ? p.weightOptions.slice() : (p.weight ? [p.weight] : []);
+      if(Array.isArray(p.variants)){
+        p.variants.forEach(v => {
+          const key = `${v.color||''}||${v.size||''}||${v.weight||''}`;
+          st.matrix[key] = { price: v.price ?? '', stock: v.stock ?? '', sku: v.sku || '' };
+        });
+      }
+    }
+    window.__bsVeState = st;
+    renderColorRows(); renderChips('sizes'); renderChips('weights'); renderMatrix();
+  }
+
+  // Hook: when Add Product modal opens, load state; on edit, populate from product.
+  function hookProductModalOpen(){
+    const addBtn = document.getElementById('addProductBtn');
+    if(addBtn && !addBtn.__veHook){
+      addBtn.__veHook = true;
+      addBtn.addEventListener('click', () => setTimeout(() => { wireVariantEditor(); loadVariantsFromProduct(null); }, 30), true);
+    }
+    // Patch openEditProduct to preload
+    if(window.openEditProduct && !window.openEditProduct.__veHook){
+      const orig = window.openEditProduct;
+      window.openEditProduct = function(id){
+        const r = orig.apply(this, arguments);
+        setTimeout(() => {
+          wireVariantEditor();
+          const p = (window.allProducts || []).find(x => x._id === id);
+          loadVariantsFromProduct(p);
+        }, 40);
+        return r;
+      };
+      window.openEditProduct.__veHook = true;
+    }
+  }
+
+  // Collect current variant payload
+  function collectVariantPayload(){
+    const st = window.__bsVeState || {};
+    const colorOptions = (st.colors||[]).filter(c => c.name || c.img).map(c => ({
+      name: c.name||'', hex: c.hex||'', img: c.img||'', stock: c.stock === '' ? undefined : c.stock
+    }));
+    const sizeOptions = (st.sizes||[]).slice();
+    const weightOptions = (st.weights||[]).slice();
+    const variants = [];
+    Object.keys(st.matrix||{}).forEach(k => {
+      const [color, size, weight] = k.split('||');
+      const v = st.matrix[k] || {};
+      if(v.price === '' && v.stock === '' && !v.sku) return;
+      variants.push({
+        color, size, weight,
+        price: v.price === '' ? undefined : v.price,
+        stock: v.stock === '' ? undefined : v.stock,
+        sku: v.sku || undefined,
+      });
+    });
+    return {
+      colorOptions, sizeOptions, weightOptions, variants,
+      // Backward-compat flat arrays consumed by existing frontend detail pages
+      colors: colorOptions.map(c => c.name).filter(Boolean),
+      sizes: sizeOptions,
+      weight: weightOptions[0] || undefined,
+    };
+  }
+
+  // Monkey-patch window.fetch to inject variant fields into product save requests
+  (function patchFetch(){
+    if(window.fetch.__bsVePatched) return;
+    const orig = window.fetch.bind(window);
+    const patched = function(input, init){
+      try{
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        const method = (init && init.method || (input && input.method) || 'GET').toUpperCase();
+        const isProd = /\/products(\/id\/[^/]+)?(\?|$)/.test(url) && (method === 'POST' || method === 'PUT');
+        if(isProd && init && init.body && typeof init.body === 'string'){
+          try{
+            const b = JSON.parse(init.body);
+            const extra = collectVariantPayload();
+            Object.assign(b, extra);
+            init = Object.assign({}, init, { body: JSON.stringify(b) });
+          } catch(_){}
+        }
+      } catch(_){}
+      return orig(input, init);
+    };
+    patched.__bsVePatched = true;
+    window.fetch = patched;
+  })();
+
   // ---------- Init ----------
   function init() {
     injectAutoSEOButtons();
@@ -274,6 +650,7 @@
     highlightNoLandingProducts();
     enhanceOrderDetail();
     fixFakeOrderButtons();
+    hookProductModalOpen();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

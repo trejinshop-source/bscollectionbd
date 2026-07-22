@@ -91,6 +91,12 @@ const ProductSchema = new mongoose.Schema({
   colors: [String],
   sizes: [String],
   weight: String,
+  // Rich variant editor data (color+size+weight+thumbnail unified). Mixed so
+  // future fields can be added without a schema migration.
+  colorOptions: { type: mongoose.Schema.Types.Mixed, default: () => [] }, // [{name, hex, img}]
+  sizeOptions:  { type: mongoose.Schema.Types.Mixed, default: () => [] }, // ["S","M",...]
+  weightOptions:{ type: mongoose.Schema.Types.Mixed, default: () => [] }, // ["500g","1kg",...]
+  variants:     { type: mongoose.Schema.Types.Mixed, default: () => [] }, // [{color,size,weight,price,stock,sku,img}]
   // Mixed টাইপ ব্যবহার করা হয়েছে যাতে "শপ পেজ", "হোম — ফিচার্ড পণ্য" (homeProduct)
   // ছাড়াও অ্যাডমিন প্যানেলের "Filter Tabs" থেকে ডাইনামিকভাবে যোগ করা যেকোনো
   // কাস্টম ট্যাব-কী (placements.<filterKey>) নিরাপদে সেভ/আপডেট হয় — আগে এখানে
