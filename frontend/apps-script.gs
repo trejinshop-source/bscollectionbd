@@ -71,7 +71,11 @@ function newOrder(d) {
   const items = o.items || [];
   const rows = items.map(i => `
     <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0">${_esc(i.name || '')}<div style="color:${BRAND.muted};font-size:12px;margin-top:2px">${_esc(i.sku || '')}</div></td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e2e8f0">${_esc(i.name || '')}<div style="color:${BRAND.muted};font-size:12px;margin-top:2px">${_esc(i.sku || '')}</div>${
+        (i.color || i.size || i.weight) ? `<div style="margin-top:4px;font-size:11.5px;color:#334155">${
+          [i.color ? 'কালার: <b>'+_esc(i.color)+'</b>' : '', i.size ? 'সাইজ: <b>'+_esc(i.size)+'</b>' : '', i.weight ? 'ওজন: <b>'+_esc(i.weight)+'</b>' : ''].filter(Boolean).join(' · ')
+        }</div>` : ''
+      }</td>
       <td align="center" style="padding:10px 12px;border-bottom:1px solid #e2e8f0">${_esc(String(i.qty || 1))}</td>
       <td align="right" style="padding:10px 12px;border-bottom:1px solid #e2e8f0">Tk ${_esc(String(i.price || 0))}</td>
       <td align="right" style="padding:10px 12px;border-bottom:1px solid #e2e8f0"><b>Tk ${_esc(String((i.price || 0) * (i.qty || 1)))}</b></td>
@@ -97,7 +101,15 @@ function newOrder(d) {
         <tr><td style="width:120px;color:${BRAND.muted}">গ্রাহকের নাম</td><td><b>${_esc(c.name || '')}</b></td></tr>
         <tr><td style="color:${BRAND.muted}">ফোন</td><td><a href="tel:${_esc(c.phone || '')}" style="color:${BRAND.navy};text-decoration:none"><b>${_esc(c.phone || '')}</b></a></td></tr>
         <tr><td style="color:${BRAND.muted}">ইমেইল</td><td>${_esc(c.email || '—')}</td></tr>
-        <tr><td style="color:${BRAND.muted}">ঠিকানা</td><td>${_esc(c.address || '')}${c.district ? ', ' + _esc(c.district) : ''}${c.division ? ', ' + _esc(c.division) : ''}</td></tr>
+      </table>
+      <table style="width:100%;font-size:14px;line-height:1.6;margin-top:10px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+        <tr style="background:#f8fafc"><td colspan="2" style="padding:8px 12px;font-weight:700;color:${BRAND.navy};font-size:13px">ঠিকানা (বিস্তারিত)</td></tr>
+        ${c.division ? `<tr><td style="width:140px;padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">বিভাগ</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.division)}</b></td></tr>` : ''}
+        ${c.district ? `<tr><td style="padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">জেলা</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.district)}</b></td></tr>` : ''}
+        ${c.upazila ? `<tr><td style="padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">থানা/উপজেলা</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.upazila)}</b></td></tr>` : ''}
+        ${c.union ? `<tr><td style="padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">ইউনিয়ন</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.union)}</b></td></tr>` : ''}
+        ${c.area ? `<tr><td style="padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">বিস্তারিত এলাকা</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.area)}</b></td></tr>` : ''}
+        ${(!c.division && !c.district && !c.upazila && c.address) ? `<tr><td style="padding:6px 12px;color:${BRAND.muted};border-top:1px solid #e2e8f0">ঠিকানা</td><td style="padding:6px 12px;border-top:1px solid #e2e8f0"><b>${_esc(c.address)}</b></td></tr>` : ''}
       </table>
       <table style="width:100%;margin-top:18px;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
         <thead>

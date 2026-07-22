@@ -212,6 +212,9 @@
     markActiveMenu();
     syncBadges();
     prefillSearch();
+    flushPendingOrders();
+    setTimeout(flushPendingOrders, 8000);
+    window.addEventListener('online', flushPendingOrders);
     // Observe DOM changes so late-rendered headers still get wired.
     // IMPORTANT: wireSearchInputs/markActiveMenu/syncBadges themselves modify the DOM
     // (e.g. syncBadges sets el.textContent). Without disconnecting first, those writes
@@ -229,6 +232,31 @@
       }, 50);
     });
     mo.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // Retry pending orders that were saved locally when backend was unreachable.
+  // Fixes: "landing page থেকে অর্ডার করলে admin panel-এ যাচ্ছে না" — অর্ডার হারায় না,
+  // সংযোগ ফিরে এলে অটো-সাবমিট হয়ে যায়।
+  async function flushPendingOrders() {
+    try {
+      const raw = localStorage.getItem('bs_pending_orders');
+      if (!raw) return;
+      const list = JSON.parse(raw);
+      if (!Array.isArray(list) || !list.length) return;
+      const remaining = [];
+      for (const o of list) {
+        try {
+          const res = await fetch(window.BS_API_BASE + '/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(o),
+          });
+          if (!res.ok) { remaining.push(o); }
+        } catch (_) { remaining.push(o); }
+      }
+      if (remaining.length) localStorage.setItem('bs_pending_orders', JSON.stringify(remaining));
+      else localStorage.removeItem('bs_pending_orders');
+    } catch (_) { /* ignore */ }
   }
   if (document.readyState === 'loading')
     document.addEventListener('DOMContentLoaded', init);

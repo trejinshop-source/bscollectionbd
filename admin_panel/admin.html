@@ -1370,31 +1370,65 @@ document.querySelectorAll('#ordersViewTabs .chip').forEach(chip=>{
 
 /* Order Modal */
 let currentOrderId = null;
-function openOrderModal(id){
-  const o = allOrders.find(x=>x._id===id);
+async function openOrderModal(id){
+  // A#5 fix: order may not be in allOrders (e.g. clicked from Fake tab which
+  // fetches its own list). Fall back to fetching by id from the backend.
+  let o = allOrders.find(x=>x._id===id);
+  if(!o){
+    try{
+      const modalBody = document.getElementById('orderModalBody');
+      document.getElementById('orderModalTitle').textContent = 'Order';
+      modalBody.innerHTML = '<div class="loading-row"><div class="spinner"></div>লোড হচ্ছে...</div>';
+      document.getElementById('orderModal').classList.remove('hidden');
+      o = await apiJSON('/orders/'+id);
+    }catch(e){
+      showToast('অর্ডার লোড করা যায়নি: '+e.message,'error');
+      document.getElementById('orderModal').classList.add('hidden');
+      return;
+    }
+  }
   if(!o) return;
   currentOrderId = id;
+  const c = o.customer || {};
+  const addrRow = (label, value) => value ? `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border);"><div style="min-width:130px;color:var(--text-soft);font-size:12px;font-weight:600;">${label}</div><div style="flex:1;font-size:13px;">${esc(value)}</div></div>` : '';
+  const legacyAddr = !c.division && !c.district && !c.upazila && c.address ? c.address : '';
   document.getElementById('orderModalTitle').textContent = 'Order: ' + (o.orderId||id.slice(-6));
   document.getElementById('orderModalBody').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
-      <div><div class="cell-sub">Customer</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.name)}</div></div>
-      <div><div class="cell-sub">Phone</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.phone)}</div></div>
-      <div style="grid-column:1/-1"><div class="cell-sub">Address</div><div class="cell-main" style="margin-top:3px;">${esc(o.customer?.address)}</div></div>
-      ${o.customer?.email ? `<div><div class="cell-sub">Email</div><div style="margin-top:3px;">${esc(o.customer.email)}</div></div>` : ''}
-      ${o.note ? `<div style="grid-column:1/-1"><div class="cell-sub">Note</div><div style="margin-top:3px;">${esc(o.note)}</div></div>` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+      <div><div class="cell-sub">গ্রাহক</div><div class="cell-main" style="margin-top:3px;">${esc(c.name)}</div></div>
+      <div><div class="cell-sub">ফোন</div><div class="cell-main" style="margin-top:3px;">${esc(c.phone)}</div></div>
+      ${c.email ? `<div style="grid-column:1/-1"><div class="cell-sub">ইমেইল</div><div style="margin-top:3px;">${esc(c.email)}</div></div>` : ''}
     </div>
+    <div style="background:var(--surface-2,#f8fafc);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text-soft);margin-bottom:6px;letter-spacing:.3px;">ঠিকানা (বিস্তারিত)</div>
+      ${addrRow('বিভাগ', c.division)}
+      ${addrRow('জেলা', c.district)}
+      ${addrRow('থানা/উপজেলা', c.upazila)}
+      ${addrRow('ইউনিয়ন', c.union)}
+      ${addrRow('বিস্তারিত এলাকা', c.area)}
+      ${legacyAddr ? addrRow('ঠিকানা', legacyAddr) : ''}
+    </div>
+    ${o.note ? `<div style="margin-bottom:14px;"><div class="cell-sub">নোট</div><div style="margin-top:3px;font-size:13px;">${esc(o.note)}</div></div>` : ''}
     <div style="margin-bottom:18px;">
-      ${(o.items||[]).map(item=>`<div class="order-item-row">
-        <div class="order-img">${item.img ? `<img src="${item.img}" style="width:50px;height:50px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>`}</div>
-        <div style="flex:1"><div class="order-item-name">${esc(item.name||'Product')}</div><div class="order-item-meta">SKU: ${item.sku||'—'} · Qty: ${item.qty||1}</div></div>
-        <div class="cell-main">৳${((item.price||0)*(item.qty||1)).toLocaleString()}</div>
-      </div>`).join('')}
+      ${(o.items||[]).map(item=>{
+        const variantChips = [
+          item.color ? `<span style="display:inline-block;padding:2px 8px;background:#eef2ff;color:#3730a3;border-radius:999px;font-size:11px;margin-right:4px;">কালার: ${esc(item.color)}</span>` : '',
+          item.size ? `<span style="display:inline-block;padding:2px 8px;background:#ecfdf5;color:#065f46;border-radius:999px;font-size:11px;margin-right:4px;">সাইজ: ${esc(item.size)}</span>` : '',
+          item.weight ? `<span style="display:inline-block;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:999px;font-size:11px;margin-right:4px;">ওজন: ${esc(item.weight)}</span>` : '',
+        ].join('');
+        return `<div class="order-item-row">
+          <div class="order-img">${item.img ? `<img src="${item.img}" style="width:50px;height:50px;border-radius:8px;object-fit:cover;" onerror="this.style.display='none'">` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:22px;height:22px;"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>`}</div>
+          <div style="flex:1"><div class="order-item-name">${esc(item.name||'Product')}</div><div class="order-item-meta">SKU: ${item.sku||'—'} · Qty: ${item.qty||1}</div>${variantChips ? `<div style="margin-top:4px;">${variantChips}</div>` : ''}</div>
+          <div class="cell-main">৳${((item.price||0)*(item.qty||1)).toLocaleString()}</div>
+        </div>`;
+      }).join('')}
     </div>
     <div style="border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:6px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Subtotal</span><span>৳${(o.subtotal||o.total||0).toLocaleString()}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Delivery</span><span>৳${(o.deliveryCharge||60).toLocaleString()}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span>Delivery</span><span>৳${(o.deliveryCharge||o.deliveryFee||60).toLocaleString()}</span></div>
       <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;"><span>Total</span><span>৳${(o.total||0).toLocaleString()}</span></div>
     </div>
+    ${(o.fakeScore||0) > 0 ? `<div style="margin-top:14px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:10px 12px;font-size:12px;"><b>ফেক স্কোর: ${o.fakeScore}%</b>${(o.fakeReasons||[]).length ? '<ul style="margin:6px 0 0;padding-left:18px;">'+(o.fakeReasons||[]).map(r=>`<li>${esc(r)}</li>`).join('')+'</ul>' : ''}</div>` : ''}
     <div style="margin-top:18px;">
       <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">Status পরিবর্তন করুন</label>
       <select class="status-select" id="orderStatusSelect">

@@ -1172,6 +1172,10 @@ function bindInteractions(thumbImages, colors) {
     var _union = (document.getElementById('ofUnion')||{}).value||'';
     var _area = (document.getElementById('ofArea')||{}).value||'';
     var _subtotal = (window.PRODUCT_PRICE||0)*qty;
+    var _selColorEl = document.querySelector('#pdColors .pd-color.active') || document.querySelector('.pd-color.active');
+    var _selColor = _selColorEl ? (_selColorEl.getAttribute('data-color')||'') : '';
+    var _selSizeEl = document.querySelector('#pdSizes .pd-size.active, .pd-size.active');
+    var _selSize = _selSizeEl ? (_selSizeEl.getAttribute('data-size')||_selSizeEl.textContent.trim()) : '';
     var payload = {
       customer: {
         name: _name,
@@ -1189,7 +1193,9 @@ function bindInteractions(thumbImages, colors) {
         name: window.PRODUCT_NAME||'পণ্য',
         qty: qty,
         price: window.PRODUCT_PRICE||0,
-        img: window.PRODUCT_IMG||''
+        img: window.PRODUCT_IMG||'',
+        color: _selColor,
+        size: _selSize
       }],
       subtotal: _subtotal,
       deliveryCharge: delivery,

@@ -2102,15 +2102,24 @@ function toggleRelatedWishlist(btn){
       var _deliveryInput = document.querySelector('input[name=\"ofDelivery\"]:checked');
       var _delivery = _deliveryInput ? parseInt(_deliveryInput.value,10) : 70;
       var _subtotal = BSCart.getTotal();
+      var _selColorEl = document.querySelector('.pd-color.active');
+      var _selColor = _selColorEl ? (_selColorEl.getAttribute('data-color')||'') : '';
+      var _selSizeEl = document.querySelector('.pd-size.active');
+      var _selSize = _selSizeEl ? (_selSizeEl.getAttribute('data-size')||_selSizeEl.textContent.trim()) : '';
+      var _cartItems = BSCart.getCart().map(function(it){
+        return Object.assign({}, it, { color: it.color || _selColor, size: it.size || _selSize });
+      });
       BSAdmin.addOrder({
         customer: {
           name: ofName.value, phone: ofPhone.value,
           division: ofDivision.value, district: ofDistrict.value,
           upazila: ofUpazila.value, union: ofUnion.value,
-          area: (document.getElementById('ofArea')||{}).value || ''
+          area: (document.getElementById('ofArea')||{}).value || '',
+          address: [((document.getElementById('ofArea')||{}).value||''), ofUpazila.value, ofDistrict.value, ofDivision.value].filter(Boolean).join(', ')
         },
-        items: BSCart.getCart(),
+        items: _cartItems,
         deliveryFee: _delivery,
+        deliveryCharge: _delivery,
         subtotal: _subtotal,
         total: _subtotal + _delivery,
         source: location.pathname.split('/').pop() || 'site'
