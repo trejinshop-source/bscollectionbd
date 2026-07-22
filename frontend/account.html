@@ -694,7 +694,17 @@ function renderProfile(u){
   if(avatarEl) avatarEl.textContent = (u.name||'U').trim().charAt(0).toUpperCase();
 }
 function doLogout(){
+  // F6 fix: previously only removed LS_CURRENT (\'bs_current_user\'), leaving
+  // bs_customer_token / bs_customer_user / bs_current_user_v1 behind.
+  // syncWithBackendAuth() then re-hydrated the session on the very next
+  // page load, making it impossible to log in as a different user.
   clearCurrentUser();
+  try { localStorage.removeItem('bs_customer_token'); } catch(e){}
+  try { localStorage.removeItem('bs_customer_user'); } catch(e){}
+  try { localStorage.removeItem('bs_current_user_v1'); } catch(e){}
+  try { localStorage.removeItem('bs_user'); } catch(e){}
+  var box = document.getElementById('orderHistoryBox');
+  if (box) box.innerHTML = '';
   if(window.bsToast) bsToast('Logged out successfully.','ok');
   showAuthStep('login');
 }

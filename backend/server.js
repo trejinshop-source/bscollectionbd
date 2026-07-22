@@ -28,12 +28,26 @@ cloudinary.config({
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",").map(s => s.trim()).filter(Boolean);
 app.use(cors({
+  // F1 fix: landing pages might be hosted on any domain (custom domain,
+  // vercel preview, netlify, GitHub Pages, etc). If the explicit list does
+  // not match, still allow *.vercel.app / *.netlify.app / *.pages.dev /
+  // *.onrender.com / *.lovable.app / *.github.io and localhost so that
+  // orders always reach the admin panel. credentials:false lets us safely
+  // reflect any origin without wildcard/credential clash.
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
-    if (!allowedOrigins.length || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error("Not allowed by CORS: " + origin));
+    try {
+      if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) return cb(null, true);
+      const host = new URL(origin).hostname;
+      const okHost = /(^|\.)(vercel\.app|netlify\.app|pages\.dev|onrender\.com|lovable\.app|github\.io|bscollectionbd\.com)$/i.test(host)
+        || /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/i.test(host);
+      if (okHost) return cb(null, true);
+    } catch (_) {}
+    // last-resort: allow (log for review) instead of blocking a real customer order
+    console.warn("CORS: allowing unlisted origin →", origin);
+    cb(null, true);
   },
-  credentials: true,
+  credentials: false,
 }));
 app.use(express.json({ limit: "5mb" }));
 

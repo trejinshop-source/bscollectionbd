@@ -740,13 +740,9 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
 <script>
 /* mini init for standalone pages */
 (function(){
-  var ham = document.getElementById('hamburger');
-  var nav = document.getElementById('navMenu');
-  var ov  = document.getElementById('overlay');
-  if(ham && nav && ov){
-    ham.addEventListener('click', function(){ nav.classList.toggle('open'); ov.classList.toggle('show'); });
-    ov.addEventListener('click', function(){ nav.classList.remove('open'); ov.classList.remove('show'); });
-  }
+  // F7 fix: duplicate hamburger wiring removed — the definitive handler
+  // lives in the "HAMBURGER (mobile nav)" IIFE further down. Two listeners
+  // toggled .open twice per tap, so the menu opened and closed instantly.
   var y = document.getElementById('year'); if(y) y.textContent = new Date().getFullYear();
   var tt = document.getElementById('toTop');
   if(tt){

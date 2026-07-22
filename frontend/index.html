@@ -1428,23 +1428,25 @@ function star(n){let s='';for(let i=0;i<5;i++)s+=`<i class="fa${i<n?'s':'r'} fa-
 function productHTML(p){
   var wl = getWL ? getWL() : [];
   var wished = wl.some(function(x){return (x.id||x)===p.id;});
-  return `<a class="product-card fade-in" data-cat="${p.cat}" data-id="${p.id}" href="${p.url||'#'}">
-    <div class="product-img">
+  var _pid = String(p.id).replace(/'/g,"\\'");
+  var _purl = String(p.url||'#').replace(/'/g,"\\'");
+  return `<div class="product-card fade-in" data-cat="${p.cat}" data-id="${p.id}" style="cursor:pointer">
+    <div class="product-img" onclick="location.href='${_purl}'">
       <span class="sale-badge">${p.sale}</span>
       <div class="product-actions">
-        <button aria-label="Wishlist" data-id="${p.id}" onclick="event.preventDefault();event.stopPropagation();addWishlist(this)"><i class="${wished?'fas':'far'} fa-heart" style="${wished?'color:#FCA311':''}"></i></button>
-        <button aria-label="Quick view" onclick="event.preventDefault();event.stopPropagation();"><i class="far fa-eye"></i></button>
+        <button type="button" aria-label="Wishlist" data-id="${p.id}" onclick="event.stopPropagation();addWishlist(this)"><i class="${wished?'fas':'far'} fa-heart" style="${wished?'color:#FCA311':''}"></i></button>
+        <button type="button" aria-label="Quick view" onclick="event.stopPropagation();location.href='${_purl}'"><i class="far fa-eye"></i></button>
       </div>
       <img loading="lazy" src="${p.img}" alt="${p.name}"/>
-      <button class="quick-add" onclick="event.preventDefault();event.stopPropagation();addCart(${p.id})"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+      <button type="button" class="quick-add" onclick="event.stopPropagation();addCart('${_pid}')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
     </div>
-    <div class="product-info">
+    <div class="product-info" onclick="location.href='${_purl}'">
       <span class="cat">${p.cat}</span>
       <h4>${p.name}</h4>
-      <div class="rating">${star(p.rating)}<span>(${20+((p.id*7)%80)})</span></div>
+      <div class="rating">${star(p.rating)}<span>(${20+((typeof p.id==='number'?p.id:0)*7)%80})</span></div>
       <div class="price"><span class="now">${fmt(p.now)}</span><span class="old">${fmt(p.old)}</span></div>
     </div>
-  </a>`;
+  </div>`;
 }
 function renderProducts(arr,target){document.getElementById(target).innerHTML = arr.map(productHTML).join('');}
 /* ফিচার্ড গ্রিড ডিফল্টে খালি থাকবে — শুধু অ্যাডমিন প্যানেল থেকে যোগ করা পণ্যই

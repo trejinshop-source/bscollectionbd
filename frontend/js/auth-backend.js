@@ -20,8 +20,10 @@
   function currentUser() { try { return JSON.parse(localStorage.getItem(UK) || 'null'); } catch { return null; } }
   function token() { return localStorage.getItem(TK) || ''; }
   function logout() {
-    localStorage.removeItem(TK); localStorage.removeItem(UK);
-    localStorage.removeItem('bs_current_user_v1');
+    // F6: clear every known session key so account.html's syncWithBackendAuth
+    // cannot re-hydrate the old user on the next page load.
+    ['bs_customer_token','bs_customer_user','bs_current_user_v1','bs_current_user','bs_user']
+      .forEach(function(k){ try { localStorage.removeItem(k); } catch(_){} });
     toast('লগআউট হয়েছে', 'ok');
     setTimeout(() => location.href = 'index.html', 500);
   }
