@@ -246,10 +246,13 @@
       const remaining = [];
       for (const o of list) {
         try {
+          // Older versions queued the order wrapped as { payload, at }.
+          // Newer versions push the raw payload. Support both here so no order is lost.
+          const body = (o && o.payload && typeof o.payload === 'object') ? o.payload : o;
           const res = await fetch(window.BS_API_BASE + '/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(o),
+            body: JSON.stringify(body),
           });
           if (!res.ok) { remaining.push(o); }
         } catch (_) { remaining.push(o); }

@@ -1213,10 +1213,10 @@ function bindInteractions(thumbImages, colors) {
           var succ = document.getElementById('successModalOverlay');
           if(succ) succ.classList.add('show');
         } else {
-          alert('অর্ডার পাঠানো যায়নি: ' + ((res.data&&res.data.error)||'সার্ভার ত্রুটি'));
+          (window.bsPopup||alert)('অর্ডার পাঠানো যায়নি: ' + ((res.data&&res.data.error)||'সার্ভার ত্রুটি'), 'err');
           try{
             var pending = JSON.parse(localStorage.getItem('bs_pending_orders')||'[]');
-            pending.push({payload:payload, at:new Date().toISOString()});
+            pending.push(payload); // raw payload — flushPendingOrders re-submits directly
             localStorage.setItem('bs_pending_orders', JSON.stringify(pending));
           }catch(e){}
         }
@@ -1224,10 +1224,10 @@ function bindInteractions(thumbImages, colors) {
       .catch(function(err){
         var ov = document.getElementById('orderModalOverlay');
         if(ov) ov.classList.remove('show');
-        alert('নেটওয়ার্ক ত্রুটি — অর্ডার লোকালি সেভ করা হলো। পরে আবার চেষ্টা করুন।');
+        (window.bsPopup||alert)('অর্ডার সংরক্ষিত হয়েছে — সংযোগ ফিরলে স্বয়ংক্রিয়ভাবে পাঠানো হবে।', 'info');
         try{
           var pending = JSON.parse(localStorage.getItem('bs_pending_orders')||'[]');
-          pending.push({payload:payload, at:new Date().toISOString()});
+          pending.push(payload); // raw payload — flushPendingOrders re-submits directly
           localStorage.setItem('bs_pending_orders', JSON.stringify(pending));
         }catch(e){}
       })

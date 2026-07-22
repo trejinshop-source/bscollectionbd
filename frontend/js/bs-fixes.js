@@ -241,10 +241,47 @@
     });
   }
 
+  function injectMobileMenu() {
+    if (document.getElementById('bsMobileMenu')) {
+      document.getElementById('bsMobileMenu').classList.toggle('show');
+      return;
+    }
+    const nav = document.createElement('div');
+    nav.id = 'bsMobileMenu';
+    nav.innerHTML = `
+      <div class="bs-mm-backdrop"></div>
+      <div class="bs-mm-panel">
+        <button class="bs-mm-close">&times;</button>
+        <a href="index.html">🏠 হোম</a>
+        <a href="shop.html">🛍 শপ</a>
+        <a href="wishlist.html">❤️ Wishlist</a>
+        <a href="cart.html">🛒 কার্ট</a>
+        <a href="account.html">👤 একাউন্ট</a>
+        <a href="orders.html">📦 আমার অর্ডারসমূহ</a>
+        <a href="about.html">ℹ️ আমাদের সম্পর্কে</a>
+        <a href="contact.html">📞 যোগাযোগ</a>
+      </div>`;
+    document.body.appendChild(nav);
+    const s = document.createElement('style');
+    s.textContent = `
+      #bsMobileMenu{position:fixed;inset:0;z-index:9990;display:none}
+      #bsMobileMenu.show{display:block}
+      #bsMobileMenu .bs-mm-backdrop{position:absolute;inset:0;background:rgba(11,21,38,.55)}
+      #bsMobileMenu .bs-mm-panel{position:absolute;top:0;right:0;height:100%;width:80%;max-width:320px;background:#fff;padding:60px 20px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:-10px 0 30px rgba(0,0,0,.15);overflow:auto}
+      #bsMobileMenu a{color:#14213D;font-weight:600;text-decoration:none;padding:10px 8px;border-bottom:1px solid #eef1f6;font-size:15px}
+      #bsMobileMenu a:hover{color:#FCA311}
+      #bsMobileMenu .bs-mm-close{position:absolute;top:12px;right:12px;background:transparent;border:0;font-size:28px;cursor:pointer;color:#14213D}
+    `;
+    document.head.appendChild(s);
+    nav.classList.add('show');
+    nav.querySelector('.bs-mm-close').addEventListener('click', () => nav.classList.remove('show'));
+    nav.querySelector('.bs-mm-backdrop').addEventListener('click', () => nav.classList.remove('show'));
+  }
 
-
-  // ---------- (8) Mobile order fix: intercept checkout submissions;
-  //   if primary fetch fails, queue in bs_pending_orders and inform user. ----------
+  // ---------- (8) Mobile order fix: silently queue any order POST that fails
+  //   at the network layer (no popup — the page's own handler already shows
+  //   feedback if needed, and bs-shared.js auto-flushes when connectivity
+  //   returns). Prevents duplicate/spurious "ইন্টারনেট সমস্যা" notifications. ----------
   const origFetch = window.fetch;
   window.fetch = function (input, init) {
     return origFetch.apply(this, arguments).catch(err => {
@@ -253,11 +290,17 @@
         if (/\/api\/orders(\/|$|\?)/.test(url) && init && init.method === 'POST' && init.body) {
           let bodyObj = null;
           try { bodyObj = JSON.parse(init.body); } catch (_) {}
-          if (bodyObj) {
+          // Only queue when we clearly have an order payload with customer info.
+          if (bodyObj && bodyObj.customer && (bodyObj.customer.name || bodyObj.customer.phone)) {
             const list = JSON.parse(localStorage.getItem('bs_pending_orders') || '[]');
-            list.push(bodyObj);
-            localStorage.setItem('bs_pending_orders', JSON.stringify(list));
-            popup('ইন্টারনেট সমস্যা — অর্ডার সংরক্ষিত হয়েছে, সংযোগ ফিরলে অটো-সাবমিট হবে', 'info');
+            // De-duplicate: don't push the same order twice (the page's own
+            // handler may also push into the queue in its catch block).
+            const key = JSON.stringify(bodyObj);
+            const already = list.some(o => JSON.stringify(o && o.payload ? o.payload : o) === key);
+            if (!already) {
+              list.push(bodyObj);
+              localStorage.setItem('bs_pending_orders', JSON.stringify(list));
+            }
           }
         }
       } catch (_) {}
