@@ -1075,17 +1075,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 8px 24px r
         <button class="shop-side-close" id="shopSideClose" aria-label="Close filters"><i class="fas fa-xmark"></i></button>
         <h4>Categories</h4>
         <ul id="catList">
-          <li data-cat="All" class="active-cat">All Products <span id="countAll">0</span></li>
-          <li data-cat="Ceiling Fans">Ceiling Fans <span id="count-ceiling-fans">0</span></li>
-          <li data-cat="Table Fans">Table Fans <span id="count-table-fans">0</span></li>
-          <li data-cat="Stand Fans">Stand Fans <span id="count-stand-fans">0</span></li>
-          <li data-cat="Industrial Fans">Industrial Fans <span id="count-industrial-fans">0</span></li>
-          <li data-cat="Exhaust Fans">Exhaust Fans <span id="count-exhaust-fans">0</span></li>
-          <li data-cat="Rechargeable Fans">Rechargeable Fans <span id="count-rechargeable-fans">0</span></li>
-          <li data-cat="LED Lights">LED Lights <span id="count-led-lights">0</span></li>
-          <li data-cat="Home Appliances">Home Appliances <span id="count-home-appliances">0</span></li>
-          <li data-cat="Wall Fans">Wall Fans <span id="count-wall-fans">0</span></li>
-          <li data-cat="Accessories">Accessories <span id="count-accessories">0</span></li>
+          <li data-cat-slug="All" class="active-cat">All Products <span id="countAll">0</span></li>
         </ul>
         <h4>Price Range (৳)</h4>
         <div class="price-range"><input type="number" id="priceMin" placeholder="Min"/><input type="number" id="priceMax" placeholder="Max"/></div>
@@ -1210,8 +1200,23 @@ let shopProducts = BSAdmin.getProducts();
 // অ্যাডমিন প্যানেল থেকে আসল ডেটা ব্যাকএন্ড থেকে লোড হওয়ার পর তালিকা রিফ্রেশ হবে
 document.addEventListener('bsdata:ready', function(){
   shopProducts = BSAdmin.getProducts();
+  renderCatList();
   if (typeof applyState === 'function') applyState();
+  applyCategoryFromURL();
 });
+
+/* ================= CATEGORY SIDEBAR (dynamic — supports any admin-created category, e.g. Kids Collection) ================= */
+function renderCatList(){
+  const catListEl = document.getElementById('catList');
+  if(!catListEl) return;
+  const activeSlug = state.cat;
+  const cats = BSAdmin.getCategories() || [];
+  catListEl.innerHTML = '<li data-cat-slug="All">All Products <span id="countAll">0</span></li>' +
+    cats.map(c => `<li data-cat-slug="${c.slug}">${c.name} <span id="count-${c.slug}">0</span></li>`).join('');
+  document.querySelectorAll('#catList li').forEach(x=>x.classList.remove('active-cat'));
+  const activeLi = document.querySelector(`#catList li[data-cat-slug="${activeSlug}"]`) || document.querySelector('#catList li[data-cat-slug="All"]');
+  if(activeLi) activeLi.classList.add('active-cat');
+}
 
 const fmt = n => "৳ " + n.toLocaleString('en-IN');
 function star(n){let s='';for(let i=0;i<5;i++)s+=`<i class="fa${i<n?'s':'r'} fa-star"></i>`;return s;}
@@ -1291,7 +1296,7 @@ function applyState(){
     const q = state.q.toLowerCase();
     list = list.filter(p=>p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q));
   }
-  if(state.cat !== 'All') list = list.filter(p=>p.cat===state.cat);
+  if(state.cat !== 'All') list = list.filter(p=>p.categorySlug===state.cat || p.cat===state.cat);
   if(state.brands.length) list = list.filter(p=>state.brands.includes(p.brand));
   if(state.min !== null && !isNaN(state.min)) list = list.filter(p=>p.now >= state.min);
   if(state.max !== null && !isNaN(state.max)) list = list.filter(p=>p.now <= state.max);
@@ -1304,10 +1309,9 @@ function applyState(){
   // category counts (based on full catalog, unaffected by current filters other than search)
   const countBase = state.q ? shopProducts.filter(p=>p.name.toLowerCase().includes(state.q.toLowerCase())||p.cat.toLowerCase().includes(state.q.toLowerCase())) : shopProducts;
   document.getElementById('countAll').textContent = countBase.length;
-  ["Ceiling Fans","Table Fans","Stand Fans","Industrial Fans","Exhaust Fans","Rechargeable Fans","LED Lights","Home Appliances","Wall Fans","Accessories"].forEach(c=>{
-    const slug = 'count-' + c.toLowerCase().replace(/\s+/g,'-');
-    const el = document.getElementById(slug);
-    if(el) el.textContent = countBase.filter(p=>p.cat===c).length;
+  (BSAdmin.getCategories()||[]).forEach(c=>{
+    const el = document.getElementById('count-' + c.slug);
+    if(el) el.textContent = countBase.filter(p=>p.categorySlug===c.slug || p.cat===c.name).length;
   });
 
   const totalPages = Math.max(1, Math.ceil(list.length/PAGE_SIZE));
@@ -1375,11 +1379,11 @@ window.addEventListener('resize', ()=>{ if(window.innerWidth>900) closeFilters()
 
 /* category sidebar clicks */
 document.getElementById('catList').addEventListener('click', e=>{
-  const li = e.target.closest('li[data-cat]');
+  const li = e.target.closest('li[data-cat-slug]');
   if(!li) return;
   document.querySelectorAll('#catList li').forEach(x=>x.classList.remove('active-cat'));
   li.classList.add('active-cat');
-  state.cat = li.dataset.cat;
+  state.cat = li.dataset.catSlug;
   state.page = 1;
   applyState();
   if(window.innerWidth<=900) closeFilters();
@@ -1409,7 +1413,8 @@ document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
   document.getElementById('priceMin').value=''; document.getElementById('priceMax').value='';
   document.querySelectorAll('#brandList input').forEach(cb=>cb.checked=false);
   document.querySelectorAll('#catList li').forEach(x=>x.classList.remove('active-cat'));
-  document.querySelector('#catList li[data-cat="All"]').classList.add('active-cat');
+  const allLi = document.querySelector('#catList li[data-cat-slug="All"]');
+  if(allLi) allLi.classList.add('active-cat');
   document.getElementById('searchInput').value='';
   applyState();
   toast('Filters cleared');
@@ -1434,23 +1439,20 @@ function doSearch(){
 document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')doSearch();});
 
 /* ================= URL CATEGORY PARAM (from index.html category cards / footer links) ================= */
-(function applyCategoryFromURL(){
+function applyCategoryFromURL(){
   const params = new URLSearchParams(window.location.search);
   const cat = params.get('category');
   if(!cat) return;
-  const slugMap = {
-    "ceiling-fans":"Ceiling Fans","table-fans":"Table Fans","stand-fans":"Stand Fans",
-    "industrial-fans":"Industrial Fans","exhaust-fans":"Exhaust Fans","rechargeable-fans":"Rechargeable Fans",
-    "led-lights":"LED Lights","home-appliances":"Home Appliances","wall-fans":"Wall Fans","accessories":"Accessories"
-  };
-  const validCats = ["Ceiling Fans","Table Fans","Stand Fans","Industrial Fans","Exhaust Fans","Rechargeable Fans","LED Lights","Home Appliances","Wall Fans","Accessories"];
-  let resolved = slugMap[cat.toLowerCase()] || cat;
-  if(!validCats.includes(resolved)) return;
-  state.cat = resolved;
+  const cats = BSAdmin.getCategories() || [];
+  const match = cats.find(c => c.slug === cat) || cats.find(c => c.slug === cat.toLowerCase());
+  if(!match) return; // category not (yet) known — leave "All Products" selected rather than silently failing
+  state.cat = match.slug;
   document.querySelectorAll('#catList li').forEach(x=>x.classList.remove('active-cat'));
-  const li = document.querySelector(`#catList li[data-cat="${resolved}"]`);
+  const li = document.querySelector(`#catList li[data-cat-slug="${match.slug}"]`);
   if(li) li.classList.add('active-cat');
-})();
+}
+renderCatList();
+applyCategoryFromURL();
 
 updateBadges();
 applyState();
