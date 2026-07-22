@@ -598,7 +598,7 @@ header{position:sticky;top:0;background:#fff;z-index:100;box-shadow:var(--shadow
           <div class="of-group"><label>বিভাগ <span class="req">*</span></label><select id="ofDivision" required><option value="">বিভাগ নির্বাচন করুন</option></select></div>
           <div class="of-group"><label>জেলা <span class="req">*</span></label><select id="ofDistrict" required disabled><option value="">প্রথমে বিভাগ নির্বাচন করুন</option></select></div>
           <div class="of-group"><label>থানা/উপজেলা <span class="req">*</span></label><select id="ofUpazila" required disabled><option value="">প্রথমে জেলা নির্বাচন করুন</option></select></div>
-          <div class="of-group"><label>ইউনিয়ন</label><input type="text" id="ofUnion" placeholder="ইউনিয়নের নাম লিখুন (ঐচ্ছিক)"/></div>
+          <div class="of-group"><label>ইউনিয়ন</label><select id="ofUnion" disabled><option value="">প্রথমে থানা/উপজেলা নির্বাচন করুন</option></select></div>
         </div>
         <div class="of-group"><label>বিস্তারিত এলাকা (রোড, বাসা/হোল্ডিং নং)</label><textarea id="ofArea" placeholder="বিস্তারিত ঠিকানা লিখুন"></textarea></div>
         <div class="of-group">
@@ -1017,10 +1017,9 @@ function renderPage(p) {
     '<div class="pd-advice-item"><div class="pd-advice-icon hot"><i class="fas fa-tag"></i></div><div class="pd-advice-text"><h4>রিভিউ</h4><p>পণ্য রিসিভ করার পর এটি সম্পর্কে একটি ভিডিও রিভিউ তৈরি করে আমাদের ইনবক্সে পাঠালে খুশি হবো।</p></div></div>' +
     '</div></div>' +
 
-    /* Related grid */
-    (relatedGridHtml?
-      '<div class="pd-related bn"><h2><span class="pd-related-title-desktop">আপনার জন্য প্রস্তাবিত</span><span class="pd-related-title-mobile">সম্পর্কিত পণ্য</span></h2>' +
-      '<div class="pd-related-grid">'+relatedGridHtml+'</div></div>':'') +
+    /* Related grid placeholder – filled async */
+    '<div class="pd-related bn" id="relatedSection" style="display:none"><h2><span class="pd-related-title-desktop">আপনার জন্য প্রস্তাবিত</span><span class="pd-related-title-mobile">সম্পর্কিত পণ্য</span></h2>' +
+    '<div class="pd-related-grid" id="relatedGrid"></div></div>' +
 
     '</div></section>';
 
@@ -1029,6 +1028,75 @@ function renderPage(p) {
 
   /* Bind interactions */
   bindInteractions(thumbImages, colors);
+
+  /* Auto-load related products from same category */
+  autoLoadRelated(p);
+}
+
+async function autoLoadRelated(p) {
+  var cat = p.categorySlug || p.category || '';
+  var currentSlug = (new URLSearchParams(location.search)).get('slug') || '';
+  /* Try relatedGrid from admin first, then auto-fetch from category */
+  var relatedGrid = p.relatedGrid || [];
+  if(relatedGrid.length) {
+    renderRelatedGrid(relatedGrid.map(function(r){ return {
+      cat: r.cat||cat, name: r.name, now: r.price||0, old: r.oldPrice||0,
+      img: r.image||'', link: r.link||'', rating: r.rating||5,
+      ratingCount: r.ratingCount||0, badge: r.badge||0
+    };}));
+    return;
+  }
+  /* Auto-fetch from API */
+  if(!cat) return;
+  try {
+    var url = API + '/products?cat=' + encodeURIComponent(cat) + '&limit=10';
+    var res = await fetch(url);
+    if(!res.ok) return;
+    var products = await res.json();
+    /* Filter out this landing page product if matched */
+    products = products.filter(function(pr){
+      return !(pr.slug === currentSlug || (pr.hasDetailPage && (pr.detailPage||'').includes('slug='+currentSlug)));
+    });
+    if(!products.length) return;
+    renderRelatedGrid(products.map(function(pr){ return {
+      cat: pr.cat||cat, name: pr.name, now: pr.now||0, old: pr.old||0,
+      img: pr.img||'', link: pr.detailPage||'', rating: pr.rating||5,
+      ratingCount: 0, badge: (pr.old && pr.now && pr.old > pr.now) ? Math.round((pr.old-pr.now)/pr.old*100) : 0
+    };}));
+  } catch(e) {}
+}
+
+function renderRelatedGrid(items) {
+  if(!items || !items.length) return;
+  var gridEl = document.getElementById('relatedGrid');
+  var sectionEl = document.getElementById('relatedSection');
+  if(!gridEl || !sectionEl) return;
+  var html = '';
+  items.forEach(function(r) {
+    var rs = Math.max(1,Math.min(5,r.rating||5));
+    var starH = '';
+    for(var x=1;x<=5;x++) starH += '<i class="'+(x<=rs?'fas':'far')+' fa-star"></i>';
+    var badgePct = Number(r.badge)||0;
+    var hasLink = !!(r.link);
+    html += '<div class="product-card" onclick="'+(hasLink?'location.href=''+esc(r.link)+''':'addRelatedToCart(''+esc(r.name)+'','+Number(r.now||0)+')')+'" style="cursor:pointer">' +
+      '<div class="product-img-wrap" style="position:relative">' +
+      (r.img?'<img loading="lazy" src="'+esc(r.img)+'" alt="'+esc(r.name)+'" style="width:100%;aspect-ratio:1;object-fit:cover"/>':'<div style="width:100%;aspect-ratio:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center"><i class="fas fa-image" style="font-size:2rem;color:#ccc"></i></div>') +
+      (badgePct?'<span class="pd-badge-sale">-'+badgePct+'%</span>':'') +
+      '</div>' +
+      '<div class="product-info" style="padding:10px">' +
+      (r.cat?'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">'+esc(r.cat)+'</div>':'') +
+      '<h4 style="font-size:13px;font-weight:700;margin:0 0 6px;line-height:1.4;color:var(--primary)">'+esc(r.name)+'</h4>' +
+      '<div class="rating" style="font-size:11px;color:#f59e0b;margin-bottom:6px">'+starH+'</div>' +
+      '<div style="display:flex;align-items:center;gap:6px">' +
+      '<span style="font-size:14px;font-weight:800;color:var(--accent)">৳'+Number(r.now||0).toLocaleString('en-IN')+'</span>' +
+      (r.old&&r.old>r.now?'<span style="font-size:11px;color:var(--muted);text-decoration:line-through">৳'+Number(r.old).toLocaleString('en-IN')+'</span>':'') +
+      '</div>' +
+      (hasLink?'':'<button onclick="event.stopPropagation();addRelatedToCart(''+esc(r.name)+'','+Number(r.now||0)+')" style="margin-top:8px;width:100%;padding:7px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600">কার্টে যোগ করুন</button>') +
+      '</div>' +
+      '</div>';
+  });
+  gridEl.innerHTML = html;
+  sectionEl.style.display = '';
 }
 
 function bindInteractions(thumbImages, colors) {
@@ -1464,9 +1532,29 @@ function bsShareProduct(e){
   distSel.addEventListener('change', function(){
     upaSel.innerHTML='<option value="">থানা/উপজেলা নির্বাচন করুন</option>';
     upaSel.disabled=!distSel.value;
+    var unionSel=document.getElementById('ofUnion');
+    if(unionSel){unionSel.innerHTML='<option value="">প্রথমে থানা/উপজেলা নির্বাচন করুন</option>';unionSel.disabled=true;}
     if(!divSel.value||!distSel.value) return;
     var upas=(BD[divSel.value]||{})[distSel.value]||[];
     upas.forEach(function(u){var o=document.createElement('option');o.value=u;o.textContent=u;upaSel.appendChild(o);});
+  });
+  upaSel.addEventListener('change', function(){
+    var div=divSel.value,dist=distSel.value,upa=this.value;
+    var unionSel=document.getElementById('ofUnion');
+    if(!unionSel) return;
+    unionSel.innerHTML='<option value="">ইউনিয়ন নির্বাচন করুন</option>';
+    if(div&&dist&&upa&&BD_GEO&&BD_GEO[div]&&BD_GEO[div][dist]&&BD_GEO[div][dist][upa]){
+      var unions=BD_GEO[div][dist][upa];
+      if(unions&&unions.length){
+        unionSel.disabled=false;
+        unions.forEach(function(u){var o=document.createElement('option');o.value=u;o.textContent=u;unionSel.appendChild(o);});
+      } else {
+        unionSel.disabled=true;
+        unionSel.innerHTML='<option value="">এই এলাকায় কোনো ইউনিয়ন তথ্য নেই</option>';
+      }
+    } else {
+      unionSel.disabled=true;
+    }
   });
 })();
 
@@ -1475,6 +1563,7 @@ init();
 </script>
 
 <!-- Load shared product-extras (cart, order form, wishlist) -->
+<script src="js/bd-geo.js"></script>
 <script src="js/product-extras.js" defer></script>
 </body>
 </html>
